@@ -13,7 +13,7 @@ const Header = () => {
       <NavBar />
       <div className="basis-[120px]">
         <Link
-          href="/Signup"
+          href="/signup"
           className="text-[#FFFFFF] bg-[#0ACF83] text-[15px] px-[20px] py-[6px] rounded-[16px] text-[14px] flex items-center gap-3 duration-300 hover:bg-[#00945B]"
         >
           Sign up
