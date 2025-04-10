@@ -5,7 +5,7 @@
 // import { useRouter } from "next/navigation"; // Use navigation hooks
 // import Link from "next/link";
 import Image from "next/image";
-// Adjust path based on your file structure
+// Adjust path based on your  structure
 import passIcon from "../../../../../../public/signup/pass.svg";
 
 const StartupResetPasswordPage = () => {
