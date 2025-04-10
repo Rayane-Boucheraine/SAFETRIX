@@ -136,13 +136,13 @@ const StartupSignupPage = () => {
         {" "}
         {/* Adjusted height */}
         {/* Left Image Section */}
-        <div className="hidden md:flex md:w-1/2 items-center justify-center bg-[rgba(64,127,103,0.05)] p-6">
+        <div className="hidden md:flex md:w-1/2 items-center justify-center bg-[rgba(64,127,103,0.05)]">
           {" "}
           {/* Added padding */}
           <Image
             src={startup} // Use root path for public assets
             alt="Startup illustration showing growth"
-            className="max-w-full h-auto" // Responsive image
+            className="" // Responsive image
             priority
             width={450} // Maintain aspect ratio
             height={450}
