@@ -1,18 +1,19 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
+import ReactQueryProvider from "@/components/ReactQueryProvider";
+import { Toaster } from "react-hot-toast";
 
-// Configure Poppins font
 const poppins = Poppins({
-  weight: ["400", "500", "600", "700"], 
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
-  variable: "--font-poppins", 
+  variable: "--font-poppins",
 });
 
 export const metadata: Metadata = {
   title: "SAFETRIX",
   description:
-    "Safetrix is an Algerian cybersecurity startup dedicated to providing localized solutions to combat cyber threats. We specialize in threat detection, vulnerability assessment, incident response, and bug bounty programs, tailored to meet the unique needs of Algeria’s digital landscape. By leveraging AI-driven insights, Safetrix empowers organizations to secure their digital transformation and build resilient cyber ecosystems. Our mission is to safeguard Algeria’s digital future and foster a secure, trusted environment for businesses and individuals alike.",
+    "Safetrix is an Algerian cybersecurity startup dedicated to providing localized solutions to combat cyber threats...", // Keep your description
 };
 
 export default function RootLayout({
@@ -22,7 +23,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${poppins.className}`}>{children}</body>
+      <body className={`${poppins.className}`}>
+        <ReactQueryProvider>
+          <Toaster />
+          {children}
+        </ReactQueryProvider>
+      </body>
     </html>
   );
 }

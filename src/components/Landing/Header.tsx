@@ -1,23 +1,45 @@
 import Image from "next/image";
 import NavBar from "./NavBar";
 import Link from "next/link";
-import logo from "../../../public/Logo.svg";
-import signup from "../../../public/Landing/signup.svg";
+import logo from "../../../public/Logo.svg"; 
+import signup from "../../../public/Landing/signup.svg"; 
 
 const Header = () => {
   return (
-    <header className="flex items-center justify-between w-[90%] mx-auto py-[24px]">
-      <div className="basis-[90px]">
-        <Image src={logo} alt="logo" className="w-[36px]" />
+    <header className="sticky top-0 z-50 flex items-center justify-between w-full bg-[#080808]/80 backdrop-blur-md px-[5%] py-[18px] ">
+      
+      <div className="flex-none w-[90px] ">
+       
+        <Link href="/" aria-label="Homepage">
+        
+          <div className="transition-transform duration-300 ease-out hover:animate-spin-slow w-[36px]">
+            <Image
+              src={logo}
+              alt="CyberGuard logo"
+              className="w-[36px]"
+              priority
+            />{" "}
+           
+          </div>
+        </Link>
       </div>
-      <NavBar />
-      <div className="basis-[120px]">
+
+  
+      <div className="flex-grow flex justify-center animate-fade-in animate-duration-500">
+        <NavBar />
+      </div>
+
+      <div className="flex-none w-[150px] flex justify-end animate-fade-in animate-delay-200 animate-duration-500">
+
         <Link
-          href="/signup"
-          className="text-[#FFFFFF] bg-[#0ACF83] text-[15px] px-[20px] py-[6px] rounded-[16px] text-[14px] flex items-center gap-3 duration-300 hover:bg-[#00945B]"
+          href="/auth" 
+          className="text-white block bg-[#0ACF83] text-[14px] sm:text-[15px] px-[18px] sm:px-[20px] py-[8px] rounded-[16px] flex items-center gap-3 transition-all duration-300 ease-in-out hover:bg-[#00B371] hover:shadow-lg hover:shadow-[#0ACF83]/30 hover:scale-[1.03] active:scale-95"
         >
-          Sign up
-          <Image src={signup} alt="signup" className="w-[12px]" />
+          Get Started
+          <span className="animate-pulse-slow inline-block">
+
+            <Image src={signup} alt="signup arrow" className="w-[12px]" />
+          </span>
         </Link>
       </div>
     </header>
