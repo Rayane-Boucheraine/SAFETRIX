@@ -136,13 +136,13 @@ const HackerSignupPage = () => {
         {" "}
         {/* Adjusted height */}
         {/* Left Image Section */}
-        <div className="hidden md:flex md:w-1/2 items-center justify-center bg-[rgba(74,20,120,0.05)] p-6">
+        <div className="hidden md:flex md:w-1/2 items-center justify-center bg-[rgba(74,20,120,0.05)]">
           {" "}
           {/* Added padding */}
           <Image
             src={hacker} // Ensure this path is correct relative to the `public` folder
             alt="Hacker illustration navigating digital space"
-            className="max-w-full h-auto" // Make image responsive
+            className="" // Make image responsive
             priority
             width={450} // Maintain aspect ratio
             height={450}
