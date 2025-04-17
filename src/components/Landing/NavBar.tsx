@@ -1,15 +1,13 @@
 import React from "react";
 
 const NavBar = () => {
-  // Array of navigation items with updated hrefs
   const navItems = [
-    // Consider adding '/' or '#home' if you have a distinct Hero section ID
-    { id: 1, name: "Home", href: "/#home" }, // Link to top or specific home section
+    { id: 1, name: "Home", href: "/#home" },
     { id: 2, name: "About", href: "/#about" },
     { id: 3, name: "Services", href: "/#services" },
-    { id: 4, name: "Bug Bounty", href: "/#bug-bounty" }, // Give your bug bounty section this ID
+    { id: 4, name: "Bug Bounty", href: "/bug-bounty" },
     { id: 5, name: "Pricing", href: "/#pricing" },
-    { id: 6, name: "Contact", href: "/#contact" }, // Points to the footer/contact section
+    { id: 6, name: "Contact", href: "/contact" }, 
   ];
 
  

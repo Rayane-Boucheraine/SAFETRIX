@@ -1,41 +1,71 @@
-// src/components/Card.tsx
+// src/components/Card.tsx (EXAMPLE - Incorporate into your existing Card.tsx)
 import React from "react";
 
-// Define the props the component accepts
 interface CardProps {
-  icon: React.ReactNode; // Can be an emoji (string), SVG component, etc.
+  icon: string;
   title: string;
   description: string;
 }
 
-// The Card component using Function Component type from React
 const Card: React.FC<CardProps> = ({ icon, title, description }) => {
   return (
-    // Card container: Applying Tailwind classes for styling
+    // Removed the outer p-4 wrapper as grid gap handles spacing now
+
+    // The actual card element - enhanced transitions/hovers
     <div
       className="
-        m-4 p-6                          // Spacing: Margin around card, Padding inside
-        bg-[#16291F]                    // Background: Custom dark green color (fully opaque)
-        rounded-[12px]                 // Appearance: Custom border radius (reduced from 40px)
-        shadow-lg                      // Appearance: Drop shadow (UNCOMMENTED)
-        flex flex-col items-center     // Layout: Flex column, centers content horizontally
-        text-center                    // Text Alignment: Center align text
-        w-full sm:w-[calc(50%-2rem)] md:w-[calc(33.333%-2rem)] // Responsive Width: Full width on mobile, adjusting for larger screens accounting for margin
-        transition                     // Interaction: Enable smooth transitions for hover effects
-        hover:bg-[#16291F]/90          // Interaction: Slightly reduce opacity on hover for feedback
+        h-full // Stretch to fill grid cell height
+        rounded-[30px]
+        border border-white/30 // Slightly softer default border
+        bg-gradient-to-br from-[rgba(38,45,42,0.6)] via-[rgba(25,30,28,0.5)] to-[rgba(15,20,18,0.6)] // More subtle bg gradient
+        p-8
+        text-center
+        transition-all duration-300 ease-out // Smooth transitions
+        group // Added group for potential group-hover effects
+        relative // Needed for potential pseudo-elements or overlays
+        overflow-hidden // Ensure gradients/glows inside don't bleed unexpectedly
+        cursor-pointer // Indicate interactivity
+        hover:scale-[1.04] // Slightly more scale on hover
+        hover:border-emerald-400/80 // Brighter border glow
+        hover:shadow-2xl hover:shadow-emerald-900/40 // More prominent shadow
+        flex flex-col
+        items-center
       "
     >
-      {/* Wrapper for the icon with specific background and rounded shape */}
-      <div className="mb-4 inline-flex items-center justify-center p-3 bg-gray-700 rounded-full">
-        {/* Icon styling using Tailwind */}
-        <span className="text-3xl text-emerald-400">{icon}</span>
+      {/* Optional: Subtle inner glow on hover */}
+      <div className="absolute inset-0 rounded-[30px] bg-gradient-to-t from-emerald-800/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
+
+      {/* Content remains on top */}
+      <div className="relative z-10 flex flex-col items-center h-full">
+        {/* Stylized Icon Container */}
+        <div
+          className="
+            w-16 h-16
+            mb-6
+            inline-flex items-center justify-center
+            rounded-full
+            bg-gradient-to-tl from-emerald-800/60 via-emerald-600/40 to-emerald-900/60
+            text-emerald-300
+            text-3xl
+            flex-shrink-0
+            shadow-md shadow-emerald-950/30
+            ring-1 ring-emerald-500/30 // Add subtle ring
+            transition-transform duration-300 group-hover:scale-110 // Icon scale on hover
+          "
+        >
+          {icon}
+        </div>
+
+        {/* Text Content Area */}
+        <div className="flex-grow">
+          <h2 className="text-xl font-semibold text-gray-100 title-font mb-3 transition-colors duration-300 group-hover:text-emerald-300">
+            {title}
+          </h2>
+          <p className="leading-relaxed text-base text-gray-400 transition-colors duration-300 group-hover:text-gray-300">
+            {description}
+          </p>
+        </div>
       </div>
-
-      {/* Card Title Styling */}
-      <h3 className="text-xl font-semibold text-gray-100 mb-2">{title}</h3>
-
-      {/* Card Description Styling */}
-      <p className="text-base text-gray-300">{description}</p>
     </div>
   );
 };

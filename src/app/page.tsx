@@ -5,20 +5,22 @@ import Hero from "@/components/Landing/Hero";
 import Services from "@/components/Landing/Services";
 import Trust from "@/components/Landing/Trust";
 // Import other sections when ready
-// import WhyUs from "@/components/Landing/WhyUs";
+import WhyUs from "@/components/Landing/WhyUs";
 // import Testimonial from "@/components/Landing/Testimonial";
-// import Pricing from "@/components/Landing/Pricing";
+import Pricing from "@/components/Landing/Pricing";
 import FAQ from "@/components/Landing/FAQ";
 
 export default function Home() {
   return (
-    <div className="bg-[#080808] text-white overflow-x-hidden">
+    <div className="bg-[#101010] text-white overflow-x-hidden">
       <Header />
       <main>
         <Hero />
         <Trust />
         <Services />
         <About />
+        <WhyUs />
+        <Pricing />
         <FAQ />
         <Footer />
       </main>

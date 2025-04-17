@@ -36,7 +36,9 @@ const Hero = () => {
           </Link>
         </div>
       </div>
-
+      <div
+        className="absolute top-[30%] right-[140px] w-[360px] h-[360px] rounded-[50%] bg-gradient-to-r from-[rgba(10,207,131,0.4)] via-[rgba(12,170,109,0.54)] via-[30.98%] to-[rgba(21,24,23,0.48)] blur-[120px]"
+      ></div>
       <div className="w-full md:basis-[40%] flex justify-center md:justify-end mt-10 md:mt-0 animate-fade-in animation-delay-400">
         <div className="w-[70%] sm:w-[60%] md:w-full max-w-md lg:max-w-lg animate-pulse-slow">
           <Image

@@ -3,7 +3,7 @@ import about from "../../../public/Landing/about.svg";
 
 const About = () => {
   return (
-    <div className="w-full bg-gradient-to-b from-[rgba(10,207,131,0.06)] via-[rgba(7,7,7,0.20)] to-[#101010] py-[60px]">
+    <div id="about" className="w-full bg-gradient-to-b from-[rgba(10,207,131,0.06)] via-[rgba(7,7,7,0.20)] to-[#101010] py-[60px]">
       <div className="w-[90%] mx-auto">
         <h2 className="text-3xl md:text-4xl text-center font-bold text-white mb-12">
           About Us
