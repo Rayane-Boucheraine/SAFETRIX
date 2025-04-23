@@ -1,29 +1,34 @@
 // app/auth/reset-password/hacker/[token]/page.tsx
 "use client";
 
-// import Link from "next/link";
+import React from "react";
 import Image from "next/image";
 import passIcon from "../../../../../../public/signup/pass.svg";
 
 const HackerResetPasswordPage = () => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    // Add logic to handle password reset submission
+    console.log("Resetting password...");
+    alert("Password Reset Submitted (Simulated)");
+  };
+
   return (
     <div className="bg-[radial-gradient(70.07%_69.22%_at_50%_50%,#2A0D45_6.63%,#080808_100%)] w-full min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md p-6 md:p-10 rounded-[16px] border border-white/40 bg-[#2A0D45] bg-opacity-70 shadow-[0px_4px_30px_0px_rgba(255,255,255,0.15)] backdrop-blur-sm">
-        {/* ... rest of your JSX */}
         <h2 className="text-2xl font-bold text-white mb-2 text-center">
           Set New Password
         </h2>
         <p className="text-gray-300 mb-6 text-sm text-center">
           Create a new strong password for your account.
         </p>
-        <form className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label
               htmlFor="password"
               className="block text-xs font-medium text-gray-300 mb-1"
             >
-              {" "}
-              New Password{" "}
+              New Password
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -45,8 +50,7 @@ const HackerResetPasswordPage = () => {
               htmlFor="confirmPassword"
               className="block text-xs font-medium text-gray-300 mb-1"
             >
-              {" "}
-              Confirm New Password{" "}
+              Confirm New Password
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -67,6 +71,15 @@ const HackerResetPasswordPage = () => {
                 placeholder="••••••••"
               />
             </div>
+          </div>
+          {/* Added Submit Button */}
+          <div className="pt-4">
+            <button
+              type="submit"
+              className="w-full cursor-pointer bg-purple-600 hover:bg-purple-700 text-white font-semibold text-sm py-2.5 px-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-[#1e0a33] transition duration-200 ease-in-out disabled:opacity-60"
+            >
+              Reset Password
+            </button>
           </div>
         </form>
       </div>

@@ -29,7 +29,7 @@ const Hero = () => {
             Get Started
           </Link>
           <Link
-            href="#contact"
+            href="/contact"
             className="text-[#E0E0E0] border border-[#E0E0E0]/50 text-[15px] px-[28px] py-[8px] rounded-[16px] flex items-center justify-center gap-3 transition-all duration-300 ease-in-out hover:bg-white/10 hover:border-white/80 hover:scale-[1.03] active:scale-95 w-full sm:w-auto"
           >
             Contact Us

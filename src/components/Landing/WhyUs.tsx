@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React from "react"; // Removed useState as we'll use CSS group-hover
 import Image from "next/image";
 
 interface Reason {
@@ -8,10 +10,18 @@ interface Reason {
   icon: React.ReactNode;
 }
 
-const AiIcon = () => (
+interface IconProps {
+  className?: string;
+}
+
+// --- Icons with group-hover effects ---
+const AiIcon: React.FC<IconProps> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    className="h-6 w-6"
+    className={
+      className ||
+      "h-6 w-6 transition-transform duration-300 group-hover:scale-110"
+    }
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
@@ -24,10 +34,13 @@ const AiIcon = () => (
     />
   </svg>
 );
-const ExpertIcon = () => (
+const ExpertIcon: React.FC<IconProps> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    className="h-6 w-6"
+    className={
+      className ||
+      "h-6 w-6 transition-transform duration-300 group-hover:scale-110"
+    }
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
@@ -40,10 +53,13 @@ const ExpertIcon = () => (
     />
   </svg>
 );
-const ProactiveIcon = () => (
+const ProactiveIcon: React.FC<IconProps> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    className="h-6 w-6"
+    className={
+      className ||
+      "h-6 w-6 transition-transform duration-300 group-hover:scale-110"
+    }
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
@@ -56,10 +72,13 @@ const ProactiveIcon = () => (
     />
   </svg>
 );
-const SupportIcon = () => (
+const SupportIcon: React.FC<IconProps> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    className="h-6 w-6"
+    className={
+      className ||
+      "h-6 w-6 transition-transform duration-300 group-hover:scale-110"
+    }
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
@@ -104,6 +123,8 @@ const reasonsData: Reason[] = [
   },
 ];
 
+// IconContainer component is removed as its logic is integrated below
+
 const WhyUs: React.FC = () => {
   return (
     <section id="why-us" className="py-16 md:py-24 bg-[#0a0a0a]">
@@ -121,17 +142,31 @@ const WhyUs: React.FC = () => {
           </p>
         </div>
         <div className="lg:grid lg:grid-cols-2 lg:gap-16 xl:gap-24 lg:items-center">
-          <div className="animate-fade-in-left">
+          <div>
             <dl className="space-y-10 md:space-y-12">
               {reasonsData.map((reason) => (
-                <div key={reason.id} className="relative flex items-start">
+                // Add 'group' class to this parent div
+                <div
+                  key={reason.id}
+                  className="relative flex items-start group"
+                >
                   <dt className="flex-shrink-0">
-                    <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-gradient-to-br from-emerald-700/30 via-emerald-600/20 to-emerald-900/30 text-[#0ACF83]">
+                    {/* Apply styles directly, using group-hover for changes */}
+                    <div
+                      className={`flex items-center justify-center h-12 w-12 rounded-lg transition-all duration-300 ease-in-out transform 
+                                   bg-gradient-to-br from-emerald-700/30 via-emerald-600/20 to-emerald-900/30
+                                   text-[#0ACF83] 
+                                   group-hover:bg-gradient-to-r group-hover:from-emerald-600 group-hover:to-emerald-400 
+                                   group-hover:scale-110 
+                                   group-hover:shadow-lg group-hover:shadow-emerald-700/30`}
+                    >
+                      {/* Icon component is rendered inside. Icon itself will also scale via its own group-hover */}
                       {reason.icon}
                     </div>
                   </dt>
                   <dd className="ml-6">
-                    <p className="text-lg leading-6 font-semibold text-white">
+                    {/* Optional: Add group-hover effect to text as well */}
+                    <p className="text-lg leading-6 font-semibold text-white transition-colors duration-300 group-hover:text-emerald-300">
                       {reason.title}
                     </p>
                     <p className="mt-2 text-base text-gray-400">
@@ -142,9 +177,9 @@ const WhyUs: React.FC = () => {
               ))}
             </dl>
           </div>
-          <div className="mt-12 lg:mt-0 flex justify-center animate-fade-in-right animation-delay-200">
+          <div className="mt-12 lg:mt-0 flex justify-center">
             <Image
-              src="/Landing/whyus.svg"
+              src="/Landing/whyus.svg" // Ensure this path is correct
               alt="Abstract representation of secure connections and data protection"
               width={500}
               height={450}

@@ -3,7 +3,7 @@ import secureLocalStorage from "react-secure-storage";
 
 const BaseUrl = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BASE_URL,
-  // validateStatus: (status: any) => status == 200 || status == 201,
+  validateStatus: (status) => status == 200 || status == 201,
   withCredentials: true,
   headers: {
     Accept: "application/json",

@@ -1,17 +1,17 @@
-// app/auth/reset-password/startup/[token]/page.tsx
 "use client";
 
-// import React, { useState, FormEvent } from "react";
-// import { useRouter } from "next/navigation"; // Use navigation hooks
-// import Link from "next/link";
+import React from "react";
 import Image from "next/image";
-// Adjust path based on your  structure
-import passIcon from "../../../../../../public/signup/pass.svg";
+import passIcon from "../../../../../../public/signup/pass.svg"; 
 
 const StartupResetPasswordPage = () => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    console.log("Resetting startup password...");
+    alert("Password Reset Submitted (Startup - Simulated)");
+  };
 
   return (
-    // --- Startup Theme ---
     <div className="bg-[radial-gradient(70.07%_69.22%_at_50%_50%,#195033_6.63%,#080808_100%)] w-full min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md p-6 md:p-10 rounded-[16px] border border-white/40 bg-[rgba(64,127,103,0.1)] shadow-[0px_4px_30px_0px_rgba(255,255,255,0.15)] backdrop-blur-sm">
         <h2 className="text-2xl font-bold text-white mb-2 text-center">
@@ -21,8 +21,7 @@ const StartupResetPasswordPage = () => {
           Create a new strong password for your company account.
         </p>
 
-        <form  className="space-y-4">
-          {/* New Password Field */}
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label
               htmlFor="password"
@@ -40,14 +39,12 @@ const StartupResetPasswordPage = () => {
                 name="password"
                 required
                 autoComplete="new-password"
-                // --- Startup Input Style ---
                 className="w-full text-sm bg-black/30 border border-white/20 rounded-lg pl-9 pr-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-green-500 placeholder-gray-500 disabled:opacity-50"
                 placeholder="••••••••"
               />
             </div>
           </div>
 
-          {/* Confirm New Password Field */}
           <div>
             <label
               htmlFor="confirmPassword"
@@ -68,22 +65,23 @@ const StartupResetPasswordPage = () => {
                 type="password"
                 id="confirmPassword"
                 name="confirmPassword"
-
                 required
                 autoComplete="new-password"
-                // --- Startup Input Style ---
                 className="w-full text-sm bg-black/30 border border-white/20 rounded-lg pl-9 pr-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-green-500 placeholder-gray-500 disabled:opacity-50"
                 placeholder="••••••••"
               />
             </div>
           </div>
 
-         
-
-          
+          <div className="pt-4">
+            <button
+              type="submit"
+              className="w-full cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm py-2.5 px-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-[#195033] transition duration-200 ease-in-out disabled:opacity-60" // Changed colors
+            >
+              Reset Password
+            </button>
+          </div>
         </form>
-
-       
       </div>
     </div>
   );

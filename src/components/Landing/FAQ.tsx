@@ -51,6 +51,7 @@ const FAQ = () => {
 
   return (
     <div
+    id="faq"
       className={`bg-[linear-gradient(0deg,_rgba(10,207,131,0.04)_-71.1%,_rgba(7,7,7,0.40)_85.26%),_linear-gradient(180deg,_#070707_0%,_#101010_100%)] py-16 px-4 sm:px-6 lg:px-8 text-gray-100`}
     >
       <div className="max-w-7xl mx-auto">

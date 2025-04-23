@@ -12,10 +12,30 @@ import arrow from "../../../public/Landing/arrow.svg";
 import Image from "next/image";
 
 const Footer = () => {
+  const navLinks = [
+    { name: "Home", url: "/#home" },
+    { name: "Services", url: "/#services" },
+    { name: "About Us", url: "/#about" },
+    { name: "Bug Bounty", url: "/bug-bounty" },
+    { name: "Pricing", url: "/#pricing" },
+  ];
+
+  const quickLinks = [
+    { name: "Contact", url: "/contact" },
+    { name: "FAQ", url: "/#faq" },
+  ];
+
+  const socialLinks = [
+    { Icon: FaFacebookF, url: "https://facebook.com/safetrix" },
+    { Icon: FaTwitter, url: "https://twitter.com/safetrix" },
+    { Icon: FaInstagram, url: "https://instagram.com/safetrix" },
+    { Icon: FaLinkedinIn, url: "https://linkedin.com/company/safetrix" },
+    { Icon: SiGmail, url: "mailto:contact@safetrix.com" },
+  ];
+
   return (
     <footer className="rounded-t-[30px] bg-gradient-to-b from-[#0E241B] from-[55.57%] to-[#080808]">
       <div className="w-[90%] mx-auto py-[40px] flex flex-col md:flex-row justify-between gap-8">
-        {/* Company Info */}
         <div className="max-w-[300px] mx-auto md:mx-0">
           <h1 className="text-white font-semibold text-[30px] text-center md:text-left">
             SAFETRIX
@@ -25,55 +45,51 @@ const Footer = () => {
             protect your business from evolving digital threats.
           </p>
           <ul className="flex items-center gap-4 mt-6 justify-center md:justify-start">
-            {[FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, SiGmail].map(
-              (Icon, index) => (
-                <li
-                  key={index}
-                  className="bg-[#0ACF83] p-2 rounded-full hover:bg-[#00945B] transition"
-                >
+            {socialLinks.map(({ Icon, url }, index) => (
+              <li
+                key={index}
+                className="bg-[#0ACF83] p-2 rounded-full hover:bg-[#00945B] transition"
+              >
+                <Link href={url} target="_blank" rel="noopener noreferrer">
                   <Icon className="text-white cursor-pointer text-sm" />
-                </li>
-              )
-            )}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
 
-        {/* Navigation */}
         <div className="text-center md:text-left">
           <h2 className="text-white font-semibold text-[18px] mb-4">
             Navigation
           </h2>
           <ul className="space-y-3">
-            {["Home", "Services", "About Us", "Bug Bounty", "Pricing"].map(
-              (item) => (
-                <li key={item} className="flex items-center gap-3">
-                  <Image
-                    src={arrow}
-                    alt="arrow"
-                    className="w-2 h-2"
-                    width={10}
-                    height={10}
-                  />
-                  <Link
-                    href="#"
-                    className="text-[#E0E0E0] hover:text-[#0ACF83] transition text-[15px]"
-                  >
-                    {item}
-                  </Link>
-                </li>
-              )
-            )}
+            {navLinks.map(({ name, url }) => (
+              <li key={name} className="flex items-center gap-3">
+                <Image
+                  src={arrow}
+                  alt="arrow"
+                  className="w-2 h-2"
+                  width={10}
+                  height={10}
+                />
+                <Link
+                  href={url}
+                  className="text-[#E0E0E0] hover:text-[#0ACF83] transition text-[15px]"
+                >
+                  {name}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
 
-        {/* Quick Links */}
         <div className="text-center md:text-left">
           <h2 className="text-white font-semibold text-[18px] mb-4">
             Quick Links
           </h2>
           <ul className="space-y-3">
-            {["Contact", "FAQ"].map((item) => (
-              <li key={item} className="flex items-center gap-3">
+            {quickLinks.map(({ name, url }) => (
+              <li key={name} className="flex items-center gap-3">
                 <Image
                   src={arrow}
                   alt="arrow"
@@ -82,17 +98,16 @@ const Footer = () => {
                   height={12}
                 />
                 <Link
-                  href="#"
+                  href={url}
                   className="text-[#E0E0E0] hover:text-[#0ACF83] transition text-[15px]"
                 >
-                  {item}
+                  {name}
                 </Link>
               </li>
             ))}
           </ul>
         </div>
 
-        {/* Get In Touch */}
         <div className="text-center md:text-left">
           <h2 className="text-white font-semibold text-lg mb-4">
             Get In Touch
@@ -132,10 +147,8 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Divider */}
       <div className="w-[90%] mx-auto h-[1.6px] rounded-[16px] bg-[#E0E0E0] opacity-20 mb-6"></div>
 
-      {/* Copyright */}
       <div className="text-center text-[#E0E0E0] text-[15px] pb-6">
         Copyright © 2025 Safetrix. All Rights Reserved.
       </div>
