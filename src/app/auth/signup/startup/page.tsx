@@ -4,22 +4,27 @@ import { useState, FormEvent } from "react";
 import { useMutation } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
-import { isAxiosError } from "axios"; 
-
-import BaseUrl from "@/components/BaseUrl"; 
-
-import startup from "../../../../../public/Landing/startup.svg"; 
-import emailIcon from "../../../../../public/signup/email.svg"; 
-import passIcon from "../../../../../public/signup/pass.svg"; 
-import GoogleAuthButton from "../../comp/GoogleAuthButton"; 
+import { useRouter } from "next/navigation";
+import { isAxiosError } from "axios";
+import toast from "react-hot-toast";
+import BaseUrl from "@/components/BaseUrl";
+import startup from "../../../../../public/Landing/startup.svg";
+import emailIcon from "../../../../../public/signup/email.svg";
+import passIcon from "../../../../../public/signup/pass.svg";
+import GoogleAuthButton from "../../comp/GoogleAuthButton";
+import secureLocalStorage from "react-secure-storage";
 
 interface SignupPayload {
+  name: string;
   email: string;
   password: string;
+  role: "startup";
+  avatar: string;
 }
 
 interface SignupResponse {
-  message: string; 
+  message: string;
+  token: string;
 }
 
 interface ApiErrorResponse {
@@ -30,99 +35,90 @@ const StartupSignupPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [formError, setFormError] = useState<string | null>(null);
+  const router = useRouter();
 
-  const signupMutation = useMutation<
-    SignupResponse, 
-    Error, 
-    SignupPayload 
-  >({
+  const staticName = "Startup User";
+  const defaultAvatar = "https://avatar.iran.liara.run/public/girl";
+
+  const signupMutation = useMutation<SignupResponse, Error, SignupPayload>({
     mutationFn: async (payload: SignupPayload) => {
       try {
         const response = await BaseUrl.post<SignupResponse>(
-          "/auth/signup/startup", 
+          "/auth/user/signup",
           payload
         );
-        return response.data; 
+        return response.data;
       } catch (error: unknown) {
-        let errorMessage = "Startup signup failed. Please try again."; 
+        let errorMessage = "Startup signup failed. Please try again.";
 
         if (isAxiosError<ApiErrorResponse>(error)) {
           errorMessage =
             error.response?.data?.message || error.message || errorMessage;
-          console.error(
-            "Axios Error Details (Startup):",
-            error.response?.status,
-            error.response?.data,
-            error.message
-          );
         } else if (error instanceof Error) {
           errorMessage = error.message;
-          console.error("Generic Error (Startup):", error.message);
-        } else {
-          console.error("Unknown Error Type (Startup):", error);
         }
-        throw new Error(errorMessage); 
+        throw new Error(errorMessage);
       }
     },
     onSuccess: (data) => {
-      console.log("Startup Signup Success:", data.message);
-      setFormError(null);
-
-      alert("Signup Successful! You would normally be redirected now."); 
+      toast.success(
+        data.message || "Account created successfully! Please sign in."
+      );
+      secureLocalStorage.setItem("token", data.token);
+      router.push("/auth/verify/startup");
     },
     onError: (error: Error) => {
-      console.error("Mutation Error (Startup):", error.message);
-      setFormError(error.message);
+      const errorMessage = error.message || "An unexpected error occurred.";
+      toast.error(errorMessage);
     },
   });
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setFormError(null); 
 
     if (!email || !password || !confirmPassword) {
-      setFormError("All fields are required.");
-      return;
-    }
-    if (password !== confirmPassword) {
-      setFormError("Passwords do not match.");
-      return;
-    }
-    if (password.length < 6) {
-      setFormError("Password must be at least 6 characters long.");
+      toast.error("All fields are required.");
       return;
     }
     if (!/\S+@\S+\.\S+/.test(email)) {
-      setFormError("Please enter a valid email address.");
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters long.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match.");
       return;
     }
 
-    signupMutation.mutate({ email, password });
+    signupMutation.mutate({
+      name: staticName,
+      email,
+      password,
+      role: "startup",
+      avatar: defaultAvatar,
+    });
   };
 
   return (
-
     <div className="bg-[radial-gradient(70.07%_69.22%_at_50%_50%,#195033_6.63%,#080808_100%)] w-full min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-4xl lg:w-[62.8%] flex flex-col md:flex-row rounded-[16px] border border-white/40 bg-[rgba(64,127,103,0.05)] shadow-[0px_4px_30px_0px_rgba(255,255,255,0.20)] overflow-hidden h-auto max-h-[90vh] md:max-h-[700px] md:h-auto">
-        {" "}
         <div className="hidden md:flex md:w-1/2 items-center justify-center bg-[rgba(64,127,103,0.05)]">
-          {" "}
           <Image
             src={startup}
             alt="Startup illustration showing growth"
-            className="" 
+            className=""
             priority
-            width={450} 
+            width={450}
             height={450}
             style={{ objectFit: "contain" }}
           />
         </div>
         <div className="w-full md:w-1/2 bg-[#1a4530] bg-opacity-90 backdrop-blur-sm flex flex-col justify-center items-center p-6 sm:p-8 md:p-10 overflow-y-auto">
-          {" "}
           <div className="w-full max-w-sm min-h-[400px] flex flex-col justify-center">
             <div>
-              {" "}
               <h2 className="text-2xl sm:text-[26px] font-bold text-white mb-1 text-center">
                 Startup Sign Up
               </h2>
@@ -135,7 +131,6 @@ const StartupSignupPage = () => {
                     htmlFor="email-startup"
                     className="block text-xs font-medium text-gray-300 mb-1"
                   >
-
                     Email
                   </label>
                   <div className="relative">
@@ -161,8 +156,7 @@ const StartupSignupPage = () => {
                     htmlFor="password-startup"
                     className="block text-xs font-medium text-gray-300 mb-1"
                   >
-                    {" "}
-                    Password{" "}
+                    Password
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -187,8 +181,7 @@ const StartupSignupPage = () => {
                     htmlFor="confirmPassword-startup"
                     className="block text-xs font-medium text-gray-300 mb-1"
                   >
-                    {" "}
-                    Confirm Password{" "}
+                    Confirm Password
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -207,16 +200,6 @@ const StartupSignupPage = () => {
                     />
                   </div>
                 </div>
-
-                <div className="h-4 mt-1">
-                  {" "}
-                  {formError && (
-                    <p className="text-xs text-red-400 text-center">
-                      {formError}
-                    </p>
-                  )}
-                </div>
-
                 <button
                   type="submit"
                   disabled={signupMutation.isPending}
@@ -261,18 +244,18 @@ const StartupSignupPage = () => {
                 <div className="flex-grow border-t border-gray-600"></div>
               </div>
               <div className="mb-4">
-                <GoogleAuthButton />{" "}
+                <GoogleAuthButton />
               </div>
               <p className="text-center text-xs text-gray-400">
                 Already have an account?{" "}
                 <Link
-                  href="/auth/signin/startup" 
+                  href="/auth/signin/startup"
                   className="text-green-400 hover:underline"
                 >
                   Sign In
                 </Link>
               </p>
-            </div>{" "}
+            </div>
           </div>
         </div>
       </div>

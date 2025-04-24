@@ -47,11 +47,11 @@ const Trust = () => {
   const keyframes = `
     @keyframes marqueeTrust {
       0% { transform: translateX(0%); }
-      100% { transform: translateX(-100%); }
+      100% { transform: translateX(-50%); }
     }
     .animate-marqueeTrust {
-      /* MODIFICATION HERE: Added 'alternate' */
-      animation: marqueeTrust 30s linear infinite alternate; /* Adjust 30s for speed */
+      /* Reduced duration for faster speed */
+      animation: marqueeTrust 20s linear infinite; /* Adjust 20s for speed */
     }
   `;
 
@@ -63,7 +63,7 @@ const Trust = () => {
     >
       <style dangerouslySetInnerHTML={{ __html: keyframes }} />
 
-      <div className="px-20">
+      <div className="px-4 sm:px-8 md:px-20">
         <h2
           id="trust-heading"
           className="text-lg sm:text-xl lg:text-2xl text-[#FAFAFA]/80 mb-12 md:mb-16 animate-fade-in-up"
@@ -77,15 +77,18 @@ const Trust = () => {
 
         <div className="relative w-full overflow-hidden">
           <ul
-            className="flex w-max animate-marqueeTrust hover:[animation-play-state:paused] py-2" 
+            className="flex w-[200%] animate-marqueeTrust hover:[animation-play-state:paused] py-2"
+            aria-hidden="true"
           >
             {extendedLogos.map((company, index) => (
               <li
-                key={`${company.id}-${index}`}
-                className="flex-shrink-0 px-8 sm:px-10 md:px-12" 
+                key={`${company.id}-marquee-${index}`}
+                className={`flex-shrink-0 px-6 sm:px-8 md:px-10 lg:px-12 w-[${
+                  100 / trustedCompanies.length
+                }%]`}
               >
                 <div
-                  className="h-8 md:h-10 flex items-center transition-transform duration-300 ease-in-out transform hover:scale-110"
+                  className="h-8 md:h-10 flex items-center justify-center transition-transform duration-300 ease-in-out transform hover:scale-110"
                   title={company.name}
                 >
                   <Image
@@ -93,13 +96,17 @@ const Trust = () => {
                     alt={company.alt}
                     width={130}
                     height={40}
-                    className="max-h-full w-auto object-contain opacity-80 hover:opacity-100 transition-opacity duration-300" // Removed grayscale
-                    unoptimized 
+                    className="max-h-full w-auto object-contain opacity-80 hover:opacity-100 transition-opacity duration-300"
+                    unoptimized
                   />
                 </div>
               </li>
             ))}
           </ul>
+          <p className="sr-only">
+            Logos of trusted companies include:{" "}
+            {trustedCompanies.map((c) => c.name).join(", ")}
+          </p>
         </div>
       </div>
     </section>

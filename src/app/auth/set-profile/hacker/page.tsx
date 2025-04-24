@@ -4,80 +4,127 @@
 import React, { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-// import Link from "next/link";
+import { useMutation } from "@tanstack/react-query";
+import { isAxiosError } from "axios";
+import toast from "react-hot-toast";
+// import secureLocalStorage from "react-secure-storage";
 
-// Adjust path to your illustration
+import BaseUrl from "@/components/BaseUrl"; // Assuming BaseUrl is configured with interceptors for token
 import hackerIllustration from "../../../../../public/Landing/hacker.svg";
+
+// Define the structure of the data expected by the API
+interface HackerProfilePayload {
+  github?: string; // Optional fields
+  linkedin?: string; // Optional fields
+  skills: string[]; // Required array of skills
+  field: string; // Required field/specialization
+}
+
+interface ApiResponse {
+  message: string;
+  // Include other potential response fields if needed
+}
+
+interface ApiErrorResponse {
+  message: string;
+}
 
 const HackerSetProfilePage = () => {
   const router = useRouter();
+
   // --- State for Form Fields ---
-  const [alias, setAlias] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [skills, setSkills] = useState("");
-  const [bio, setBio] = useState("");
-  const [website, setWebsite] = useState("");
-  const [githubUrl, setGithubUrl] = useState("");
-  const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [alias, setAlias] = useState(""); // Keep for potential future use or display, but not sent in this payload
+  const [fullName, setFullName] = useState(""); // Keep for potential future use or display, but not sent in this payload
+  const [skills, setSkills] = useState(""); // Comma-separated input
+  const [field, setField] = useState(""); // NEW: Field/Specialization
+  const [bio, setBio] = useState(""); // Keep for potential future use or display, but not sent in this payload
+  const [website, setWebsite] = useState(""); // Keep for potential future use or display, but not sent in this payload
+  const [githubUrl, setGithubUrl] = useState(""); // Input for GitHub URL
+  const [linkedinUrl, setLinkedinUrl] = useState(""); // Input for LinkedIn URL
 
-  // --- State for UI ---
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // --- State for UI (managed by useMutation) ---
+  // const [isLoading, setIsLoading] = useState(false); // Replaced by mutation.isPending
+  const [formError, setFormError] = useState<string | null>(null); // Still useful for form-level validation
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const updateProfileMutation = useMutation<
+    ApiResponse,
+    Error,
+    HackerProfilePayload
+  >({
+    mutationFn: async (payload) => {
+      // Assuming BaseUrl instance has interceptor to add Auth token
+      try {
+        // Use PATCH for updating profile data
+        const response = await BaseUrl.patch<ApiResponse>(
+          "/user/hacker/profile",
+          payload
+        );
+        return response.data;
+      } catch (error) {
+        let errorMessage = "Failed to update profile.";
+        if (isAxiosError<ApiErrorResponse>(error)) {
+          errorMessage =
+            error.response?.data?.message || error.message || errorMessage;
+        } else if (error instanceof Error) {
+          errorMessage = error.message;
+        }
+        throw new Error(errorMessage);
+      }
+    },
+    onSuccess: (data) => {
+      toast.success(data.message || "Profile updated successfully!");
+      router.push("/dashboard/hacker"); // Redirect on success
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "An unexpected error occurred.");
+    },
+  });
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setErrorMessage(null);
+    setFormError(null);
 
-    if (!alias || !fullName || !skills) {
-      setErrorMessage("Please fill in Alias, Full Name, and Skills.");
+    // Validate required fields for the API payload
+    if (!skills || !field) {
+      const errorMsg = "Please fill in Skills and Field/Specialization.";
+      setFormError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
 
-    setIsLoading(true);
+    // --- Prepare Payload ---
+    const skillsArray = skills
+      .split(",")
+      .map((skill) => skill.trim())
+      .filter((skill) => skill !== ""); // Convert CSV string to array, trim whitespace, remove empty strings
 
-    try {
-      const response = await fetch("/api/auth/set-profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          profileData: {
-            alias,
-            fullName,
-            skills,
-            bio,
-            website,
-            githubUrl,
-            linkedinUrl,
-          },
-          // Assuming backend knows user is 'hacker' from session/auth token
-        }),
-      });
-
-      if (!response.ok) {
-        let errorMsg = "Failed to update profile.";
-        try {
-          const errorData = await response.json();
-          errorMsg = errorData.message || errorMsg;
-        } catch (e) {
-          console.log(e);
-        }
-        throw new Error(errorMsg);
-      }
-
-      router.push("/dashboard/hacker"); // Redirect on success
-    } catch (error: unknown) {
-      console.error("Password reset failed (Hacker Flow):", error);
-      setErrorMessage(
-        error instanceof Error ? error.message : "An unexpected error occurred."
-      );
+    if (skillsArray.length === 0) {
+      const errorMsg = "Please enter at least one valid skill.";
+      setFormError(errorMsg);
+      toast.error(errorMsg);
+      return;
     }
+
+    const payload: HackerProfilePayload = {
+      skills: skillsArray,
+      field: field.trim(), // Trim whitespace
+    };
+
+    // Add optional fields only if they have values
+    if (githubUrl.trim()) {
+      payload.github = githubUrl.trim();
+    }
+    if (linkedinUrl.trim()) {
+      payload.linkedin = linkedinUrl.trim();
+    }
+
+    // Trigger the mutation
+    updateProfileMutation.mutate(payload);
   };
 
   return (
     <div className="bg-[radial-gradient(70.07%_69.22%_at_50%_50%,#2A0D45_6.63%,#080808_100%)] w-full min-h-screen flex items-center justify-center p-4">
-      {/* --- Main Card Container --- */}
       <div className="w-full max-w-4xl flex flex-col md:flex-row rounded-[16px] border border-white/40 bg-[rgba(74,20,120,0.05)] shadow-[0px_4px_30px_0px_rgba(255,255,255,0.15)] overflow-hidden h-[77vh] md:max-h-[700px]">
-        {/* --- Image Section (Left) --- */}
         <div className="hidden md:flex md:w-1/2 items-center justify-center bg-gradient-to-br from-purple-900/20 to-black/10 relative">
           <Image
             src={hackerIllustration}
@@ -89,11 +136,7 @@ const HackerSetProfilePage = () => {
           />
         </div>
 
-        {/* --- Form Section (Right - SCROLLABLE) --- */}
         <div className="w-full bg-[#2A0D45]/90 flex flex-col justify-start items-center md:w-1/2 p-6 md:p-8 bg-[rgba(74,20,120,0.15)] backdrop-blur-sm scrollbar-hide overflow-y-auto">
-          {" "}
-          {/* KEY: overflow-y-auto */}
-          {/* Inner container */}
           <div className="w-full max-w-sm">
             <h2 className="text-2xl font-bold text-white mb-1 text-center">
               Setup Hacker Profile
@@ -103,13 +146,14 @@ const HackerSetProfilePage = () => {
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* --- Fields NOT sent in this payload, kept for potential UI use --- */}
               {/* Alias */}
               <div>
                 <label
                   htmlFor="alias"
                   className="block text-xs font-medium text-gray-300 mb-1"
                 >
-                  Hacker Alias
+                  Hacker Alias (Display Only)
                 </label>
                 <input
                   type="text"
@@ -117,19 +161,18 @@ const HackerSetProfilePage = () => {
                   name="alias"
                   value={alias}
                   onChange={(e) => setAlias(e.target.value)}
-                  required
-                  disabled={isLoading}
+                  disabled={updateProfileMutation.isPending}
                   className="w-full text-sm bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-purple-500 placeholder-gray-500 disabled:opacity-50"
+                  placeholder="Your unique hacker name"
                 />
               </div>
-
               {/* Full Name */}
               <div>
                 <label
                   htmlFor="fullName"
                   className="block text-xs font-medium text-gray-300 mb-1"
                 >
-                  Full Name
+                  Full Name (Display Only)
                 </label>
                 <input
                   type="text"
@@ -137,19 +180,58 @@ const HackerSetProfilePage = () => {
                   name="fullName"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  required
-                  disabled={isLoading}
+                  disabled={updateProfileMutation.isPending}
                   className="w-full text-sm bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-purple-500 placeholder-gray-500 disabled:opacity-50"
                 />
               </div>
+              {/* Bio */}
+              <div>
+                <label
+                  htmlFor="bio"
+                  className="block text-xs font-medium text-gray-300 mb-1"
+                >
+                  Bio / About (Optional)
+                </label>
+                <textarea
+                  id="bio"
+                  name="bio"
+                  rows={3} // Reduced rows slightly
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  disabled={updateProfileMutation.isPending}
+                  className="w-full text-sm bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-purple-500 placeholder-gray-500 disabled:opacity-50"
+                  placeholder="Your experience..."
+                />
+              </div>
+              {/* Website/Portfolio */}
+              <div>
+                <label
+                  htmlFor="website"
+                  className="block text-xs font-medium text-gray-300 mb-1"
+                >
+                  Website/Portfolio (Optional)
+                </label>
+                <input
+                  type="url"
+                  id="website"
+                  name="website"
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                  disabled={updateProfileMutation.isPending}
+                  className="w-full text-sm bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-purple-500 placeholder-gray-500 disabled:opacity-50"
+                  placeholder="https://your-portfolio.com"
+                />
+              </div>
+              {/* --- End Display Only Fields --- */}
 
+              {/* --- Fields SENT to API --- */}
               {/* Skills */}
               <div>
                 <label
                   htmlFor="skills"
                   className="block text-xs font-medium text-gray-300 mb-1"
                 >
-                  Key Skills
+                  Key Skills <span className="text-red-400">*</span>
                 </label>
                 <textarea
                   id="skills"
@@ -158,53 +240,33 @@ const HackerSetProfilePage = () => {
                   required
                   value={skills}
                   onChange={(e) => setSkills(e.target.value)}
-                  disabled={isLoading}
+                  disabled={updateProfileMutation.isPending}
                   className="w-full text-sm bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-purple-500 placeholder-gray-500 disabled:opacity-50"
-                  placeholder="e.g., Web App Security, Pentesting..."
+                  placeholder="e.g., Web App Security, Pentesting, Reverse Engineering"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Enter skills separated by commas.
                 </p>
               </div>
 
-              {/* Bio */}
+              {/* Field/Specialization (NEW) */}
               <div>
                 <label
-                  htmlFor="bio"
+                  htmlFor="field"
                   className="block text-xs font-medium text-gray-300 mb-1"
                 >
-                  Bio / About <span className="text-gray-500">(Opt.)</span>
-                </label>
-                <textarea
-                  id="bio"
-                  name="bio"
-                  rows={4}
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  disabled={isLoading}
-                  className="w-full text-sm bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-purple-500 placeholder-gray-500 disabled:opacity-50"
-                  placeholder="Your experience..."
-                />
-              </div>
-
-              {/* Website/Portfolio */}
-              <div>
-                <label
-                  htmlFor="website"
-                  className="block text-xs font-medium text-gray-300 mb-1"
-                >
-                  Website/Portfolio{" "}
-                  <span className="text-gray-500">(Opt.)</span>
+                  Field / Specialization <span className="text-red-400">*</span>
                 </label>
                 <input
-                  type="url"
-                  id="website"
-                  name="website"
-                  value={website}
-                  onChange={(e) => setWebsite(e.target.value)}
-                  disabled={isLoading}
+                  type="text"
+                  id="field"
+                  name="field"
+                  value={field}
+                  onChange={(e) => setField(e.target.value)}
+                  required
+                  disabled={updateProfileMutation.isPending}
                   className="w-full text-sm bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-purple-500 placeholder-gray-500 disabled:opacity-50"
-                  placeholder="https://your-portfolio.com"
+                  placeholder="e.g., Web Security, Cloud Security, Mobile Security"
                 />
               </div>
 
@@ -214,7 +276,7 @@ const HackerSetProfilePage = () => {
                   htmlFor="githubUrl"
                   className="block text-xs font-medium text-gray-300 mb-1"
                 >
-                  GitHub <span className="text-gray-500">(Opt.)</span>
+                  GitHub (Optional)
                 </label>
                 <input
                   type="url"
@@ -222,7 +284,7 @@ const HackerSetProfilePage = () => {
                   name="githubUrl"
                   value={githubUrl}
                   onChange={(e) => setGithubUrl(e.target.value)}
-                  disabled={isLoading}
+                  disabled={updateProfileMutation.isPending}
                   className="w-full text-sm bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-purple-500 placeholder-gray-500 disabled:opacity-50"
                   placeholder="https://github.com/yourusername"
                 />
@@ -234,7 +296,7 @@ const HackerSetProfilePage = () => {
                   htmlFor="linkedinUrl"
                   className="block text-xs font-medium text-gray-300 mb-1"
                 >
-                  LinkedIn <span className="text-gray-500">(Opt.)</span>
+                  LinkedIn (Optional)
                 </label>
                 <input
                   type="url"
@@ -242,29 +304,63 @@ const HackerSetProfilePage = () => {
                   name="linkedinUrl"
                   value={linkedinUrl}
                   onChange={(e) => setLinkedinUrl(e.target.value)}
-                  disabled={isLoading}
+                  disabled={updateProfileMutation.isPending}
                   className="w-full text-sm bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-purple-500 placeholder-gray-500 disabled:opacity-50"
                   placeholder="https://linkedin.com/in/yourprofile"
                 />
               </div>
+              {/* --- End Fields SENT to API --- */}
 
-              {/* Error Message Display */}
-              {errorMessage && (
+              {/* Form Validation Error Message Display */}
+              {formError &&
+                !updateProfileMutation.error && ( // Show only if no API error
+                  <div className="text-center text-sm text-red-300 border border-red-700/60 p-2 rounded-md mt-1">
+                    {formError}
+                  </div>
+                )}
+
+              {/* API Error Message Display (from useMutation) */}
+              {updateProfileMutation.error && (
                 <div className="text-center text-sm text-red-300 border border-red-700/60 p-2 rounded-md mt-1">
-                  {errorMessage}
+                  {updateProfileMutation.error.message}
                 </div>
               )}
 
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isLoading}
-                className="w-full cursor-pointer bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium py-2.5 px-4 rounded-lg transition-colors mt-4 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#1a1a2e] focus:ring-purple-500 disabled:opacity-60 disabled:cursor-not-allowed"
+                disabled={updateProfileMutation.isPending}
+                className="w-full cursor-pointer bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium py-2.5 px-4 rounded-lg transition-colors mt-4 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#2A0D45] focus:ring-purple-500 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {isLoading ? "Saving..." : "Complete Profile & Enter Dashboard"}
+                {updateProfileMutation.isPending ? (
+                  <span className="flex items-center justify-center">
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Saving...
+                  </span>
+                ) : (
+                  "Complete Profile & Enter Dashboard"
+                )}
               </button>
             </form>
-            {/* Optional: Add skip link or logout */}
           </div>
         </div>
       </div>

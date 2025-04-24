@@ -1,17 +1,19 @@
+// src/app/auth/signup/hacker/page.tsx
 "use client";
 
 import React, { useState, FormEvent } from "react";
 import { useMutation } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { isAxiosError } from "axios";
-import BaseUrl from "@/components/BaseUrl"; 
-import hacker from "../../../../../public/Landing/hacker.svg"; 
-import emailIcon from "../../../../../public/signup/email.svg"; 
-import passIcon from "../../../../../public/signup/pass.svg"; 
-// import nameIcon from "../../../../../public/signup/";
+import BaseUrl from "@/components/BaseUrl";
+import hacker from "../../../../../public/Landing/hacker.svg";
+import emailIcon from "../../../../../public/signup/email.svg";
+import passIcon from "../../../../../public/signup/pass.svg";
 import GoogleAuthButton from "../../comp/GoogleAuthButton";
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
+import secureLocalStorage from "react-secure-storage";
 
 interface SignupPayload {
   name: string;
@@ -23,6 +25,7 @@ interface SignupPayload {
 
 interface SignupResponse {
   message: string;
+  token: string; // Add the token property
 }
 
 interface ApiErrorResponse {
@@ -30,13 +33,13 @@ interface ApiErrorResponse {
 }
 
 const HackerSignupPage = () => {
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [formError, setFormError] = useState<string | null>(null);
+  const router = useRouter();
 
-  const defaultAvatar = "https://example.com/default-hacker-avatar.jpg"; 
+  const defaultAvatar = "https://avatar.iran.liara.run/public/boy";
+  const staticName = "Hacker User";
 
   const signupMutation = useMutation<SignupResponse, Error, SignupPayload>({
     mutationFn: async (payload: SignupPayload) => {
@@ -51,57 +54,48 @@ const HackerSignupPage = () => {
         if (isAxiosError<ApiErrorResponse>(error)) {
           errorMessage =
             error.response?.data?.message || error.message || errorMessage;
-          console.error(
-            "Axios Error:",
-            error.response?.status,
-            error.response?.data
-          );
         } else if (error instanceof Error) {
           errorMessage = error.message;
-          console.error("Generic Error:", error.message);
-        } else {
-          console.error("Unknown Error Type:", error);
         }
         throw new Error(errorMessage);
       }
     },
     onSuccess: (data) => {
-      console.log("Signup Success:", data.message);
-      setFormError(null);
-      // toast.success(data.message || 'Account created successfully!');
-      // router.push("/auth/signin/hacker?signup=success"); // Example redirect
-      toast.success("Signup Successful! Redirect logic goes here."); // Placeholder
+      toast.success(
+        data.message || "Account created successfully!"
+      );
+      
+      secureLocalStorage.setItem("token", data.token)
+      router.push("/auth/verify/hacker");
     },
     onError: (error: Error) => {
-      console.error("Mutation Error:", error.message);
-      setFormError(error.message);
-      // toast.error(error.message);
+      const errorMessage = error.message || "An unexpected error occurred.";
+      toast.error(errorMessage);
     },
   });
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setFormError(null);
 
-    if (!name || !email || !password || !confirmPassword) {
-      setFormError("All fields are required.");
-      return;
-    }
-    if (password !== confirmPassword) {
-      setFormError("Passwords do not match.");
-      return;
-    }
-    if (password.length < 6) {
-      setFormError("Password must be at least 6 characters long.");
+    if (!email || !password || !confirmPassword) {
+      toast.error("Email and password fields are required.");
       return;
     }
     if (!/\S+@\S+\.\S+/.test(email)) {
-      setFormError("Please enter a valid email address.");
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters long.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match.");
       return;
     }
 
     signupMutation.mutate({
-      name,
+      name: staticName,
       email,
       password,
       role: "hacker",
@@ -134,30 +128,6 @@ const HackerSignupPage = () => {
               <form onSubmit={handleSubmit} className="space-y-3">
                 <div>
                   <label
-                    htmlFor="name-hacker"
-                    className="block text-xs font-medium text-gray-300 mb-1"
-                  >
-                    Full Name
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Image src={passIcon} alt="" width={16} height={16} />
-                    </div>
-                    <input
-                      type="text"
-                      id="name-hacker"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      disabled={signupMutation.isPending}
-                      className="w-full text-sm bg-black/30 border border-white/20 rounded-lg pl-9 pr-3 py-[8px] text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-purple-500 disabled:opacity-50 transition-colors"
-                      placeholder="Your Full Name"
-                      required
-                      autoComplete="name"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label
                     htmlFor="email-hacker"
                     className="block text-xs font-medium text-gray-300 mb-1"
                   >
@@ -180,6 +150,7 @@ const HackerSignupPage = () => {
                     />
                   </div>
                 </div>
+
                 <div>
                   <label
                     htmlFor="password-hacker"
@@ -204,6 +175,7 @@ const HackerSignupPage = () => {
                     />
                   </div>
                 </div>
+
                 <div>
                   <label
                     htmlFor="confirmPassword-hacker"
@@ -227,13 +199,6 @@ const HackerSignupPage = () => {
                       autoComplete="new-password"
                     />
                   </div>
-                </div>
-                <div className="h-4 mt-1">
-                  {formError && (
-                    <p className="text-xs text-red-400 text-center">
-                      {formError}
-                    </p>
-                  )}
                 </div>
                 <button
                   type="submit"
@@ -273,14 +238,17 @@ const HackerSignupPage = () => {
                   )}
                 </button>
               </form>
+
               <div className="flex items-center my-4">
                 <div className="flex-grow border-t border-gray-600"></div>
                 <span className="mx-3 text-gray-400 text-xs">OR</span>
                 <div className="flex-grow border-t border-gray-600"></div>
               </div>
+
               <div className="mb-4">
                 <GoogleAuthButton />
               </div>
+
               <p className="text-center text-xs text-gray-400">
                 Already have an account?{" "}
                 <Link

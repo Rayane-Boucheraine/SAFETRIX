@@ -20,7 +20,7 @@ const Header = () => {
         </Link>
       </div>
 
-      <div className="flex-grow flex justify-center animate-fade-in animate-duration-500">
+      <div className="flex-grow flex justify-center animate-fade-in animate-duration-500 max-lg:hidden">
         <NavBar />
       </div>
 

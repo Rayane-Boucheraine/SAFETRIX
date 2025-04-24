@@ -142,10 +142,10 @@ const ContactPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 lg:gap-20 items-start">
-          <div className="order-2 lg:order-1 animate-fade-in-left animation-delay-200">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 lg:gap-20 items-start max-lg:flex max-lg:flex-col-reverse">
+          <div className="order-2 lg:order-1 animate-fade-in-left animation-delay-200 max-lg:w-full">
             <div className="bg-gradient-to-br from-[#111111]/80 to-[#181818]/90 p-8 md:p-10 rounded-2xl border border-gray-700/60 shadow-2xl shadow-black/30">
-              <h2 className="text-2xl font-semibold text-white mb-6">
+              <h2 className="text-2xl font-semibold text-white mb-6 max-md:text-[22px]">
                 Send Us a Secure Message
               </h2>
               <form onSubmit={handleSubmit} className="space-y-5">
@@ -226,8 +226,7 @@ const ContactPage: React.FC = () => {
               </form>
             </div>
           </div>
-
-          <div className="lg:order-2 text-center animate-fade-in-right animation-delay-100 space-y-10">
+          <div className="lg:order-2 text-center animate-fade-in-right animation-delay-100 space-y-10 max-lg:w-full">
             <h2 className="text-2xl font-semibold text-white mb-6">
               Contact Details & Channels
             </h2>

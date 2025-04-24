@@ -60,7 +60,7 @@ const FAQ = () => {
         </h1>
 
         <div className="flex flex-col md:flex-row gap-8 lg:gap-16 items-center">
-          <div className="md:w-1/2 space-y-4">
+          <div className="md:w-1/2 space-y-4 max-md:text-center">
             <h2 className="text-2xl font-semibold text-gray-100">
               Common Cybersecurity Questions
             </h2>

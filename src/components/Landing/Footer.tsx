@@ -62,9 +62,12 @@ const Footer = () => {
           <h2 className="text-white font-semibold text-[18px] mb-4">
             Navigation
           </h2>
-          <ul className="space-y-3">
+          <ul className="space-y-3 ">
             {navLinks.map(({ name, url }) => (
-              <li key={name} className="flex items-center gap-3">
+              <li
+                key={name}
+                className="flex items-center gap-3 max-md:justify-center"
+              >
                 <Image
                   src={arrow}
                   alt="arrow"
@@ -89,7 +92,10 @@ const Footer = () => {
           </h2>
           <ul className="space-y-3">
             {quickLinks.map(({ name, url }) => (
-              <li key={name} className="flex items-center gap-3">
+              <li
+                key={name}
+                className="flex items-center gap-3 max-md:justify-center"
+              >
                 <Image
                   src={arrow}
                   alt="arrow"
@@ -113,7 +119,7 @@ const Footer = () => {
             Get In Touch
           </h2>
           <ul className="space-y-3">
-            <li className="flex items-center gap-2">
+            <li className="flex items-center gap-2 max-md:justify-center max-md:flex-col">
               <Image
                 src={email}
                 alt="Email"
@@ -128,7 +134,7 @@ const Footer = () => {
                 contact@safetrix.com
               </Link>
             </li>
-            <li className="flex items-center gap-4 mt-3 pr-10">
+            <li className="flex items-center gap-4 mt-3 pr-10 max-md:justify-center max-md:flex-col max-md:pr-0">
               <Image
                 src={phone}
                 alt="Phone"

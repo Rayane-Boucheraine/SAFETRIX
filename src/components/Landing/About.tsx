@@ -12,13 +12,13 @@ const About = () => {
           About Us
         </h2>
 
-        <div className="grid md:grid-cols-2 items-center">
+        <div className="grid md:grid-cols-2 items-center max-xl:!grid-cols-1">
           <Image
             src={about}
             alt="Safetrix security illustration"
-            className="w-[500px] ml-16"
+            className="w-[500px] ml-16 max-md:ml-0 max-md:w-[460px] max-md:mb-6 max-xl:hidden"
           />
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-6 max-xl:text-center">
             <h2 className="text-[30px] font-[600]">
               Empowering Startups with Cyber Resilience
             </h2>
