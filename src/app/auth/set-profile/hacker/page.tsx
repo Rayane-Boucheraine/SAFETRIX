@@ -7,12 +7,10 @@ import Image from "next/image";
 import { useMutation } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import toast from "react-hot-toast";
-// import secureLocalStorage from "react-secure-storage";
 
-import BaseUrl from "@/components/BaseUrl"; // Assuming BaseUrl is configured with interceptors for token
+import BaseUrl from "@/components/BaseUrl";
 import hackerIllustration from "../../../../../public/Landing/hacker.svg";
 
-// Define the structure of the data expected by the API
 interface HackerProfilePayload {
   github?: string; // Optional fields
   linkedin?: string; // Optional fields
@@ -22,7 +20,6 @@ interface HackerProfilePayload {
 
 interface ApiResponse {
   message: string;
-  // Include other potential response fields if needed
 }
 
 interface ApiErrorResponse {
@@ -44,7 +41,6 @@ const HackerSetProfilePage = () => {
 
   // --- State for UI (managed by useMutation) ---
   // const [isLoading, setIsLoading] = useState(false); // Replaced by mutation.isPending
-  const [formError, setFormError] = useState<string | null>(null); // Still useful for form-level validation
 
   const updateProfileMutation = useMutation<
     ApiResponse,
@@ -55,7 +51,7 @@ const HackerSetProfilePage = () => {
       // Assuming BaseUrl instance has interceptor to add Auth token
       try {
         // Use PATCH for updating profile data
-        const response = await BaseUrl.patch<ApiResponse>(
+        const response = await BaseUrl.post<ApiResponse>(
           "/user/hacker/profile",
           payload
         );
@@ -82,12 +78,10 @@ const HackerSetProfilePage = () => {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setFormError(null);
 
     // Validate required fields for the API payload
     if (!skills || !field) {
       const errorMsg = "Please fill in Skills and Field/Specialization.";
-      setFormError(errorMsg);
       toast.error(errorMsg);
       return;
     }
@@ -100,7 +94,6 @@ const HackerSetProfilePage = () => {
 
     if (skillsArray.length === 0) {
       const errorMsg = "Please enter at least one valid skill.";
-      setFormError(errorMsg);
       toast.error(errorMsg);
       return;
     }
@@ -195,7 +188,7 @@ const HackerSetProfilePage = () => {
                 <textarea
                   id="bio"
                   name="bio"
-                  rows={3} // Reduced rows slightly
+                  rows={3}
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   disabled={updateProfileMutation.isPending}
@@ -203,7 +196,7 @@ const HackerSetProfilePage = () => {
                   placeholder="Your experience..."
                 />
               </div>
-              {/* Website/Portfolio */}
+
               <div>
                 <label
                   htmlFor="website"
@@ -222,10 +215,7 @@ const HackerSetProfilePage = () => {
                   placeholder="https://your-portfolio.com"
                 />
               </div>
-              {/* --- End Display Only Fields --- */}
 
-              {/* --- Fields SENT to API --- */}
-              {/* Skills */}
               <div>
                 <label
                   htmlFor="skills"
@@ -290,7 +280,6 @@ const HackerSetProfilePage = () => {
                 />
               </div>
 
-              {/* LinkedIn URL */}
               <div>
                 <label
                   htmlFor="linkedinUrl"
@@ -309,24 +298,13 @@ const HackerSetProfilePage = () => {
                   placeholder="https://linkedin.com/in/yourprofile"
                 />
               </div>
-              {/* --- End Fields SENT to API --- */}
 
-              {/* Form Validation Error Message Display */}
-              {formError &&
-                !updateProfileMutation.error && ( // Show only if no API error
-                  <div className="text-center text-sm text-red-300 border border-red-700/60 p-2 rounded-md mt-1">
-                    {formError}
-                  </div>
-                )}
-
-              {/* API Error Message Display (from useMutation) */}
               {updateProfileMutation.error && (
                 <div className="text-center text-sm text-red-300 border border-red-700/60 p-2 rounded-md mt-1">
                   {updateProfileMutation.error.message}
                 </div>
               )}
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={updateProfileMutation.isPending}

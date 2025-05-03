@@ -8,10 +8,9 @@ import { useMutation } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import toast from "react-hot-toast";
 
-import BaseUrl from "@/components/BaseUrl"; // Assuming BaseUrl is configured with interceptors for token
+import BaseUrl from "@/components/BaseUrl";
 import startupIllustration from "../../../../../public/Landing/startup.svg";
 
-// Define the structure of the data expected by the API
 interface StartupProfilePayload {
   name: string;
   industry: string;
@@ -24,7 +23,6 @@ interface StartupProfilePayload {
 
 interface ApiResponse {
   message: string;
-  // Include other potential response fields if needed
 }
 
 interface ApiErrorResponse {
@@ -34,18 +32,15 @@ interface ApiErrorResponse {
 const StartupSetProfilePage = () => {
   const router = useRouter();
 
-  // --- State for Form Fields ---
-  const [companyName, setCompanyName] = useState(""); // Maps to 'name'
-  const [website, setWebsite] = useState(""); // Keep for UI, not sent
-  const [industry, setIndustry] = useState(""); // Required
-  // Removed tagline state
-  const [description, setDescription] = useState(""); // Required
-  const [location, setLocation] = useState(""); // Required - New
-  const [teamSize, setTeamSize] = useState(""); // Required - New (input as string, parse to number)
-  const [securityNeeds, setSecurityNeeds] = useState(""); // Required - New (input as CSV string, parse to array)
-  const [yearlyRevenue, setYearlyRevenue] = useState(""); // Required - New (input as string, parse to number)
+  const [companyName, setCompanyName] = useState("");
+  const [website, setWebsite] = useState("");
+  const [industry, setIndustry] = useState("");
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
+  const [teamSize, setTeamSize] = useState("");
+  const [securityNeeds, setSecurityNeeds] = useState("");
+  const [yearlyRevenue, setYearlyRevenue] = useState("");
 
-  // --- State for UI ---
   const [formError, setFormError] = useState<string | null>(null);
 
   const updateProfileMutation = useMutation<
@@ -55,9 +50,8 @@ const StartupSetProfilePage = () => {
   >({
     mutationFn: async (payload) => {
       try {
-        // Use PATCH for updating profile data
-        const response = await BaseUrl.patch<ApiResponse>(
-          "/user/startup/profile", // Correct API endpoint
+        const response = await BaseUrl.post<ApiResponse>(
+          "/user/startup/profile",
           payload
         );
         return response.data;
@@ -74,7 +68,7 @@ const StartupSetProfilePage = () => {
     },
     onSuccess: (data) => {
       toast.success(data.message || "Profile updated successfully!");
-      router.push("/dashboard/startup"); // Redirect on success
+      router.push("/dashboard/startup");
     },
     onError: (error: Error) => {
       toast.error(error.message || "An unexpected error occurred.");
@@ -85,7 +79,6 @@ const StartupSetProfilePage = () => {
     event.preventDefault();
     setFormError(null);
 
-    // --- Validation ---
     if (
       !companyName ||
       !industry ||
@@ -128,9 +121,7 @@ const StartupSetProfilePage = () => {
       toast.error(errorMsg);
       return;
     }
-    // --- End Validation ---
 
-    // --- Prepare Payload ---
     const payload: StartupProfilePayload = {
       name: companyName.trim(),
       industry: industry.trim(),
@@ -141,7 +132,6 @@ const StartupSetProfilePage = () => {
       yearly_revenue: yearlyRevenueNum,
     };
 
-    // Trigger the mutation
     updateProfileMutation.mutate(payload);
   };
 
@@ -169,7 +159,6 @@ const StartupSetProfilePage = () => {
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Company Name */}
               <div>
                 <label
                   htmlFor="companyName"
@@ -189,7 +178,6 @@ const StartupSetProfilePage = () => {
                 />
               </div>
 
-              {/* Website (Not Sent, UI only) */}
               <div>
                 <label
                   htmlFor="website"
@@ -209,7 +197,6 @@ const StartupSetProfilePage = () => {
                 />
               </div>
 
-              {/* Industry */}
               <div>
                 <label
                   htmlFor="industry"
@@ -230,7 +217,6 @@ const StartupSetProfilePage = () => {
                 />
               </div>
 
-              {/* Location */}
               <div>
                 <label
                   htmlFor="location"
@@ -251,7 +237,6 @@ const StartupSetProfilePage = () => {
                 />
               </div>
 
-              {/* Team Size */}
               <div>
                 <label
                   htmlFor="teamSize"
@@ -260,13 +245,13 @@ const StartupSetProfilePage = () => {
                   Team Size <span className="text-red-400">*</span>
                 </label>
                 <input
-                  type="number" // Use number type for better input control
+                  type="number"
                   id="teamSize"
                   name="teamSize"
                   value={teamSize}
                   onChange={(e) => setTeamSize(e.target.value)}
                   required
-                  min="1" // Basic validation
+                  min="1"
                   step="1"
                   disabled={updateProfileMutation.isPending}
                   className="w-full text-sm bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-green-500 placeholder-gray-500 disabled:opacity-50"
@@ -274,7 +259,6 @@ const StartupSetProfilePage = () => {
                 />
               </div>
 
-              {/* Yearly Revenue */}
               <div>
                 <label
                   htmlFor="yearlyRevenue"
@@ -284,21 +268,20 @@ const StartupSetProfilePage = () => {
                   <span className="text-red-400">*</span>
                 </label>
                 <input
-                  type="number" // Use number type
+                  type="number"
                   id="yearlyRevenue"
                   name="yearlyRevenue"
                   value={yearlyRevenue}
                   onChange={(e) => setYearlyRevenue(e.target.value)}
                   required
-                  min="0" // Basic validation
-                  step="any" // Allow decimals if needed
+                  min="0"
+                  step="any"
                   disabled={updateProfileMutation.isPending}
                   className="w-full text-sm bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-green-500 placeholder-gray-500 disabled:opacity-50"
                   placeholder="e.g., 500000"
                 />
               </div>
 
-              {/* Security Needs */}
               <div>
                 <label
                   htmlFor="securityNeeds"
@@ -322,7 +305,6 @@ const StartupSetProfilePage = () => {
                 </p>
               </div>
 
-              {/* Description */}
               <div>
                 <label
                   htmlFor="description"
@@ -343,21 +325,18 @@ const StartupSetProfilePage = () => {
                 />
               </div>
 
-              {/* Form Validation Error Message Display */}
               {formError && !updateProfileMutation.error && (
                 <div className="text-center text-sm text-red-300 border border-red-700/60 p-2 rounded-md mt-1">
                   {formError}
                 </div>
               )}
 
-              {/* API Error Message Display */}
               {updateProfileMutation.error && (
                 <div className="text-center text-sm text-red-300 border border-red-700/60 p-2 rounded-md mt-1">
                   {updateProfileMutation.error.message}
                 </div>
               )}
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={updateProfileMutation.isPending}
