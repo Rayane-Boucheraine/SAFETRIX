@@ -9,8 +9,7 @@ import { useMutation } from "@tanstack/react-query";
 import BaseUrl from "@/components/BaseUrl";
 import toast from "react-hot-toast";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CaretLeft, Eye, EyeSlash } from "phosphor-react";
-import Link from "next/link";
+import { Eye, EyeSlash } from "phosphor-react";
 import Loading from "@/components/Loading";
 
 function PasswordResetContent() {
@@ -67,9 +66,11 @@ function PasswordResetContent() {
     password: ValidatePasswordProps["password"]
   ): void => {
     const strongPasswordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>_\-])[A-Za-z\d!@#$%^&*(),.?":{}|<>_\-]{8,}$/;
     if (!strongPasswordRegex.test(password)) {
-      setPasswordError("8+ caractères, majuscule, minuscule et chiffre");
+      setPasswordError(
+        "8+ caractères, majuscule, minuscule, chiffre et symbole"
+      );
     } else {
       setPasswordError("");
     }
@@ -109,110 +110,144 @@ function PasswordResetContent() {
   if (!token) return null;
 
   return (
-    <div className="bg-[#FFF] w-full h-full rounded-[16px] flex flex-col items-center justify-center gap-6 max-xl:py-6">
-      <Image src={logo} alt="logo" className="w-[140px] mb-6" />
+    <div className="bg-[radial-gradient(70.07%_69.22%_at_50%_50%,#2A0D45_6.63%,#080808_100%)] w-full min-h-screen flex items-center justify-center p-4">
+      <div className="w-full max-w-4xl lg:w-[62.8%] flex flex-col rounded-[16px] border border-white/40 bg-[rgba(74,20,120,0.05)] shadow-[0px_4px_30px_0px_rgba(255,255,255,0.20)] overflow-hidden h-auto max-h-[90vh] md:max-h-[700px] md:h-auto">
+        <div className="w-full bg-[#2A0D45] bg-opacity-90 backdrop-blur-sm flex flex-col items-center p-6 sm:p-8 md:p-10 overflow-y-auto">
+          <div className="w-full max-w-[500px] flex flex-col justify-center">
+            {/* Logo and back button */}
+            <div className="flex flex-col items-center mb-6">
+              <Image src={logo} alt="logo" className="w-[50px] mb-4" />
+            </div>
 
-      <div className="flex items-center gap-1 self-start w-[567.09px] mx-auto max-md:pl-3">
-        <Link href="/login" className="flex items-center gap-1">
-          <CaretLeft size={16} className="text-[#F8589F]" />
-          <span className="text-[15px] font-[500] text-[#F8589F]">Retour</span>
-        </Link>
-      </div>
+            <div className="mb-6">
+              <h1 className="text-2xl sm:text-[26px] font-bold text-white mb-1 text-center">
+                Réinitialisation du mot de passe
+              </h1>
+              <p className="text-gray-300 text-sm text-center">
+                Créez un nouveau mot de passe fort pour sécuriser votre compte.
+              </p>
+              <p className="text-gray-400 text-xs mt-2 text-center">
+                Le mot de passe doit contenir au moins 8 caractères, une
+                majuscule, une minuscule, un chiffre et un symbole (!@#$%^&*).
+              </p>
+            </div>
 
-      <div className="w-[567.09px] mx-auto max-md:w-[90%]">
-        <h2 className="text-[#191919] font-[500] text-[20px]">
-          Réinitialisation du mot de passe
-        </h2>
-        <p className="text-[#666666] text-[13px] mt-2">
-          Choisissez un mot de passe fort pour sécuriser votre compte.
-        </p>
-      </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* New password field */}
+              <div>
+                <label
+                  htmlFor="newPassword"
+                  className="block text-xs font-medium text-gray-300 mb-1"
+                >
+                  Nouveau mot de passe
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Image
+                      src={lock}
+                      alt="icône mot de passe"
+                      width={16}
+                      height={16}
+                    />
+                  </div>
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    id="newPassword"
+                    placeholder="Entrez votre nouveau mot de passe"
+                    value={newPassword}
+                    onChange={(e) => {
+                      setNewPassword(e.target.value);
+                      validatePassword(e.target.value);
+                    }}
+                    className="w-full text-sm bg-black/30 border border-white/20 rounded-lg pl-9 pr-10 py-[8px] text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-purple-500 disabled:opacity-50 transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-purple-400"
+                  >
+                    {showNewPassword ? (
+                      <EyeSlash size={18} weight="regular" />
+                    ) : (
+                      <Eye size={18} weight="regular" />
+                    )}
+                  </button>
+                </div>
+                {passwordError && (
+                  <p className="mt-1 text-xs text-red-400">{passwordError}</p>
+                )}
+                {!passwordError && newPassword && (
+                  <p className="mt-1 text-xs text-green-400">
+                    Mot de passe valide
+                  </p>
+                )}
+              </div>
 
-      <form
-        className="w-[567.09px] flex flex-col items-center gap-6 max-md:w-[90%]"
-        onSubmit={handleSubmit}
-      >
-        <div className="w-full flex flex-col gap-2">
-          <label
-            htmlFor="newPassword"
-            className="text-[#191919] text-[15px] font-medium"
-          >
-            Nouveau mot de passe
-          </label>
-          <div className="bg-[#FFF] w-full flex items-center gap-4 px-[16px] py-[14px] rounded-[12px] border border-[#E4E4E4]">
-            <Image src={lock} alt="icône mot de passe" />
-            <input
-              type={showNewPassword ? "text" : "password"}
-              id="newPassword"
-              placeholder="Entrez votre nouveau mot de passe"
-              value={newPassword}
-              onChange={(e) => {
-                setNewPassword(e.target.value);
-                validatePassword(e.target.value);
-              }}
-              className="text-[#6C727580] text-[14px] font-Inter bg-transparent outline-none w-full"
-            />
-            <button
-              type="button"
-              onClick={() => setShowNewPassword(!showNewPassword)}
-              className="text-[#666666] hover:text-[#FD2E8A] transition-colors"
-            >
-              {showNewPassword ? (
-                <EyeSlash size={20} className="text-[#B5BEC6]" />
-              ) : (
-                <Eye size={20} className="text-[#B5BEC6]" />
-              )}
-            </button>
+              {/* Confirm password field */}
+              <div>
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-xs font-medium text-gray-300 mb-1"
+                >
+                  Confirmer le mot de passe
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Image
+                      src={lock}
+                      alt="icône mot de passe"
+                      width={16}
+                      height={16}
+                    />
+                  </div>
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    id="confirmPassword"
+                    placeholder="Confirmez votre nouveau mot de passe"
+                    value={confirmPassword}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      validateConfirmPassword(e.target.value);
+                    }}
+                    className="w-full text-sm bg-black/30 border border-white/20 rounded-lg pl-9 pr-10 py-[8px] text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-purple-500 disabled:opacity-50 transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-purple-400"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeSlash size={18} weight="regular" />
+                    ) : (
+                      <Eye size={18} weight="regular" />
+                    )}
+                  </button>
+                </div>
+                {confirmPasswordError && (
+                  <p className="mt-1 text-xs text-red-400">
+                    {confirmPasswordError}
+                  </p>
+                )}
+                {!confirmPasswordError &&
+                  confirmPassword &&
+                  newPassword === confirmPassword && (
+                    <p className="mt-1 text-xs text-green-400">
+                      Les mots de passe correspondent
+                    </p>
+                  )}
+              </div>
+
+              {/* Submit button */}
+              <button
+                type="submit"
+                className="w-full cursor-pointer bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium py-2.5 px-4 rounded-lg transition-colors mt-6"
+              >
+                Réinitialiser le mot de passe
+              </button>
+            </form>
           </div>
-          {passwordError && (
-            <p className="text-red-500 text-[12px]">{passwordError}</p>
-          )}
         </div>
-
-        <div className="w-full flex flex-col gap-2">
-          <label
-            htmlFor="confirmPassword"
-            className="text-[#191919] text-[15px] font-medium"
-          >
-            Confirmer le mot de passe
-          </label>
-          <div className="bg-[#FFF] w-full flex items-center gap-4 px-[16px] py-[14px] rounded-[12px] border border-[#E4E4E4]">
-            <Image src={lock} alt="icône mot de passe" />
-            <input
-              type={showConfirmPassword ? "text" : "password"}
-              id="confirmPassword"
-              placeholder="Confirmez votre nouveau mot de passe"
-              value={confirmPassword}
-              onChange={(e) => {
-                setConfirmPassword(e.target.value);
-                validateConfirmPassword(e.target.value);
-              }}
-              className="text-[#6C727580] text-[14px] font-Inter bg-transparent outline-none w-full"
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="text-[#666666] hover:text-[#FD2E8A] transition-colors"
-            >
-              {showConfirmPassword ? (
-                <EyeSlash size={20} className="text-[#B5BEC6]" />
-              ) : (
-                <Eye size={20} className="text-[#B5BEC6]" />
-              )}
-            </button>
-          </div>
-          {confirmPasswordError && (
-            <p className="text-red-500 text-[12px]">{confirmPasswordError}</p>
-          )}
-        </div>
-
-        <button
-          type="submit"
-          className="bg-gradient-to-t from-[#FD2E8A] to-[#F8589F] text-[#FEFEFE] text-[15px] w-full py-[12px] rounded-[12px] font-medium mt-4"
-        >
-          Réinitialiser le mot de passe
-        </button>
-      </form>
+      </div>
     </div>
   );
 }

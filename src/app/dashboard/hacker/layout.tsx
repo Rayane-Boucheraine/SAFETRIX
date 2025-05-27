@@ -35,11 +35,11 @@ export default function HackerLayout({
     router.push("/");
   };
 
-  const gradientBackground =
-    "bg-[radial-gradient(70.07%_69.22%_at_50%_50%,#195033_6.63%,#080808_100%)]";
+  const layoutGradient =
+    "bg-[radial-gradient(70.07%_69.22%_at_50%_50%,#2A0D45_6.63%,#080808_100%)]";
 
   return (
-    <div className={`flex h-screen overflow-hidden ${gradientBackground}`}>
+    <div className={`flex h-screen overflow-hidden ${layoutGradient}`}>
       <aside
         className={`
           w-64 text-white p-6 max-md:hidden flex flex-col flex-shrink-0
@@ -71,13 +71,11 @@ export default function HackerLayout({
                   className={`
                     group flex items-center gap-3.5 px-4 py-2.5 rounded-md /* Standard padding/rounding */
                     transition-all duration-200 ease-in-out /* Faster transition */
-                    transform focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-opacity-75
+                    transform focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-opacity-75
                     ${
                       isActive
-                        ?
-                          "bg-emerald-800/80 text-white font-medium scale-[1.02] shadow-sm"
-                        : 
-                          "text-gray-300 hover:bg-slate-700/50 hover:text-white active:scale-[0.99]"
+                        ? "bg-purple-800/80 text-white font-medium scale-[1.02] shadow-sm"
+                        : "text-gray-300 hover:bg-slate-700/50 hover:text-white active:scale-[0.99]"
                     }
                   `}
                 >

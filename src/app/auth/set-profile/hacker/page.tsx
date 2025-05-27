@@ -12,10 +12,15 @@ import BaseUrl from "@/components/BaseUrl";
 import hackerIllustration from "../../../../../public/Landing/hacker.svg";
 
 interface HackerProfilePayload {
-  github?: string; // Optional fields
-  linkedin?: string; // Optional fields
-  skills: string[]; // Required array of skills
-  field: string; // Required field/specialization
+  name?: string;
+  alias?: string;
+  description?: string;
+  portfolio?: string;
+  github?: string;
+  linkedin?: string;
+  skills: string[];
+  field: string;
+  avatar?: string; // Added avatar field
 }
 
 interface ApiResponse {
@@ -29,6 +34,10 @@ interface ApiErrorResponse {
 const HackerSetProfilePage = () => {
   const router = useRouter();
 
+  // Default avatar URL for users - moved inside component
+  const defaultAvatar =
+    "https://res.cloudinary.com/dgxaezwuv/image/upload/v1748310953/hacker_tkfbzg.avif";
+
   // --- State for Form Fields ---
   const [alias, setAlias] = useState(""); // Keep for potential future use or display, but not sent in this payload
   const [fullName, setFullName] = useState(""); // Keep for potential future use or display, but not sent in this payload
@@ -38,6 +47,7 @@ const HackerSetProfilePage = () => {
   const [website, setWebsite] = useState(""); // Keep for potential future use or display, but not sent in this payload
   const [githubUrl, setGithubUrl] = useState(""); // Input for GitHub URL
   const [linkedinUrl, setLinkedinUrl] = useState(""); // Input for LinkedIn URL
+  const [avatar, setAvatar] = useState(defaultAvatar); // New avatar state with default value
 
   // --- State for UI (managed by useMutation) ---
   // const [isLoading, setIsLoading] = useState(false); // Replaced by mutation.isPending
@@ -101,12 +111,30 @@ const HackerSetProfilePage = () => {
     const payload: HackerProfilePayload = {
       skills: skillsArray,
       field: field.trim(), // Trim whitespace
+      avatar: avatar, // Always include avatar (either default or user-provided)
     };
 
     // Add optional fields only if they have values
+    if (fullName.trim()) {
+      payload.name = fullName.trim();
+    }
+
+    if (alias.trim()) {
+      payload.alias = alias.trim();
+    }
+
+    if (bio.trim()) {
+      payload.description = bio.trim();
+    }
+
+    if (website.trim()) {
+      payload.portfolio = website.trim();
+    }
+
     if (githubUrl.trim()) {
       payload.github = githubUrl.trim();
     }
+
     if (linkedinUrl.trim()) {
       payload.linkedin = linkedinUrl.trim();
     }
@@ -139,6 +167,41 @@ const HackerSetProfilePage = () => {
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Avatar URL field - new */}
+              <div>
+                <label
+                  htmlFor="avatar"
+                  className="block text-xs font-medium text-gray-300 mb-1"
+                >
+                  Avatar URL
+                </label>
+                <div className="flex gap-4 items-center">
+                  <input
+                    type="url"
+                    id="avatar"
+                    name="avatar"
+                    value={avatar}
+                    onChange={(e) => setAvatar(e.target.value)}
+                    disabled={updateProfileMutation.isPending}
+                    className="w-full text-sm bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-purple-500 placeholder-gray-500 disabled:opacity-50"
+                    placeholder="https://example.com/your-avatar.jpg"
+                  />
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full overflow-hidden border border-white/20">
+                    <img
+                      src={avatar || defaultAvatar}
+                      alt="Avatar preview"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = defaultAvatar;
+                      }}
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Enter a URL to your profile picture or leave as default
+                </p>
+              </div>
+
               {/* --- Fields NOT sent in this payload, kept for potential UI use --- */}
               {/* Alias */}
               <div>

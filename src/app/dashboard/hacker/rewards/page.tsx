@@ -169,16 +169,16 @@ export default function RewardsPage() {
     setActiveFilters({ status: null, program: null, dateRange: null });
   };
 
-  const themeAccentText = `text-emerald-400`;
+  const themeAccentText = `text-purple-400`;
 
   return (
     <div className="space-y-8 text-slate-200 max-w-7xl mx-auto">
       {/* Page Header with Stats */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-tr from-slate-900 via-slate-800/50 to-slate-900 border border-emerald-800/30 p-6 shadow-lg">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(16,185,129,0.15)_0%,transparent_60%)] opacity-70 pointer-events-none"></div>
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-tr from-slate-900 via-slate-800/50 to-slate-900 border border-purple-800/30 p-6 shadow-lg">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(147,51,234,0.15)_0%,transparent_60%)] opacity-70 pointer-events-none"></div>
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-gradient-to-br from-emerald-600/20 to-emerald-800/30 rounded-xl border border-emerald-500/30 shadow-inner">
+            <div className="p-3 bg-gradient-to-br from-purple-600/20 to-purple-800/30 rounded-xl border border-purple-500/30 shadow-inner">
               <Trophy
                 size={28}
                 className={themeAccentText + " drop-shadow-lg"}
@@ -232,11 +232,11 @@ export default function RewardsPage() {
             placeholder="Search by Report ID, Title, Program..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-700/80 border border-slate-600/70 rounded-lg py-2.5 pl-11 pr-4 text-slate-100 placeholder-slate-400/80 focus:outline-none focus:ring-2 focus:ring-emerald-500/80 focus:border-transparent text-sm shadow-inner focus:bg-slate-700"
+            className="w-full bg-slate-700/80 border border-slate-600/70 rounded-lg py-2.5 pl-11 pr-4 text-slate-100 placeholder-slate-400/80 focus:outline-none focus:ring-2 focus:ring-purple-500/80 focus:border-transparent text-sm shadow-inner focus:bg-slate-700"
           />
           <Search
             size={18}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none peer-focus:text-emerald-400 transition-colors"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none peer-focus:text-purple-400 transition-colors"
           />
         </div>
         <div className="flex flex-wrap gap-2 items-center shrink-0">
@@ -280,7 +280,7 @@ export default function RewardsPage() {
       <div>
         <p className="text-slate-400 text-sm mb-5">
           Displaying{" "}
-          <span className="font-semibold text-emerald-300">
+          <span className="font-semibold text-purple-300">
             {filteredRewards.length}
           </span>{" "}
           payout records.
@@ -306,7 +306,7 @@ export default function RewardsPage() {
             </p>
             <button
               onClick={clearFilters}
-              className="mt-6 px-5 py-2 bg-emerald-600/30 text-emerald-300 rounded-md hover:bg-emerald-600/50 border border-emerald-700/50 hover:border-emerald-600/80 transition-all text-sm shadow-md"
+              className="mt-6 px-5 py-2 bg-purple-600/30 text-purple-300 rounded-md hover:bg-purple-600/50 border border-purple-700/50 hover:border-purple-600/80 transition-all text-sm shadow-md"
             >
               Clear Parameters
             </button>
@@ -349,24 +349,24 @@ const RewardItem: React.FC<{ reward: Reward }> = ({ reward }) => {
       className={`
         bg-slate-800/70 border border-slate-700/50 rounded-lg shadow-md p-4
         flex flex-col sm:flex-row sm:items-center sm:gap-4
-        transition-all duration-200 hover:border-emerald-600/40 hover:bg-slate-800/90
+        transition-all duration-200 hover:border-purple-600/40 hover:bg-slate-800/90
         relative overflow-hidden group isolate
       `}
     >
       {/* Decorative glow on hover */}
-      <div className="absolute -inset-px bg-gradient-to-br from-transparent via-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg -z-10"></div>
+      <div className="absolute -inset-px bg-gradient-to-br from-transparent via-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg -z-10"></div>
 
       {/* Column 1: Reward Amount & Bonus */}
       <div className="flex items-center gap-3 mb-3 sm:mb-0 sm:border-r sm:border-slate-700/50 sm:pr-4 flex-shrink-0">
         <div
-          className={`p-2 rounded-lg bg-gradient-to-br from-emerald-800/30 to-emerald-950/40 border border-emerald-700/30 ${
+          className={`p-2 rounded-lg bg-gradient-to-br from-purple-800/30 to-purple-950/40 border border-purple-700/30 ${
             reward.status === "Paid" ? "opacity-100" : "opacity-60"
           }`}
         >
-          <Gift size={24} className="text-emerald-400" />
+          <Gift size={24} className="text-purple-400" />
         </div>
         <div className="text-left">
-          <p className="text-xl font-bold text-emerald-300">
+          <p className="text-xl font-bold text-purple-300">
             ${reward.amount.toLocaleString()}
           </p>
           {reward.bonus && (
@@ -390,7 +390,7 @@ const RewardItem: React.FC<{ reward: Reward }> = ({ reward }) => {
           <span className="font-medium text-slate-300">{reward.program}</span>
         </p>
         <p className="text-xs font-mono text-slate-500">
-          Report ID: <span className="text-emerald-500">{reward.reportId}</span>{" "}
+          Report ID: <span className="text-purple-500">{reward.reportId}</span>{" "}
           | Payout ID: <span className="text-slate-400">{reward.id}</span>
         </p>
       </div>
@@ -417,7 +417,7 @@ const RewardItem: React.FC<{ reward: Reward }> = ({ reward }) => {
         {/* Could link to report or transaction detail */}
         <Link
           href={`/dashboard/hacker/reports/${reward.reportId}`}
-          className="flex items-center gap-1 px-3 py-1 bg-slate-700/50 border border-slate-600/70 rounded text-xs text-slate-300 hover:bg-slate-700 hover:border-slate-500 hover:text-emerald-400 transition-all"
+          className="flex items-center gap-1 px-3 py-1 bg-slate-700/50 border border-slate-600/70 rounded text-xs text-slate-300 hover:bg-slate-700 hover:border-slate-500 hover:text-purple-400 transition-all"
         >
           View Report <ExternalLink size={12} />
         </Link>
@@ -445,9 +445,9 @@ const RewardFilterDropdown: React.FC<{
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 bg-slate-700/60 border border-slate-600/80 rounded-lg px-3 py-1.5 text-xs text-slate-200 hover:border-emerald-600/60 hover:bg-slate-700/80 focus:outline-none focus:ring-1 focus:ring-emerald-500/80 transition-all shadow-sm"
+        className="flex items-center gap-2 bg-slate-700/60 border border-slate-600/80 rounded-lg px-3 py-1.5 text-xs text-slate-200 hover:border-purple-600/60 hover:bg-slate-700/80 focus:outline-none focus:ring-1 focus:ring-purple-500/80 transition-all shadow-sm"
       >
-        {icon && <span className="text-emerald-400 opacity-80">{icon}</span>}
+        {icon && <span className="text-purple-400 opacity-80">{icon}</span>}
         <span className="hidden sm:inline">{label}:</span>{" "}
         <span className="font-medium text-white">{value}</span>
         <ChevronDown
@@ -467,15 +467,15 @@ const RewardFilterDropdown: React.FC<{
                 onChange(option);
                 setIsOpen(false);
               }}
-              className={`px-3.5 py-2 hover:bg-emerald-700/20 cursor-pointer flex items-center justify-between text-slate-300 ${
+              className={`px-3.5 py-2 hover:bg-purple-700/20 cursor-pointer flex items-center justify-between text-slate-300 ${
                 value === option
-                  ? "bg-emerald-800/50 text-emerald-300 font-medium"
+                  ? "bg-purple-800/50 text-purple-300 font-medium"
                   : "hover:text-white"
               }`}
             >
               <span>{option}</span>
               {value === option && (
-                <CheckCircle size={13} className="text-emerald-400" />
+                <CheckCircle size={13} className="text-purple-400" />
               )}
             </div>
           ))}

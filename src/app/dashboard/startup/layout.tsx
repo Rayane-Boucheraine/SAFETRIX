@@ -45,14 +45,14 @@ export default function StartupLayout({
     router.push("/");
   };
 
-  // Use the correct purple radial gradient from your dashboard file
-  const layoutGradient =
-    "bg-[radial-gradient(70.07%_69.22%_at_50%_50%,#2A0D45_6.63%,#080808_100%)]";
+  // Use the correct green radial gradient
+  const gradientBackground =
+    "bg-[radial-gradient(70.07%_69.22%_at_50%_50%,#195033_6.63%,#080808_100%)]";
 
   return (
-    <div className={`flex h-screen overflow-hidden ${layoutGradient}`}>
+    <div className={`flex h-screen overflow-hidden ${gradientBackground}`}>
       <aside
-        className={`w-60 text-white p-5 flex flex-col justify-between flex-shrink-0 border-r border-purple-900/30 ${layoutGradient} shadow-lg`}
+        className={`w-60 text-white p-5 flex flex-col justify-between flex-shrink-0 border-r border-green-900/30 ${gradientBackground} shadow-lg`}
       >
         <div className="flex items-center justify-center pt-4">
           <Link href="/dashboard/startup" className="block relative">
@@ -78,19 +78,19 @@ export default function StartupLayout({
                 href={path}
                 className={`group flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-all duration-200 ease-out relative overflow-hidden ${
                   isActive
-                    ? "bg-[#2A0D45]/80 text-purple-100 font-medium shadow-sm border border-purple-500/30"
-                    : "text-slate-300 hover:bg-[#2A0D45]/70 hover:border-purple-800/40 hover:text-white border border-transparent active:scale-[0.98]"
+                    ? "bg-[#195033]/80 text-emerald-100 font-medium shadow-sm border border-emerald-500/30"
+                    : "text-slate-300 hover:bg-[#195033]/70 hover:border-green-800/40 hover:text-white border border-transparent active:scale-[0.98]"
                 }`}
               >
                 {isActive && (
-                  <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-purple-400"></div>
+                  <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-emerald-400"></div>
                 )}
                 <Icon
                   size={18}
                   className={`flex-shrink-0 transition-all duration-300 ${
                     isActive
-                      ? "text-purple-300"
-                      : "text-slate-400 group-hover:text-purple-300 group-hover:scale-110"
+                      ? "text-emerald-300"
+                      : "text-slate-400 group-hover:text-emerald-300 group-hover:scale-110"
                   }`}
                 />
                 <span className="flex-grow truncate text-[15px]">{name}</span>
@@ -113,7 +113,7 @@ export default function StartupLayout({
         </div>
       </aside>
 
-      <main className={`flex-1 overflow-y-auto isolate ${layoutGradient}`}>
+      <main className={`flex-1 overflow-y-auto isolate ${gradientBackground}`}>
         {children}
       </main>
     </div>

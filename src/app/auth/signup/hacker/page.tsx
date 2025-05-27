@@ -11,21 +11,19 @@ import BaseUrl from "@/components/BaseUrl";
 import hacker from "../../../../../public/Landing/hacker.svg";
 import emailIcon from "../../../../../public/signup/email.svg";
 import passIcon from "../../../../../public/signup/pass.svg";
-import GoogleAuthButton from "../../comp/GoogleAuthButton";
+// import GoogleAuthButton from "../../comp/GoogleAuthButton";
 import toast from "react-hot-toast";
 import secureLocalStorage from "react-secure-storage";
 
 interface SignupPayload {
-  name: string;
   email: string;
   password: string;
   role: "hacker";
-  avatar: string;
 }
 
 interface SignupResponse {
   message: string;
-  token: string; // Add the token property
+  token: string;
 }
 
 interface ApiErrorResponse {
@@ -38,8 +36,7 @@ const HackerSignupPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const router = useRouter();
 
-  const defaultAvatar = "https://avatar.iran.liara.run/public/boy";
-  const staticName = "Hacker User";
+  // defaultAvatar removed - will be handled in profile setup
 
   const signupMutation = useMutation<SignupResponse, Error, SignupPayload>({
     mutationFn: async (payload: SignupPayload) => {
@@ -61,11 +58,9 @@ const HackerSignupPage = () => {
       }
     },
     onSuccess: (data) => {
-      toast.success(
-        data.message || "Account created successfully!"
-      );
-      
-      secureLocalStorage.setItem("token", data.token)
+      toast.success(data.message || "Account created successfully!");
+
+      secureLocalStorage.setItem("token", data.token);
       router.push("/auth/verify/hacker");
     },
     onError: (error: Error) => {
@@ -95,11 +90,9 @@ const HackerSignupPage = () => {
     }
 
     signupMutation.mutate({
-      name: staticName,
       email,
       password,
       role: "hacker",
-      avatar: defaultAvatar,
     });
   };
 
@@ -239,17 +232,17 @@ const HackerSignupPage = () => {
                 </button>
               </form>
 
-              <div className="flex items-center my-4">
+              {/* <div className="flex items-center my-4">
                 <div className="flex-grow border-t border-gray-600"></div>
                 <span className="mx-3 text-gray-400 text-xs">OR</span>
                 <div className="flex-grow border-t border-gray-600"></div>
-              </div>
+              </div> */}
 
-              <div className="mb-4">
+              {/* <div className="mb-4">
                 <GoogleAuthButton />
-              </div>
+              </div> */}
 
-              <p className="text-center text-xs text-gray-400">
+              <p className="text-center text-xs text-gray-400 mt-6">
                 Already have an account?{" "}
                 <Link
                   href="/auth/signin/hacker"

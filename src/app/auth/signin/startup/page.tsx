@@ -6,7 +6,7 @@ import startup from "../../../../../public/Landing/startup.svg";
 import emailIcon from "../../../../../public/signup/email.svg";
 import passIcon from "../../../../../public/signup/pass.svg";
 import Link from "next/link";
-import GoogleAuthButton from "../../comp/GoogleAuthButton"; // Assuming props are added here
+// import GoogleAuthButton from "../../comp/GoogleAuthButton"; // Assuming props are added here
 import { useState, FormEvent } from "react";
 import { Switch } from "@headlessui/react";
 import { useMutation } from "@tanstack/react-query";
@@ -283,18 +283,17 @@ const StartupSigninPage = () => {
               </button>
             </form>
 
-            <div className="flex items-center my-5">
+            {/* <div className="flex items-center my-5">
               <div className="flex-grow border-t border-gray-600"></div>
               <span className="mx-3 text-gray-400 text-xs">OR</span>
               <div className="flex-grow border-t border-gray-600"></div>
-            </div>
+            </div> */}
 
-            <div className="mb-5">
-              {/* Pass disabled prop */}
+            {/* <div className="mb-5">
               <GoogleAuthButton disabled={signinMutation.isPending} />
-            </div>
+            </div> */}
 
-            <p className="text-center text-xs text-gray-400">
+            <p className="text-center text-xs text-gray-400 mt-6">
               New to SAFETRIX?{" "}
               <Link
                 href="/auth/signup/startup"

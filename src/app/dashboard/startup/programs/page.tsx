@@ -245,12 +245,12 @@ const getStatusStyles = (status: ProgramStatus) => {
 };
 
 // --- Style Variables ---
-const themeAccentText = "text-purple-400";
-const themeAccentColor = "purple";
+const themeAccentText = "text-emerald-400";
+const themeAccentColor = "emerald";
 const cardBaseStyle =
-  "bg-slate-900/70 backdrop-blur-md border border-purple-900/30 shadow-xl rounded-xl p-5 relative overflow-hidden isolate group";
+  "bg-slate-900/70 backdrop-blur-md border border-green-900/30 shadow-xl rounded-xl p-5 relative overflow-hidden isolate group";
 const gradientBg =
-  "bg-[radial-gradient(70.07%_69.22%_at_50%_50%,#2A0D45_6.63%,#080808_100%)]";
+  "bg-[radial-gradient(70.07%_69.22%_at_50%_50%,#195033_6.63%,#080808_100%)]";
 
 // --- Main Page Component ---
 export default function ProgramsDashboardPage() {
@@ -329,7 +329,7 @@ export default function ProgramsDashboardPage() {
     <div className={`min-h-screen p-8 text-slate-200 ${gradientBg}`}>
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header - Matched styling */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-purple-800/40 pb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-green-800/40 pb-6">
           <div className="flex items-center gap-4">
             <div
               className={`p-3 bg-gradient-to-br from-${themeAccent.colorName}-800/30 to-slate-900 rounded-xl border ${themeAccent.borderLighter}`}
@@ -520,10 +520,7 @@ const ProgramCard: React.FC<{ program: Program; themeColor: string }> = ({
               {/* Show star ONLY if featured */}
               {program.featured && (
                 <span title="Featured Program">
-                  <Star
-                    size={10}
-                    className={`fill-current text-yellow-400`}
-                  />
+                  <Star size={10} className={`fill-current text-yellow-400`} />
                 </span>
               )}
             </div>

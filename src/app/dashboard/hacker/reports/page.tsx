@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useState } from "react";
 import {
@@ -374,16 +374,16 @@ export default function EnhancedReportsPage() {
   return (
     <div className="space-y-8 text-slate-200 max-w-7xl mx-auto">
       {/* Interactive Header with Dashboard Stats */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-slate-700/50 p-6 shadow-lg">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-purple-700/50 p-6 shadow-lg">
         {/* Background decorative elements */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
         <div className="absolute bottom-0 left-20 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl translate-y-1/2"></div>
 
         {/* Header Content */}
         <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-emerald-900/30 rounded-lg border border-emerald-500/30 shadow-inner shadow-emerald-500/10">
-              <Bug size={26} className="text-emerald-400" />
+            <div className="p-2 bg-purple-900/30 rounded-lg border border-purple-500/30 shadow-inner shadow-purple-500/10">
+              <Bug size={26} className="text-purple-400" />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-slate-100 tracking-tight flex items-center gap-3">
@@ -405,7 +405,7 @@ export default function EnhancedReportsPage() {
               className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200
                 ${
                   viewMode === "stats"
-                    ? "bg-emerald-600/30 text-emerald-200 border border-emerald-500/50"
+                    ? "bg-purple-600/30 text-purple-200 border border-purple-500/50"
                     : "border border-slate-700 text-slate-300 hover:bg-slate-700/50"
                 }`}
             >
@@ -417,7 +417,7 @@ export default function EnhancedReportsPage() {
               className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200
                 ${
                   viewMode === "grid"
-                    ? "bg-emerald-600/30 text-emerald-200 border border-emerald-500/50"
+                    ? "bg-purple-600/30 text-purple-200 border border-purple-500/50"
                     : "border border-slate-700 text-slate-300 hover:bg-slate-700/50"
                 }`}
             >
@@ -429,14 +429,14 @@ export default function EnhancedReportsPage() {
               className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200
                 ${
                   viewMode === "list"
-                    ? "bg-emerald-600/30 text-emerald-200 border border-emerald-500/50"
+                    ? "bg-purple-600/30 text-purple-200 border border-purple-500/50"
                     : "border border-slate-700 text-slate-300 hover:bg-slate-700/50"
                 }`}
             >
               <FileText size={16} />
               <span className="hidden sm:inline">List</span>
             </button>
-            <button className="inline-flex items-center group gap-2 px-4 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-emerald-100 text-sm font-medium rounded-md hover:from-emerald-500 hover:to-teal-500 transition-all duration-200 shadow-md hover:shadow-emerald-500/20">
+            <button className="inline-flex items-center group gap-2 px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-purple-100 text-sm font-medium rounded-md hover:from-purple-500 hover:to-indigo-500 transition-all duration-200 shadow-md hover:shadow-purple-500/20">
               <Send
                 size={14}
                 className="group-hover:translate-x-1 transition-transform duration-200"
@@ -547,7 +547,7 @@ export default function EnhancedReportsPage() {
             placeholder="Search reports by title, ID, or description..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-700/70 border border-slate-600 rounded-lg py-2.5 pl-10 pr-4 text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-transparent text-sm"
+            className="w-full bg-slate-700/70 border border-slate-600 rounded-lg py-2.5 pl-10 pr-4 text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-transparent text-sm"
           />
           <Search
             size={18}
@@ -682,7 +682,7 @@ export default function EnhancedReportsPage() {
           {/* Sort Options - For demonstration only */}
           <div className="flex items-center gap-2 text-sm">
             <span className="text-slate-400">Sort by:</span>
-            <select className="bg-slate-800 border border-slate-700 rounded-md px-2 py-1 text-slate-300 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500">
+            <select className="bg-slate-800 border border-slate-700 rounded-md px-2 py-1 text-slate-300 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500">
               <option>Newest</option>
               <option>Oldest</option>
               <option>Highest Severity</option>
@@ -793,7 +793,7 @@ export default function EnhancedReportsPage() {
                   <Compass size={18} className="text-purple-400" /> Recent
                   Program Activity
                 </h3>
-                <button className="text-xs text-slate-400 hover:text-emerald-400">
+                <button className="text-xs text-slate-400 hover:text-purple-400">
                   View All
                 </button>
               </div>
@@ -804,7 +804,7 @@ export default function EnhancedReportsPage() {
                     key={idx}
                     className="flex items-center gap-3 py-2 border-b border-slate-700/50 last:border-0"
                   >
-                    <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
+                    <div className="w-2 h-2 rounded-full bg-purple-400"></div>
                     <div className="flex-grow">
                       <p className="text-sm text-slate-300">{report.program}</p>
                       <p className="text-xs text-slate-500">
@@ -814,14 +814,17 @@ export default function EnhancedReportsPage() {
                     <div className="flex items-center gap-1 text-xs">
                       <span
                         className={`${
-                          getSeverityStyles(report.severity as ReportSeverity).color
+                          getSeverityStyles(report.severity as ReportSeverity)
+                            .color
                         } font-medium`}
                       >
                         {report.severity}
                       </span>
                       <span className="text-slate-500">•</span>
                       <span
-                        className={`${getStatusStyles(report.status as ReportStatus).color}`}
+                        className={`${
+                          getStatusStyles(report.status as ReportStatus).color
+                        }`}
                       >
                         {report.status}
                       </span>
@@ -907,7 +910,7 @@ export default function EnhancedReportsPage() {
             </p>
             <button
               onClick={clearFilters}
-              className="mt-4 px-4 py-2 bg-emerald-600/30 text-emerald-300 rounded-md hover:bg-emerald-600/50 transition-colors"
+              className="mt-4 px-4 py-2 bg-purple-600/30 text-purple-300 rounded-md hover:bg-purple-600/50 transition-colors"
             >
               Clear Filters
             </button>
@@ -1112,7 +1115,7 @@ const ReportCard: React.FC<{ report: Report; onClick: () => void }> = ({
         bg-gradient-to-br from-slate-800/80 to-slate-900/90
         rounded-lg border border-slate-700/60 p-5 shadow-lg
         transition-all duration-200 ease-out hover:shadow-lg ${severityGlow}
-        hover:border-emerald-600/40 hover:-translate-y-0.5
+        hover:border-purple-600/40 hover:-translate-y-0.5
         flex flex-col md:flex-row md:items-center gap-4 md:gap-6
         relative isolate overflow-hidden cursor-pointer
       `}
@@ -1187,13 +1190,13 @@ const ReportCard: React.FC<{ report: Report; onClick: () => void }> = ({
 
       {/* View Details Action */}
       <div className="flex-shrink-0 flex items-center justify-end text-right md:ml-auto">
-        <span className="inline-flex items-center text-sm text-emerald-400 hover:text-emerald-200 transition-colors duration-200">
+        <span className="inline-flex items-center text-sm text-purple-400 hover:text-purple-300 transition-colors duration-200">
           View Details <ChevronRight size={16} />
         </span>
       </div>
 
       {/* Decorative corner */}
-      <div className="absolute bottom-0 right-0 h-6 w-6 border-l border-t border-emerald-800/30 rounded-tl-lg opacity-30 group-hover:opacity-70 transition-opacity duration-200"></div>
+      <div className="absolute bottom-0 right-0 h-6 w-6 border-l border-t border-purple-800/30 rounded-tl-lg opacity-30 group-hover:opacity-70 transition-opacity duration-200"></div>
     </div>
   );
 };
@@ -1423,7 +1426,7 @@ const FilterDropdown: React.FC<{
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 bg-slate-700/80 border border-slate-600 rounded-md px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-600/80 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
+        className="flex items-center gap-2 bg-slate-700/80 border border-slate-600 rounded-md px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-600/80 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all"
       >
         {label}: <span className="font-medium text-white">{value}</span>
         <ChevronDown

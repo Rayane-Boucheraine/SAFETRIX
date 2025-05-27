@@ -260,19 +260,19 @@ export default function CreativeProgramsPageV2() {
     setActiveFilters({ type: null, vrt: null, target: null });
   };
 
-  const themeAccentText = `text-emerald-400`;
+  const themeAccentText = `text-purple-400`;
 
   return (
     <div className="space-y-8 text-slate-200 max-w-7xl mx-auto">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 border-b border-emerald-900/50 pb-8 relative">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 border-b border-purple-900/50 pb-8 relative">
         {/* Background decoration */}
-        <div className="absolute -top-4 -left-4 w-48 h-48 bg-gradient-to-br from-emerald-950/30 via-black/10 to-transparent rounded-full blur-2xl opacity-40 pointer-events-none"></div>
+        <div className="absolute -top-4 -left-4 w-48 h-48 bg-gradient-to-br from-purple-950/30 via-black/10 to-transparent rounded-full blur-2xl opacity-40 pointer-events-none"></div>
         <div className="flex items-center gap-4 z-10">
-          <div className="p-3 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl border border-emerald-700/30 shadow-lg">
+          <div className="p-3 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl border border-purple-700/30 shadow-lg">
             <Compass
               size={28}
-              className={`${themeAccentText} drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]`}
+              className={`${themeAccentText} drop-shadow-[0_0_5px_rgba(147,51,234,0.5)]`}
             />
           </div>
           <div>
@@ -400,7 +400,7 @@ export default function CreativeProgramsPageV2() {
             </p>
             <button
               onClick={clearFilters}
-              className="mt-6 px-5 py-2 bg-emerald-600/30 text-emerald-300 rounded-md hover:bg-emerald-600/50 border border-emerald-700/50 hover:border-emerald-600/80 transition-all text-sm shadow-md"
+              className="mt-6 px-5 py-2 bg-purple-600/30 text-purple-300 rounded-md hover:bg-purple-600/50 border border-purple-700/50 hover:border-purple-600/80 transition-all text-sm shadow-md"
             >
               Reset Parameters
             </button>
@@ -411,19 +411,19 @@ export default function CreativeProgramsPageV2() {
   );
 }
 
-// -------- Creative Program Card Component V2--------
+// -------- Update Creative Program Card Component V2 with purple theme --------
 const CreativeProgramCardV2: React.FC<{ program: Program }> = ({ program }) => {
   const cardBaseStyle = `bg-slate-900/70 backdrop-blur-xl border border-slate-700/50 shadow-lg rounded-xl relative isolate overflow-hidden transition-all duration-300 h-full flex flex-col group`;
-  const cardHoverStyle = `hover:border-emerald-600/60 hover:shadow-emerald-500/20 hover:shadow-2xl hover:scale-[1.015]`;
-  const themeAccentText = `text-emerald-400`;
+  const cardHoverStyle = `hover:border-purple-600/60 hover:shadow-purple-500/20 hover:shadow-2xl hover:scale-[1.015]`;
+  const themeAccentText = `text-purple-400`;
 
   return (
     <div className={`${cardBaseStyle} ${cardHoverStyle}`}>
       {/* Angled Background Element */}
-      <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-emerald-900/30 to-transparent z-[-1] clip-path-polygon-[0%_0%,_100%_0%,_100%_80%,_0%_100%]"></div>
+      <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-purple-900/30 to-transparent z-[-1] clip-path-polygon-[0%_0%,_100%_0%,_100%_80%,_0%_100%]"></div>
 
       {/* Corner Accent */}
-      <div className="absolute top-0 right-0 w-0 h-0 border-l-[40px] border-l-transparent border-t-[40px] border-t-emerald-700/30 group-hover:border-t-emerald-600/40 transition-colors rounded-tr-xl"></div>
+      <div className="absolute top-0 right-0 w-0 h-0 border-l-[40px] border-l-transparent border-t-[40px] border-t-purple-700/30 group-hover:border-t-purple-600/40 transition-colors rounded-tr-xl"></div>
       {program.featured && (
         <div
           className="absolute top-1.5 right-1.5 text-amber-300 group-hover:animate-pulse"
@@ -530,7 +530,7 @@ const CreativeProgramCardV2: React.FC<{ program: Program }> = ({ program }) => {
         <div className="mt-auto pt-4 border-t border-slate-700/50">
           <Link
             href={`/dashboard/hacker/programs/${program.id}`}
-            className={`w-full block text-center px-4 py-2 text-sm ${themeAccentText} font-semibold border border-emerald-700/50 rounded-md bg-emerald-900/20 hover:bg-emerald-800/40 hover:border-emerald-600/70 hover:text-emerald-300 transition-all duration-200 shadow-sm`}
+            className={`w-full block text-center px-4 py-2 text-sm ${themeAccentText} font-semibold border border-purple-700/50 rounded-md bg-purple-900/20 hover:bg-purple-800/40 hover:border-purple-600/70 hover:text-purple-300 transition-all duration-200 shadow-sm`}
           >
             Analyze Target & Engage
           </Link>

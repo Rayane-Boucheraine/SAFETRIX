@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useState, useEffect } from "react";
 import {
@@ -113,7 +113,6 @@ const featuredPrograms = [
   },
 ];
 
-// ------------- Component for the Enhanced Dashboard --------------
 const EnhancedDashboard = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const hackerName = "CyberNinja";
@@ -132,7 +131,7 @@ const EnhancedDashboard = () => {
       {/* --------- Enhanced Header Section with Futuristic Design --------- */}
       <div className="relative mb-8">
         {/* Background decorative elements */}
-        <div className="absolute -left-8 top-0 w-20 h-20 rounded-full bg-emerald-500/5 blur-xl"></div>
+        <div className="absolute -left-8 top-0 w-20 h-20 rounded-full bg-purple-500/5 blur-xl"></div>
         <div className="absolute -right-8 bottom-0 w-32 h-32 rounded-full bg-blue-500/5 blur-xl"></div>
 
         {/* Hexagonal grid pattern - decorative */}
@@ -147,22 +146,22 @@ const EnhancedDashboard = () => {
         </div>
 
         {/* Main header content */}
-        <div className="bg-gradient-to-r from-slate-900/90 via-slate-800/90 to-slate-900/90 rounded-2xl p-8 border border-slate-700/50 shadow-lg relative overflow-hidden">
+        <div className="bg-gradient-to-r from-[#180729]/90 via-[#2A0D45]/90 to-[#180729]/90 rounded-2xl p-8 border border-purple-900/50 shadow-lg relative overflow-hidden">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
             {/* Welcome text with animated typing effect */}
             <div className="pl-2">
               <div className="flex items-center">
-                <Terminal size={24} className="text-emerald-400 mr-3" />
-                <h1 className="text-3xl font-bold text-emerald-50">
+                <Terminal size={24} className="text-purple-400 mr-3" />
+                <h1 className="text-3xl font-bold text-purple-50">
                   Welcome back,{" "}
-                  <span className="text-emerald-400 inline-block relative">
+                  <span className="text-purple-400 inline-block relative">
                     {hackerName}
-                    <span className="absolute -bottom-1 left-0 w-full h-px bg-gradient-to-r from-emerald-400 to-transparent"></span>
+                    <span className="absolute -bottom-1 left-0 w-full h-px bg-gradient-to-r from-purple-400 to-transparent"></span>
                   </span>
                 </h1>
               </div>
               <p className="mt-2 text-slate-400 max-w-md">
-                <span className="text-emerald-400">$</span> Secure the digital
+                <span className="text-purple-400">$</span> Secure the digital
                 world, one vulnerability at a time. Your mission awaits.
               </p>
             </div>
@@ -170,8 +169,8 @@ const EnhancedDashboard = () => {
             {/* Action buttons with enhanced styling */}
             <div className="flex flex-col sm:flex-row gap-3">
               <button
-                className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg 
-                shadow-lg hover:shadow-emerald-500/20 transition-all duration-300 
+                className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg 
+                shadow-lg hover:shadow-purple-500/20 transition-all duration-300 
                 flex items-center justify-center gap-2 group"
               >
                 <Send size={18} className="group-hover:animate-pulse" />
@@ -179,9 +178,9 @@ const EnhancedDashboard = () => {
               </button>
 
               <button
-                className="px-5 py-2.5 bg-transparent text-emerald-400 border border-emerald-500/50 
-                hover:border-emerald-400 rounded-lg shadow-lg transition-all duration-300 
-                flex items-center justify-center gap-2 hover:bg-emerald-900/20"
+                className="px-5 py-2.5 bg-transparent text-purple-400 border border-purple-500/50 
+                hover:border-purple-400 rounded-lg shadow-lg transition-all duration-300 
+                flex items-center justify-center gap-2 hover:bg-purple-900/20"
               >
                 <Eye size={18} />
                 <span className="font-medium">View Programs</span>
@@ -196,7 +195,7 @@ const EnhancedDashboard = () => {
                 cx="50"
                 cy="50"
                 r="40"
-                stroke="#10B981"
+                stroke="#9333EA"
                 strokeWidth="1"
                 fill="none"
               />
@@ -204,7 +203,7 @@ const EnhancedDashboard = () => {
                 cx="50"
                 cy="50"
                 r="30"
-                stroke="#10B981"
+                stroke="#9333EA"
                 strokeWidth="0.5"
                 fill="none"
               />
@@ -212,7 +211,7 @@ const EnhancedDashboard = () => {
                 cx="50"
                 cy="50"
                 r="20"
-                stroke="#10B981"
+                stroke="#9333EA"
                 strokeWidth="0.25"
                 fill="none"
               />
@@ -221,7 +220,7 @@ const EnhancedDashboard = () => {
                 y1="50"
                 x2="100"
                 y2="50"
-                stroke="#10B981"
+                stroke="#9333EA"
                 strokeWidth="0.5"
               />
               <line
@@ -229,7 +228,7 @@ const EnhancedDashboard = () => {
                 y1="0"
                 x2="50"
                 y2="100"
-                stroke="#10B981"
+                stroke="#9333EA"
                 strokeWidth="0.5"
               />
             </svg>
@@ -240,14 +239,14 @@ const EnhancedDashboard = () => {
       {/* --------- Enhanced Stats Section with Advanced Visualization --------- */}
       <div className="relative">
         <div className="flex items-center gap-3 mb-5">
-          <BarChart3 size={22} className="text-emerald-400" />
+          <BarChart3 size={22} className="text-purple-400" />
           <h2 className="text-2xl font-bold text-slate-200">
             Performance Matrix
           </h2>
-          <span className="inline-block w-24 h-0.5 bg-gradient-to-r from-emerald-500 to-transparent"></span>
+          <span className="inline-block w-24 h-0.5 bg-gradient-to-r from-purple-500 to-transparent"></span>
         </div>
 
-        {/* Stats cards with upgraded design */}
+        {/* Stats cards with updated purple theme color scheme */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Enhanced stat cards */}
           <StatCard
@@ -267,7 +266,7 @@ const EnhancedDashboard = () => {
             iconColor="text-green-500"
             trend={+22}
             chartData={[25, 40, 50, 45, 60, 55, 65, 70, 65, 85]}
-            chartColor="#10B981"
+            chartColor="#9333EA"
           />
 
           <StatCard
@@ -282,15 +281,15 @@ const EnhancedDashboard = () => {
 
           <StatCard
             title="Total Rewards"
-            value={`$${hackerStats.totalRewards.toLocaleString()}`}
+            value={`$${hackerStats.totalRewards.toLocaleString("en-US")}`}
             icon={Award}
-            iconColor="text-emerald-400"
+            iconColor="text-purple-400"
             isSpecial={true}
             trend={+850}
             chartData={[
               1500, 2400, 1800, 3000, 2500, 3500, 4000, 4500, 5000, 5830,
             ]}
-            chartColor="#10B981"
+            chartColor="#A855F7"
           />
 
           <StatCard
@@ -321,16 +320,16 @@ const EnhancedDashboard = () => {
         {/* Activity Timeline */}
         <div className="lg:col-span-2">
           <div className="flex items-center gap-3 mb-5">
-            <Zap size={22} className="text-emerald-400" />
+            <Zap size={22} className="text-purple-400" />
             <h2 className="text-2xl font-bold text-slate-200">
               Activity Timeline
             </h2>
-            <span className="inline-block w-24 h-0.5 bg-gradient-to-r from-emerald-500 to-transparent"></span>
+            <span className="inline-block w-24 h-0.5 bg-gradient-to-r from-purple-500 to-transparent"></span>
           </div>
 
-          <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/90 rounded-2xl p-6 border border-slate-700/50 shadow-lg relative overflow-hidden h-[calc(100%-52px)]">
+          <div className="bg-gradient-to-br from-[#2A0D45]/80 to-[#180729]/90 rounded-2xl p-6 border border-purple-900/50 shadow-lg relative overflow-hidden h-[calc(100%-52px)]">
             {/* Decorative background elements */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.1),transparent_70%)]"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(147,51,234,0.1),transparent_70%)]"></div>
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-3xl"></div>
 
             {/* Activity items with timeline visual */}
@@ -359,8 +358,8 @@ const EnhancedDashboard = () => {
                       </div>
 
                       {/* Activity content */}
-                      <a 
-                        href={`/activity/${activity.id}`} 
+                      <a
+                        href={`/activity/${activity.id}`}
                         className="block bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700/50 p-4 transition-all duration-300 hover:border-slate-600/50 hover:shadow-lg"
                       >
                         <div className="flex justify-between items-start mb-1">
@@ -374,7 +373,7 @@ const EnhancedDashboard = () => {
 
                         {/* Action buttons */}
                         <div className="flex justify-end mt-2 gap-2">
-                          <span className="text-xs text-slate-400 hover:text-emerald-400 flex items-center gap-1 transition-colors duration-200">
+                          <span className="text-xs text-slate-400 hover:text-purple-400 flex items-center gap-1 transition-colors duration-200">
                             <span>Details</span>
                             <ChevronRight size={14} />
                           </span>
@@ -389,7 +388,7 @@ const EnhancedDashboard = () => {
               <div className="mt-5 text-right">
                 <a
                   href="/dashboard/hacker/activity"
-                  className="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition-colors duration-200 text-sm font-medium group"
+                  className="inline-flex items-center gap-1 text-purple-400 hover:text-purple-300 transition-colors duration-200 text-sm font-medium group"
                 >
                   <span>View All Activity</span>
                   <ArrowRight
@@ -405,16 +404,16 @@ const EnhancedDashboard = () => {
         {/* --------- Reimagined Featured Programs Section --------- */}
         <div className="lg:col-span-1">
           <div className="flex items-center gap-3 mb-5">
-            <Shield size={22} className="text-emerald-400" />
+            <Shield size={22} className="text-purple-400" />
             <h2 className="text-2xl font-bold text-slate-200">
               Featured Programs
             </h2>
-            <span className="inline-block w-16 h-0.5 bg-gradient-to-r from-emerald-500 to-transparent"></span>
+            <span className="inline-block w-16 h-0.5 bg-gradient-to-r from-purple-500 to-transparent"></span>
           </div>
 
-          <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/90 rounded-2xl p-6 border border-slate-700/50 shadow-lg relative overflow-hidden h-[calc(100%-52px)]">
+          <div className="bg-gradient-to-br from-[#2A0D45]/80 to-[#180729]/90 rounded-2xl p-6 border border-purple-900/50 shadow-lg relative overflow-hidden h-[calc(100%-52px)]">
             {/* Decorative background elements */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.1),transparent_70%)]"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(147,51,234,0.1),transparent_70%)]"></div>
 
             {/* Featured programs list */}
             <div className="relative z-10 space-y-4 flex flex-col h-full">
@@ -425,7 +424,7 @@ const EnhancedDashboard = () => {
                     <a
                       href={`/program/${program.id}`}
                       className="block bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700/50 p-4 transition-all duration-300 
-                         hover:border-emerald-500/30 hover:shadow-lg overflow-hidden"
+                         hover:border-purple-500/30 hover:shadow-lg overflow-hidden"
                     >
                       {/* Difficulty indicator */}
                       <div
@@ -451,7 +450,7 @@ const EnhancedDashboard = () => {
                       </div>
 
                       {/* Program name with animation */}
-                      <h3 className="font-medium text-slate-100 pr-24 mb-3 group-hover:text-emerald-300 transition-colors duration-300">
+                      <h3 className="font-medium text-slate-100 pr-24 mb-3 group-hover:text-purple-300 transition-colors duration-300">
                         {program.name}
                       </h3>
 
@@ -459,7 +458,9 @@ const EnhancedDashboard = () => {
                       <div className="space-y-2 text-sm">
                         <div className="flex items-center gap-2">
                           <Code size={14} className="text-slate-400" />
-                          <span className="text-slate-300">{program.scope}</span>
+                          <span className="text-slate-300">
+                            {program.scope}
+                          </span>
                         </div>
 
                         <div className="flex items-center gap-2">
@@ -479,7 +480,7 @@ const EnhancedDashboard = () => {
 
                       {/* View program button - now part of the anchor tag */}
                       <div className="mt-4 flex justify-end">
-                        <span className="flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 transition-colors duration-200">
+                        <span className="flex items-center gap-1.5 text-xs text-purple-400 hover:text-purple-300 transition-colors duration-200">
                           <span>View Program</span>
                           <ExternalLink size={12} />
                         </span>
@@ -523,7 +524,7 @@ const EnhancedDashboard = () => {
               <div className="mt-5 text-right">
                 <a
                   href="/programs"
-                  className="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition-colors duration-200 text-sm font-medium group"
+                  className="inline-flex items-center gap-1 text-purple-400 hover:text-purple-300 transition-colors duration-200 text-sm font-medium group"
                 >
                   <span>Explore All Programs</span>
                   <ArrowRight
@@ -539,12 +540,12 @@ const EnhancedDashboard = () => {
 
       {/* --------- Footer Section with Quick Actions --------- */}
       <div className="mt-12">
-        <div className="bg-gradient-to-r from-slate-900/90 via-slate-800/90 to-slate-900/90 rounded-2xl p-6 border border-slate-700/50 shadow-lg relative overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.05),transparent_70%)]"></div>
+        <div className="bg-gradient-to-r from-[#180729]/90 via-[#2A0D45]/90 to-[#180729]/90 rounded-2xl p-6 border border-purple-900/50 shadow-lg relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(147,51,234,0.05),transparent_70%)]"></div>
 
           <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Sparkles size={20} className="text-emerald-400" />
+              <Sparkles size={20} className="text-purple-400" />
               <h3 className="text-lg font-medium text-slate-200">
                 Ready to hunt more bugs?
               </h3>
@@ -552,7 +553,7 @@ const EnhancedDashboard = () => {
 
             <div className="flex flex-wrap gap-3 justify-center sm:justify-end">
               <button
-                className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg 
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg 
                 shadow-lg transition-all duration-300 text-sm flex items-center gap-2"
               >
                 <Target size={16} />
@@ -591,10 +592,10 @@ const StatCard = ({
   title,
   value,
   icon: Icon,
-  iconColor = "text-emerald-500",
+  iconColor = "text-purple-500",
   trend = 0,
   chartData = [],
-  chartColor = "#10B981",
+  chartColor = "#A855F7", // Default to purple
   isSpecial = false,
   invertTrend = false,
 }: StatCardProps) => {
@@ -625,14 +626,14 @@ const StatCard = ({
       relative overflow-hidden rounded-2xl border p-5
       ${
         isSpecial
-          ? "border-emerald-500/30 bg-gradient-to-br from-emerald-900/30 to-slate-900/90 shadow-[0_0_25px_-5px_rgba(16,185,129,0.3)]"
+          ? "border-purple-500/30 bg-gradient-to-br from-purple-900/30 to-slate-900/90 shadow-[0_0_25px_-5px_rgba(147,51,234,0.3)]"
           : "border-slate-700/50 bg-gradient-to-br from-slate-800/80 to-slate-900/90 shadow-lg"
       }
       transition-all duration-300 hover:shadow-xl group
     `}
     >
       {/* Subtle glow effect */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.1),transparent_70%)]"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(147,51,234,0.1),transparent_70%)]"></div>
 
       {/* Card content */}
       <div className="relative z-10">
@@ -654,7 +655,7 @@ const StatCard = ({
               flex items-center gap-1 text-xs px-2 py-0.5 rounded-full
               ${
                 (invertTrend ? trend < 0 : trend > 0)
-                  ? "bg-emerald-900/50 text-emerald-300"
+                  ? "bg-purple-900/50 text-purple-300"
                   : "bg-red-900/50 text-red-300"
               }
             `}
@@ -681,7 +682,7 @@ const StatCard = ({
         <div className="flex items-end justify-between">
           <h2
             className={`text-2xl font-bold mb-1 ${
-              isSpecial ? "text-emerald-300" : "text-white"
+              isSpecial ? "text-purple-300" : "text-white"
             }`}
           >
             {value}

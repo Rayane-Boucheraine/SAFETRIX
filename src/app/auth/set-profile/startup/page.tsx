@@ -19,6 +19,7 @@ interface StartupProfilePayload {
   team_size: number;
   security_needs: string[];
   yearly_revenue: number;
+  avatar?: string; // Added avatar field
 }
 
 interface ApiResponse {
@@ -32,6 +33,10 @@ interface ApiErrorResponse {
 const StartupSetProfilePage = () => {
   const router = useRouter();
 
+  // Default avatar URL for startups
+  const defaultAvatar =
+    "https://res.cloudinary.com/dgxaezwuv/image/upload/v1748310953/startup_bfgxaf.jpg";
+
   const [companyName, setCompanyName] = useState("");
   const [website, setWebsite] = useState("");
   const [industry, setIndustry] = useState("");
@@ -40,6 +45,7 @@ const StartupSetProfilePage = () => {
   const [teamSize, setTeamSize] = useState("");
   const [securityNeeds, setSecurityNeeds] = useState("");
   const [yearlyRevenue, setYearlyRevenue] = useState("");
+  const [avatar, setAvatar] = useState(defaultAvatar); // New avatar state with default value
 
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -130,6 +136,7 @@ const StartupSetProfilePage = () => {
       team_size: teamSizeNum,
       security_needs: securityNeedsArray,
       yearly_revenue: yearlyRevenueNum,
+      avatar: avatar, // Include avatar in payload
     };
 
     updateProfileMutation.mutate(payload);
@@ -159,6 +166,41 @@ const StartupSetProfilePage = () => {
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Avatar URL field - new */}
+              <div>
+                <label
+                  htmlFor="avatar"
+                  className="block text-xs font-medium text-gray-300 mb-1"
+                >
+                  Company Logo (Optional)
+                </label>
+                <div className="flex gap-4 items-center">
+                  <input
+                    type="url"
+                    id="avatar"
+                    name="avatar"
+                    value={avatar}
+                    onChange={(e) => setAvatar(e.target.value)}
+                    disabled={updateProfileMutation.isPending}
+                    className="w-full text-sm bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-green-500 placeholder-gray-500 disabled:opacity-50"
+                    placeholder="https://example.com/your-logo.png"
+                  />
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full overflow-hidden border border-white/20">
+                    <img
+                      src={avatar || defaultAvatar}
+                      alt="Company logo preview"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = defaultAvatar;
+                      }}
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Enter a URL to your company logo or leave as default
+                </p>
+              </div>
+
               <div>
                 <label
                   htmlFor="companyName"

@@ -11,15 +11,13 @@ import BaseUrl from "@/components/BaseUrl";
 import startup from "../../../../../public/Landing/startup.svg";
 import emailIcon from "../../../../../public/signup/email.svg";
 import passIcon from "../../../../../public/signup/pass.svg";
-import GoogleAuthButton from "../../comp/GoogleAuthButton";
+// import GoogleAuthButton from "../../comp/GoogleAuthButton";
 import secureLocalStorage from "react-secure-storage";
 
 interface SignupPayload {
-  name: string;
   email: string;
   password: string;
   role: "startup";
-  avatar: string;
 }
 
 interface SignupResponse {
@@ -36,9 +34,6 @@ const StartupSignupPage = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const router = useRouter();
-
-  const staticName = "Startup User";
-  const defaultAvatar = "https://avatar.iran.liara.run/public/girl";
 
   const signupMutation = useMutation<SignupResponse, Error, SignupPayload>({
     mutationFn: async (payload: SignupPayload) => {
@@ -94,11 +89,9 @@ const StartupSignupPage = () => {
     }
 
     signupMutation.mutate({
-      name: staticName,
       email,
       password,
       role: "startup",
-      avatar: defaultAvatar,
     });
   };
 
@@ -238,15 +231,11 @@ const StartupSignupPage = () => {
                   )}
                 </button>
               </form>
-              <div className="flex items-center my-4">
-                <div className="flex-grow border-t border-gray-600"></div>
-                <span className="mx-3 text-gray-400 text-xs">OR</span>
-                <div className="flex-grow border-t border-gray-600"></div>
-              </div>
-              <div className="mb-4">
+             
+              {/* <div className="mb-4">
                 <GoogleAuthButton />
-              </div>
-              <p className="text-center text-xs text-gray-400">
+              </div> */}
+              <p className="text-center text-xs text-gray-400 mt-6">
                 Already have an account?{" "}
                 <Link
                   href="/auth/signin/startup"

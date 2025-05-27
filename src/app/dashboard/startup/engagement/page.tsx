@@ -120,22 +120,22 @@ export default function EngagementPage() {
     setActiveFilters({ rank: null, specialization: null });
   };
 
-  // Keep original radial gradient background
+  // Keep original radial gradient background for consistency
   const layoutGradient =
-    "bg-[radial-gradient(70.07%_69.22%_at_50%_50%,#2A0D45_6.63%,#080808_100%)]";
-  const themeAccentText = "text-purple-400";
+    "bg-[radial-gradient(70.07%_69.22%_at_50%_50%,#195033_6.63%,#080808_100%)]";
+  const themeAccentText = "text-emerald-400";
 
   return (
     <div className={`min-h-full p-6 md:p-8 text-slate-200 ${layoutGradient}`}>
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header - Redesigned with glass card effect */}
-        <div className="bg-slate-900/40 backdrop-blur-md rounded-2xl p-6 border border-purple-800/30 shadow-xl relative overflow-hidden">
-          <div className="absolute -top-12 -right-12 w-48 h-48 bg-purple-600/20 rounded-full blur-3xl"></div>
-          <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-purple-900/20 rounded-full blur-2xl"></div>
+        <div className="bg-slate-900/40 backdrop-blur-md rounded-2xl p-6 border border-green-800/30 shadow-xl relative overflow-hidden">
+          <div className="absolute -top-12 -right-12 w-48 h-48 bg-emerald-600/20 rounded-full blur-3xl"></div>
+          <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-green-900/20 rounded-full blur-2xl"></div>
 
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 relative z-10">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-to-br from-purple-900/70 to-slate-900 rounded-xl border border-purple-500/30 shadow-lg">
+              <div className="p-3 bg-gradient-to-br from-green-900/70 to-slate-900 rounded-xl border border-emerald-500/30 shadow-lg">
                 <GitCompareArrows
                   size={28}
                   className={`${themeAccentText} drop-shadow-md`}
@@ -154,7 +154,7 @@ export default function EngagementPage() {
               <button className="inline-flex items-center gap-2 px-5 py-2.5 border-2 border-slate-700/80 text-slate-200 font-medium rounded-xl hover:bg-slate-800/70 transition-all duration-200 shadow-md">
                 <MessageSquare size={18} /> Communicate
               </button>
-              <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-700/80 to-purple-900/80 border border-purple-500/50 text-white font-medium rounded-xl hover:from-purple-600/80 hover:to-purple-800/80 transition-all duration-200 shadow-lg">
+              <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-700/80 to-green-900/80 border border-emerald-500/50 text-white font-medium rounded-xl hover:from-emerald-600/80 hover:to-green-800/80 transition-all duration-200 shadow-lg">
                 <UserPlus size={18} /> Invite to Private
               </button>
             </div>
@@ -192,7 +192,7 @@ export default function EngagementPage() {
                 placeholder="Search hackers..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-slate-900/80 border-2 border-slate-700/80 rounded-xl py-3 pl-11 pr-4 text-slate-100 placeholder-slate-400 focus:outline-none focus:border-purple-500/70 text-sm shadow-inner"
+                className="w-full bg-slate-900/80 border-2 border-slate-700/80 rounded-xl py-3 pl-11 pr-4 text-slate-100 placeholder-slate-400 focus:outline-none focus:border-emerald-500/70 text-sm shadow-inner"
               />
               <Search
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
@@ -268,7 +268,7 @@ export default function EngagementPage() {
               </p>
               <button
                 onClick={clearFilters}
-                className="mt-6 px-6 py-2.5 bg-purple-700/40 text-purple-200 rounded-xl hover:bg-purple-600/50 border border-purple-600/50 transition-all text-sm shadow-lg"
+                className="mt-6 px-6 py-2.5 bg-emerald-700/40 text-emerald-200 rounded-xl hover:bg-emerald-600/50 border border-emerald-600/50 transition-all text-sm shadow-lg"
               >
                 Clear All Filters
               </button>
@@ -304,12 +304,12 @@ const StatCard = ({
 
   return (
     <div className="bg-slate-900/70 backdrop-blur-md rounded-xl overflow-hidden border border-slate-700/40 shadow-lg group hover:shadow-xl transition-all duration-300 relative">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500/80 to-purple-900/50"></div>
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500/80 to-emerald-900/50"></div>
       <div className="p-5">
         <div className="flex items-center justify-between mb-3">
           <p className="text-sm font-medium text-slate-300">{title}</p>
           <div className="p-2 rounded-lg bg-slate-800/80 border border-slate-700/60">
-            <Icon size={18} className="text-purple-400" />
+            <Icon size={18} className="text-emerald-400" />
           </div>
         </div>
         <p className="text-3xl font-bold text-white mt-2 group-hover:scale-105 origin-left transition-transform">

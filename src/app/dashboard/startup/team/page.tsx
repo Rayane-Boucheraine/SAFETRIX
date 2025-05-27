@@ -207,106 +207,106 @@ export default function CreativeTeamPage() {
     setActiveFilters({ role: null, status: null });
   };
 
-  const themeAccentText = `text-purple-400`; 
+  const themeAccentText = `text-emerald-400`;
   const layoutGradient =
-    "bg-[radial-gradient(70.07%_69.22%_at_50%_50%,#2A0D45_6.63%,#080808_100%)]";
+    "bg-[radial-gradient(70.07%_69.22%_at_50%_50%,#195033_6.63%,#080808_100%)]";
 
   return (
-      <div className={`min-h-full p-6 md:p-8 text-slate-200 ${layoutGradient}`}>
-        <div className="max-w-7xl mx-auto space-y-8">
-          {/* Header Section */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-purple-900/40 pb-6 relative">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl border border-purple-800/40 shadow-lg backdrop-blur-sm">
-                <Users size={28} className={themeAccentText} />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-slate-100 tracking-tight">
-                  Team Command Roster
-                </h1>
-                <p className="text-slate-400 mt-1 text-sm">
-                  Assign roles, monitor activity, and manage platform operators.
-                </p>
-              </div>
+    <div className={`min-h-full p-6 md:p-8 text-slate-200 ${layoutGradient}`}>
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-green-900/40 pb-6 relative">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-gradient-to-br from-emerald-800/30 to-slate-900 rounded-xl border border-emerald-600/60 shadow-lg backdrop-blur-sm">
+              <Users size={28} className={themeAccentText} />
             </div>
-            <button className="z-10 inline-flex items-center group gap-2 px-4 py-2 bg-purple-600/30 hover:bg-purple-600/50 border border-purple-700/60 text-purple-200 text-sm font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg hover:shadow-purple-500/15">
-              <UserPlus size={16} /> Invite New Operator
-            </button>
-          </div>
-
-          {/* Filter and Search */}
-          <div className="bg-slate-900/60 backdrop-blur-lg border border-slate-700/50 rounded-xl p-4 flex flex-wrap gap-4 items-center shadow-lg">
-            <div className="relative flex-grow w-full md:w-auto min-w-[250px]">
-              <input
-                type="text"
-                placeholder="Search Operators (Name, Email)..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-slate-800/90 border border-slate-700 rounded-lg py-2.5 pl-10 pr-4 text-slate-100 placeholder-slate-400/80 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-transparent text-sm shadow-inner"
-              />
-              <Search
-                size={16}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-              />
-            </div>
-            <div className="flex flex-wrap gap-2 items-center shrink-0">
-              <TeamFilterDropdownV2
-                label="Role"
-                options={["All", ...uniqueRoles]}
-                value={activeFilters.role || "All"}
-                onChange={(v) => handleFilterChange("role", v)}
-                icon={<ShieldCheck size={14} />}
-              />
-              <TeamFilterDropdownV2
-                label="Status"
-                options={["All", ...uniqueStatuses]}
-                value={activeFilters.status || "All"}
-                onChange={(v) => handleFilterChange("status", v)}
-                icon={<Activity size={14} />}
-              />
-              {(activeFilters.role || activeFilters.status || searchTerm) && (
-                <button
-                  onClick={clearFilters}
-                  title="Clear Filters"
-                  className="p-2 rounded-md bg-slate-700/60 text-slate-400 hover:bg-red-900/50 hover:text-red-400 border border-slate-600/60 hover:border-red-700/70 transition-all duration-150"
-                >
-                  <X size={16} />
-                </button>
-              )}
+            <div>
+              <h1 className="text-3xl font-bold text-slate-100 tracking-tight">
+                Team Command Roster
+              </h1>
+              <p className="text-slate-400 mt-1 text-sm">
+                Assign roles, monitor activity, and manage platform operators.
+              </p>
             </div>
           </div>
+          <button className="z-10 inline-flex items-center group gap-2 px-4 py-2 bg-emerald-600/30 hover:bg-emerald-600/50 border border-emerald-700/60 text-emerald-200 text-sm font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg hover:shadow-emerald-500/15">
+            <UserPlus size={16} /> Invite New Operator
+          </button>
+        </div>
 
-          {/* Team Member Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTeam.length > 0 ? (
-              filteredTeam.map((member) => (
-                <TeamMemberCard key={member.id} member={member} />
-              ))
-            ) : (
-              <div className="md:col-span-2 lg:col-span-3 text-center py-16 bg-gradient-to-b from-slate-800/40 to-slate-900/50 rounded-lg border border-slate-700/40 backdrop-blur-sm shadow-inner">
-                <Users
-                  size={56}
-                  strokeWidth={1}
-                  className="mx-auto text-slate-600 mb-4 opacity-50"
-                />
-                <h3 className="text-xl font-semibold text-slate-300 mb-2">
-                  No Matching Operators
-                </h3>
-                <p className="text-slate-400 max-w-lg mx-auto">
-                  Your search and filter combination yielded no results in the
-                  operator roster.
-                </p>
-                <button
-                  onClick={clearFilters}
-                  className="mt-6 px-5 py-2 bg-purple-600/30 text-purple-300 rounded-md hover:bg-purple-600/50 border border-purple-700/50 hover:border-purple-600/80 transition-all text-sm shadow-md"
-                >
-                  Reset Search Filters
-                </button>
-              </div>
+        {/* Filter and Search */}
+        <div className="bg-slate-900/60 backdrop-blur-lg border border-green-900/30 rounded-xl p-4 flex flex-wrap gap-4 items-center shadow-lg">
+          <div className="relative flex-grow w-full md:w-auto min-w-[250px]">
+            <input
+              type="text"
+              placeholder="Search Operators (Name, Email)..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-slate-800/90 border border-slate-700 rounded-lg py-2.5 pl-10 pr-4 text-slate-100 placeholder-slate-400/80 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-transparent text-sm shadow-inner"
+            />
+            <Search
+              size={16}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+            />
+          </div>
+          <div className="flex flex-wrap gap-2 items-center shrink-0">
+            <TeamFilterDropdownV2
+              label="Role"
+              options={["All", ...uniqueRoles]}
+              value={activeFilters.role || "All"}
+              onChange={(v) => handleFilterChange("role", v)}
+              icon={<ShieldCheck size={14} />}
+            />
+            <TeamFilterDropdownV2
+              label="Status"
+              options={["All", ...uniqueStatuses]}
+              value={activeFilters.status || "All"}
+              onChange={(v) => handleFilterChange("status", v)}
+              icon={<Activity size={14} />}
+            />
+            {(activeFilters.role || activeFilters.status || searchTerm) && (
+              <button
+                onClick={clearFilters}
+                title="Clear Filters"
+                className="p-2 rounded-md bg-slate-700/60 text-slate-400 hover:bg-red-900/50 hover:text-red-400 border border-slate-600/60 hover:border-red-700/70 transition-all duration-150"
+              >
+                <X size={16} />
+              </button>
             )}
           </div>
         </div>
+
+        {/* Team Member Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredTeam.length > 0 ? (
+            filteredTeam.map((member) => (
+              <TeamMemberCard key={member.id} member={member} />
+            ))
+          ) : (
+            <div className="md:col-span-2 lg:col-span-3 text-center py-16 bg-gradient-to-b from-slate-800/40 to-slate-900/50 rounded-lg border border-slate-700/40 backdrop-blur-sm shadow-inner">
+              <Users
+                size={56}
+                strokeWidth={1}
+                className="mx-auto text-slate-600 mb-4 opacity-50"
+              />
+              <h3 className="text-xl font-semibold text-slate-300 mb-2">
+                No Matching Operators
+              </h3>
+              <p className="text-slate-400 max-w-lg mx-auto">
+                Your search and filter combination yielded no results in the
+                operator roster.
+              </p>
+              <button
+                onClick={clearFilters}
+                className="mt-6 px-5 py-2 bg-emerald-600/30 text-emerald-300 rounded-md hover:bg-emerald-600/50 border border-emerald-700/50 hover:border-emerald-600/80 transition-all text-sm shadow-md"
+              >
+                Reset Search Filters
+              </button>
+            </div>
+          )}
+        </div>
       </div>
+    </div>
   );
 }
 
@@ -314,7 +314,10 @@ export default function CreativeTeamPage() {
 const TeamMemberCard: React.FC<{ member: TeamMember }> = ({ member }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const statusStyles = getStatusStyles(member.status);
-  const rolePillStyle = getRolePillStyles(member.role);
+  const rolePillStyle = getRolePillStyles(member.role).replace(
+    "purple",
+    "emerald"
+  );
 
   // Example bar width calculations (normalize to 100)
   const triagePercentage = Math.min(
@@ -327,16 +330,16 @@ const TeamMemberCard: React.FC<{ member: TeamMember }> = ({ member }) => {
   ); // Assume $100k is high
 
   return (
-    <div className="bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-black/60 backdrop-blur-lg border border-slate-700/50 rounded-xl shadow-lg p-5 relative isolate overflow-hidden transition-all duration-300 hover:border-purple-600/50 hover:shadow-purple-500/10 group">
+    <div className="bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-black/60 backdrop-blur-lg border border-slate-700/50 rounded-xl shadow-lg p-5 relative isolate overflow-hidden transition-all duration-300 hover:border-emerald-600/50 hover:shadow-emerald-500/10 group">
       {/* Decorative background elements */}
-      <div className="absolute -top-16 -left-16 w-48 h-48 bg-gradient-radial from-purple-900/20 to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-50 transition-opacity duration-500"></div>
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-purple-500/20 to-transparent opacity-0 group-hover:opacity-80 transition-opacity duration-500"></div>
+      <div className="absolute -top-16 -left-16 w-48 h-48 bg-gradient-radial from-emerald-900/20 to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-50 transition-opacity duration-500"></div>
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent opacity-0 group-hover:opacity-80 transition-opacity duration-500"></div>
 
       {/* Actions Menu Button */}
       <div className="absolute top-3 right-3 z-20">
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="p-1.5 rounded-full text-slate-500 hover:bg-slate-700/50 hover:text-purple-300 transition-colors"
+          className="p-1.5 rounded-full text-slate-500 hover:bg-slate-700/50 hover:text-emerald-300 transition-colors"
         >
           <MoreVertical size={16} />
         </button>
@@ -388,7 +391,7 @@ const TeamMemberCard: React.FC<{ member: TeamMember }> = ({ member }) => {
         </div>
         {/* Info */}
         <div>
-          <h3 className="font-semibold text-slate-100 truncate group-hover:text-purple-300 transition-colors">
+          <h3 className="font-semibold text-slate-100 truncate group-hover:text-emerald-300 transition-colors">
             {member.name}
           </h3>
           <p className="text-xs text-slate-400 truncate">{member.email}</p>
@@ -419,7 +422,7 @@ const TeamMemberCard: React.FC<{ member: TeamMember }> = ({ member }) => {
         </div>
         <div className="w-full bg-slate-700/50 h-1 rounded-full overflow-hidden">
           <div
-            className="bg-blue-500 h-full rounded-full"
+            className="bg-emerald-500 h-full rounded-full"
             style={{ width: `${triagePercentage}%` }}
           ></div>
         </div>
@@ -465,9 +468,9 @@ const TeamFilterDropdownV2: React.FC<{
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 bg-gradient-to-r from-slate-700/70 to-slate-800/80 border border-slate-600/80 rounded-lg px-3 py-1.5 text-xs text-slate-200 hover:border-purple-600/60 focus:outline-none focus:ring-1 focus:ring-purple-500/80 transition-all shadow-sm hover:shadow-md"
+        className="flex items-center gap-2 bg-gradient-to-r from-slate-700/70 to-slate-800/80 border border-slate-600/80 rounded-lg px-3 py-1.5 text-xs text-slate-200 hover:border-emerald-600/60 focus:outline-none focus:ring-1 focus:ring-emerald-500/80 transition-all shadow-sm hover:shadow-md"
       >
-        <span className="text-purple-400 opacity-80">{icon}</span>
+        <span className="text-emerald-400 opacity-80">{icon}</span>
         <span className="hidden sm:inline">{label}:</span>
         <span className="font-medium text-white">{value}</span>
         <ChevronDown
@@ -486,15 +489,15 @@ const TeamFilterDropdownV2: React.FC<{
                 onChange(option);
                 setIsOpen(false);
               }}
-              className={`px-3.5 py-2 hover:bg-purple-700/30 cursor-pointer flex items-center justify-between text-slate-300 ${
+              className={`px-3.5 py-2 hover:bg-emerald-700/30 cursor-pointer flex items-center justify-between text-slate-300 ${
                 value === option
-                  ? "bg-purple-800/60 text-purple-300 font-medium"
+                  ? "bg-emerald-800/60 text-emerald-300 font-medium"
                   : "hover:text-white"
               }`}
             >
               <span>{option}</span>
               {value === option && (
-                <CheckCircle size={13} className="text-purple-400" />
+                <CheckCircle size={13} className="text-emerald-400" />
               )}
             </div>
           ))}

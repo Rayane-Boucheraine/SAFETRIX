@@ -6,7 +6,7 @@ import hacker from "../../../../../public/Landing/hacker.svg";
 import emailIcon from "../../../../../public/signup/email.svg";
 import passIcon from "../../../../../public/signup/pass.svg";
 import Link from "next/link";
-import GoogleAuthButton from "../../comp/GoogleAuthButton";
+// import GoogleAuthButton from "../../comp/GoogleAuthButton";
 import { useState, FormEvent } from "react";
 import { Switch } from "@headlessui/react";
 import { useMutation } from "@tanstack/react-query";
@@ -269,18 +269,17 @@ const HackerSigninPage = () => {
               </button>
             </form>
 
-            <div className="flex items-center my-5">
+            {/* <div className="flex items-center my-5">
               <div className="flex-grow border-t border-gray-600"></div>
               <span className="mx-3 text-gray-400 text-xs">OR</span>
               <div className="flex-grow border-t border-gray-600"></div>
-            </div>
+            </div> */}
 
-            <div className="mb-5">
-              {/* Pass disabled prop */}
+            {/* <div className="mb-5">
               <GoogleAuthButton disabled={signinMutation.isPending} />
-            </div>
+            </div> */}
 
-            <p className="text-center text-xs text-gray-400">
+            <p className="text-center text-xs text-gray-400 mt-6">
               New to our platform?{" "}
               <Link
                 href="/auth/signup/hacker"
