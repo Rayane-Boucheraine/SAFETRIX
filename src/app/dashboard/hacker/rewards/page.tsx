@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Activity,
@@ -16,144 +16,75 @@ import {
   X,
   Gift,
   ExternalLink,
+  Loader,
+  AlertCircle,
 } from "lucide-react";
+import rewardService, { Reward, RewardStatus } from "@/services/rewardService";
 
-// --- Enhanced Mock Rewards Data ---
-const mockRewards: Reward[] = [
-  {
-    id: "PAYOUT-001",
-    reportId: "RPT-1230",
-    program: "ACME Corp",
-    programId: "prog-acme",
-    amount: 800,
-    status: "Paid",
-    payoutDate: "2023-10-28T09:00:00Z",
-    reportTitle: "IDOR on Order Details",
-    bonus: 50,
-  },
-  {
-    id: "PAYOUT-002",
-    reportId: "RPT-1199",
-    program: "DataCorp AI",
-    programId: "prog-ai",
-    amount: 250,
-    status: "Paid",
-    payoutDate: "2023-10-21T12:00:00Z",
-    reportTitle: "SQL Injection via Search",
-  },
-  {
-    id: "PAYOUT-003",
-    reportId: "RPT-1245",
-    program: "CloudSecure",
-    programId: "prog-cloudsec-k8s",
-    amount: 2500,
-    status: "Paid",
-    payoutDate: "2023-10-29T10:00:00Z",
-    reportTitle: "Auth Bypass via JWT",
-    bonus: 200,
-    featuredReport: true,
-  },
-  {
-    id: "PAYOUT-004",
-    reportId: "RPT-1190",
-    program: "DevOps Central",
-    programId: "prog-devops",
-    amount: 1200,
-    status: "Paid",
-    payoutDate: "2023-10-18T16:40:00Z",
-    reportTitle: "SSRF in Import Feature",
-  },
-  {
-    id: "PAYOUT-005",
-    reportId: "RPT-1240",
-    program: "SecureApp",
-    programId: "prog-secureapp",
-    amount: 250,
-    status: "Pending",
-    payoutDate: null,
-    reportTitle: "Rate Limiting Bypass",
-  },
-  {
-    id: "PAYOUT-006",
-    reportId: "RPT-1099",
-    program: "FinTech Innovations",
-    programId: "prog-fintech",
-    amount: 150,
-    status: "Paid",
-    payoutDate: "2023-09-05T11:00:00Z",
-    reportTitle: "Minor UI Glitch - Info",
-  },
-  {
-    id: "PAYOUT-007",
-    reportId: "RPT-1050",
-    program: "GamerConnect",
-    programId: "prog-gamer",
-    amount: 500,
-    status: "Paid",
-    payoutDate: "2023-08-15T09:00:00Z",
-    reportTitle: "Account Takeover Chain",
-    bonus: 100,
-    featuredReport: true,
-  },
-];
-
-type PayoutStatus = "Paid" | "Pending" | "Processing" | "Failed";
-
-interface Reward {
-  id: string;
-  reportId: string;
-  program: string;
-  programId: string;
-  amount: number;
-  status: PayoutStatus;
-  payoutDate: string | null;
-  reportTitle: string;
-  bonus?: number;
-  featuredReport?: boolean;
-}
-// --- End Mock Data ---
-
-// --- Calculate Stats ---
-const totalEarned = mockRewards
-  .filter((r) => r.status === "Paid")
-  .reduce((sum, r) => sum + r.amount + (r.bonus || 0), 0);
-const pendingPayouts = mockRewards.filter((r) => r.status === "Pending").length;
-const totalBonus = mockRewards
-  .filter((r) => r.status === "Paid")
-  .reduce((sum, r) => sum + (r.bonus || 0), 0);
-const uniqueProgramsPaid = new Set(
-  mockRewards.filter((r) => r.status === "Paid").map((r) => r.program)
-).size;
-
-// -------- Main Rewards Page Component --------
 export default function RewardsPage() {
+  const [rewards, setRewards] = useState<Reward[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState<{
-    status: PayoutStatus | null;
+    status: RewardStatus | null;
     program: string | null;
-    dateRange: string | null; // e.g., 'last-30-days', 'last-90-days', null for 'all-time'
-  }>({ status: null, program: null, dateRange: null });
+  }>({ status: null, program: null });
 
-  // Simple filtering logic (add date range logic if implementing)
-  const filteredRewards = mockRewards.filter((reward) => {
+  useEffect(() => {
+    fetchMyRewards();
+  }, []);
+
+  const fetchMyRewards = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const rewardsData = await rewardService.getMyRewards();
+      setRewards(rewardsData);
+    } catch (error: unknown) {
+      console.error("Failed to fetch rewards:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to fetch rewards"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Calculate stats from actual data
+  const totalEarned = rewards
+    .filter((r) => r.status === RewardStatus.PAID)
+    .reduce((sum, r) => sum + r.amount, 0);
+  const pendingPayouts = rewards.filter(
+    (r) => r.status === RewardStatus.PENDING
+  ).length;
+  const approvedPayouts = rewards.filter(
+    (r) => r.status === RewardStatus.APPROVED
+  ).length;
+  const uniqueProgramsPaid = new Set(
+    rewards
+      .filter((r) => r.status === RewardStatus.PAID)
+      .map((r) => r.program.title)
+  ).size;
+
+  // Simple filtering logic
+  const filteredRewards = rewards.filter((reward) => {
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch =
       !searchTerm ||
-      reward.program.toLowerCase().includes(searchLower) ||
-      reward.reportId.toLowerCase().includes(searchLower) ||
-      reward.reportTitle.toLowerCase().includes(searchLower);
+      reward.program.title.toLowerCase().includes(searchLower) ||
+      reward.id.toLowerCase().includes(searchLower) ||
+      (reward.description &&
+        reward.description.toLowerCase().includes(searchLower));
     const matchesStatus =
       !activeFilters.status || reward.status === activeFilters.status;
     const matchesProgram =
-      !activeFilters.program || reward.program === activeFilters.program;
-    // const matchesDateRange = ... logic ...;
-    return (
-      matchesSearch && matchesStatus && matchesProgram /* && matchesDateRange */
-    );
+      !activeFilters.program || reward.program.title === activeFilters.program;
+    return matchesSearch && matchesStatus && matchesProgram;
   });
 
   // Unique Programs for filter
-  const uniquePrograms = [...new Set(mockRewards.map((r) => r.program))];
+  const uniquePrograms = [...new Set(rewards.map((r) => r.program.title))];
 
   // Filter change handler
   const handleFilterChange = (
@@ -164,12 +95,42 @@ export default function RewardsPage() {
       ...prev,
       [filterType]: value === "All" ? null : value,
     }));
+
   const clearFilters = () => {
     setSearchTerm("");
-    setActiveFilters({ status: null, program: null, dateRange: null });
+    setActiveFilters({ status: null, program: null });
   };
 
   const themeAccentText = `text-purple-400`;
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="flex flex-col items-center gap-4">
+          <Loader className="animate-spin text-purple-500" size={36} />
+          <p className="text-slate-400">Loading rewards...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-16">
+        <AlertCircle className="mx-auto text-red-400 mb-4" size={36} />
+        <h3 className="text-xl font-semibold text-slate-300 mb-2">
+          Error Loading Rewards
+        </h3>
+        <p className="text-slate-400 max-w-lg mx-auto mb-4">{error}</p>
+        <button
+          className="px-4 py-2 bg-purple-600/30 text-purple-300 rounded-md hover:bg-purple-600/50 border border-purple-700/50"
+          onClick={fetchMyRewards}
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 text-slate-200 max-w-7xl mx-auto">
@@ -205,19 +166,18 @@ export default function RewardsPage() {
             </div>
             <div className="text-left sm:text-right">
               <p className="text-slate-400 text-xs uppercase tracking-wider">
-                Pending
+                Pending/Approved
               </p>
               <p className="text-2xl font-semibold text-amber-400 mt-1">
-                {pendingPayouts}
+                {pendingPayouts}/{approvedPayouts}
               </p>
             </div>
             <div className="text-left sm:text-right col-span-2 sm:col-span-1 mt-2 sm:mt-0">
               <p className="text-slate-400 text-xs uppercase tracking-wider">
-                Bonus/Programs
+                Programs
               </p>
               <p className="text-base font-medium text-white mt-1">
-                ${totalBonus.toLocaleString()} Bonus / {uniqueProgramsPaid}{" "}
-                Programs
+                {uniqueProgramsPaid} Programs
               </p>
             </div>
           </div>
@@ -229,7 +189,7 @@ export default function RewardsPage() {
         <div className="relative flex-grow w-full md:w-auto min-w-[250px]">
           <input
             type="text"
-            placeholder="Search by Report ID, Title, Program..."
+            placeholder="Search by Reward ID, Description, Program..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full bg-slate-700/80 border border-slate-600/70 rounded-lg py-2.5 pl-11 pr-4 text-slate-100 placeholder-slate-400/80 focus:outline-none focus:ring-2 focus:ring-purple-500/80 focus:border-transparent text-sm shadow-inner focus:bg-slate-700"
@@ -242,9 +202,9 @@ export default function RewardsPage() {
         <div className="flex flex-wrap gap-2 items-center shrink-0">
           <RewardFilterDropdown
             label="Status"
-            options={["All", "Paid", "Pending", "Processing"]}
+            options={["All", "PENDING", "APPROVED", "REJECTED", "PAID"]}
             value={activeFilters.status || "All"}
-            onChange={(v) => handleFilterChange("status", v as PayoutStatus)}
+            onChange={(v) => handleFilterChange("status", v)}
             icon={<Activity size={14} />}
           />
           <RewardFilterDropdown
@@ -254,17 +214,7 @@ export default function RewardsPage() {
             onChange={(v) => handleFilterChange("program", v)}
             icon={<Shield size={14} />}
           />
-          <RewardFilterDropdown
-            label="Date Range"
-            options={["All Time", "Last 30 Days", "Last 90 Days"]}
-            value={activeFilters.dateRange || "All Time"}
-            onChange={(v) => handleFilterChange("dateRange", v)}
-            icon={<Calendar size={14} />}
-          />
-          {(activeFilters.status ||
-            activeFilters.program ||
-            activeFilters.dateRange ||
-            searchTerm) && (
+          {(activeFilters.status || activeFilters.program || searchTerm) && (
             <button
               onClick={clearFilters}
               title="Clear Filters"
@@ -283,7 +233,7 @@ export default function RewardsPage() {
           <span className="font-semibold text-purple-300">
             {filteredRewards.length}
           </span>{" "}
-          payout records.
+          reward records.
         </p>
         {filteredRewards.length > 0 ? (
           <div className="space-y-4">
@@ -302,7 +252,7 @@ export default function RewardsPage() {
               No Reward Records Found
             </h3>
             <p className="text-slate-400 max-w-lg mx-auto">
-              No payout records match the current filters or search query.
+              No reward records match the current filters or search query.
             </p>
             <button
               onClick={clearFilters}
@@ -319,20 +269,27 @@ export default function RewardsPage() {
 
 // -------- Reward Item Component --------
 const RewardItem: React.FC<{ reward: Reward }> = ({ reward }) => {
-  const getStatusChip = (status: PayoutStatus): React.ReactNode => {
-    let colorClasses = "bg-gray-700 text-gray-300 border-gray-600"; // Default (e.g., Processing)
+  const getStatusChip = (status: RewardStatus): React.ReactNode => {
+    let colorClasses = "bg-gray-700 text-gray-300 border-gray-600";
     let Icon = Clock;
-    if (status === "Paid") {
-      colorClasses = "bg-green-900/60 text-green-300 border-green-700/70";
-      Icon = CheckCircle;
-    }
-    if (status === "Pending") {
-      colorClasses = "bg-amber-900/60 text-amber-300 border-amber-700/70";
-      Icon = Clock;
-    }
-    if (status === "Failed") {
-      colorClasses = "bg-red-900/60 text-red-300 border-red-700/70";
-      Icon = AlertTriangle;
+
+    switch (status) {
+      case RewardStatus.PAID:
+        colorClasses = "bg-green-900/60 text-green-300 border-green-700/70";
+        Icon = CheckCircle;
+        break;
+      case RewardStatus.PENDING:
+        colorClasses = "bg-amber-900/60 text-amber-300 border-amber-700/70";
+        Icon = Clock;
+        break;
+      case RewardStatus.APPROVED:
+        colorClasses = "bg-blue-900/60 text-blue-300 border-blue-700/70";
+        Icon = CheckCircle;
+        break;
+      case RewardStatus.REJECTED:
+        colorClasses = "bg-red-900/60 text-red-300 border-red-700/70";
+        Icon = AlertTriangle;
+        break;
     }
 
     return (
@@ -356,11 +313,11 @@ const RewardItem: React.FC<{ reward: Reward }> = ({ reward }) => {
       {/* Decorative glow on hover */}
       <div className="absolute -inset-px bg-gradient-to-br from-transparent via-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg -z-10"></div>
 
-      {/* Column 1: Reward Amount & Bonus */}
+      {/* Column 1: Reward Amount */}
       <div className="flex items-center gap-3 mb-3 sm:mb-0 sm:border-r sm:border-slate-700/50 sm:pr-4 flex-shrink-0">
         <div
           className={`p-2 rounded-lg bg-gradient-to-br from-purple-800/30 to-purple-950/40 border border-purple-700/30 ${
-            reward.status === "Paid" ? "opacity-100" : "opacity-60"
+            reward.status === RewardStatus.PAID ? "opacity-100" : "opacity-60"
           }`}
         >
           <Gift size={24} className="text-purple-400" />
@@ -369,11 +326,6 @@ const RewardItem: React.FC<{ reward: Reward }> = ({ reward }) => {
           <p className="text-xl font-bold text-purple-300">
             ${reward.amount.toLocaleString()}
           </p>
-          {reward.bonus && (
-            <p className="text-xs text-yellow-400 font-medium">
-              + ${reward.bonus} Bonus
-            </p>
-          )}
         </div>
       </div>
 
@@ -381,57 +333,57 @@ const RewardItem: React.FC<{ reward: Reward }> = ({ reward }) => {
       <div className="flex-grow space-y-1 text-sm mb-3 sm:mb-0">
         <p
           className="font-medium text-slate-100 group-hover:text-white transition-colors line-clamp-1"
-          title={reward.reportTitle}
+          title={reward.description || "No description"}
         >
-          Report: {reward.reportTitle}
+          {reward.description || "Reward for vulnerability report"}
         </p>
         <p className="text-xs text-slate-400">
           Program:{" "}
-          <span className="font-medium text-slate-300">{reward.program}</span>
+          <span className="font-medium text-slate-300">
+            {reward.program.title}
+          </span>
         </p>
         <p className="text-xs font-mono text-slate-500">
-          Report ID: <span className="text-purple-500">{reward.reportId}</span>{" "}
-          | Payout ID: <span className="text-slate-400">{reward.id}</span>
+          Reward ID: <span className="text-purple-500">{reward.id}</span>
         </p>
       </div>
 
       {/* Column 3: Status & Date */}
       <div className="flex-shrink-0 flex flex-col sm:items-end gap-1 text-xs text-slate-400">
         {getStatusChip(reward.status)}
-        {reward.payoutDate ? (
-          <span className="flex items-center gap-1">
-            <Calendar size={12} />{" "}
-            {new Date(reward.payoutDate).toLocaleDateString("en-US", {
+        <span className="flex items-center gap-1">
+          <Calendar size={12} />{" "}
+          {new Date(reward.createdAt).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          })}
+        </span>
+        {reward.approvedAt && (
+          <span className="text-green-400">
+            Approved:{" "}
+            {new Date(reward.approvedAt).toLocaleDateString("en-US", {
               month: "short",
               day: "numeric",
-              year: "numeric",
             })}
           </span>
-        ) : (
-          <span>Awaiting Payout</span>
         )}
       </div>
 
-      {/* Column 4: Action Button (Placeholder) */}
+      {/* Column 4: Action Button */}
       <div className="flex-shrink-0 sm:ml-4 mt-3 sm:mt-0">
-        {/* Could link to report or transaction detail */}
         <Link
-          href={`/dashboard/hacker/reports/${reward.reportId}`}
+          href={`/dashboard/hacker/programs/${reward.program.id}`}
           className="flex items-center gap-1 px-3 py-1 bg-slate-700/50 border border-slate-600/70 rounded text-xs text-slate-300 hover:bg-slate-700 hover:border-slate-500 hover:text-purple-400 transition-all"
         >
-          View Report <ExternalLink size={12} />
+          View Program <ExternalLink size={12} />
         </Link>
       </div>
-
-      {/* Featured Indicator corner */}
-      {reward.featuredReport && (
-        <div className="absolute top-0 left-0 w-0 h-0 border-r-[24px] border-r-transparent border-t-[24px] border-t-amber-500/50 group-hover:border-t-amber-500/70 transition-colors"></div>
-      )}
     </div>
   );
 };
 
-// -------- Simple Filter Dropdown Component V2 (Refined for consistency) --------
+// -------- Simple Filter Dropdown Component --------
 const RewardFilterDropdown: React.FC<{
   label: string;
   options: string[];

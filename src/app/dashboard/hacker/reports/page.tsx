@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Search,
   ChevronDown,
   FileText,
   AlertTriangle,
   CheckCircle,
-  GitBranch,
   Clock,
   Users,
   Info,
@@ -15,303 +14,30 @@ import {
   Send,
   ChevronRight,
   Activity,
-  Award,
   Zap,
   Shield,
   Filter,
   X,
-  Star,
   BarChart,
-  TrendingUp,
-  Compass,
-  Calendar,
+  Loader,
+  AlertCircle,
 } from "lucide-react";
-
-// --- Enhanced Mock Report Data ---
-const mockReports = [
-  {
-    id: "RPT-1234",
-    title: "XSS Vulnerability in User Profile",
-    program: "FinTech Innovations",
-    status: "Triaged",
-    severity: "High",
-    submittedAt: "2023-10-26T10:00:00Z",
-    updatedAt: "2023-10-27T15:30:00Z",
-    description:
-      "Discovered a stored XSS vulnerability in the user profile bio section that allows execution of arbitrary JavaScript",
-    impact: "Account takeover, data theft",
-    techniques: ["DOM Manipulation", "Payload Injection"],
-    responseTime: 4,
-  },
-  {
-    id: "RPT-1230",
-    title: "Insecure Direct Object Reference (IDOR) on Order Details",
-    program: "ACME Corp",
-    status: "Resolved",
-    severity: "Medium",
-    submittedAt: "2023-10-25T14:15:00Z",
-    updatedAt: "2023-10-28T09:00:00Z",
-    reward: 800,
-    description:
-      "By modifying order IDs in the URL, any user can access order details of other customers",
-    impact: "Privacy violation, information disclosure",
-    techniques: ["Parameter Tampering", "Access Control Bypass"],
-    responseTime: 12,
-    bonusPoints: 50,
-  },
-  {
-    id: "RPT-1235",
-    title: "CSRF Token Bypass on Settings Update",
-    program: "GamerConnect",
-    status: "Needs More Info",
-    severity: "Medium",
-    submittedAt: "2023-10-28T11:00:00Z",
-    updatedAt: "2023-10-28T11:00:00Z",
-    description:
-      "The CSRF protection can be bypassed when updating email preferences",
-    impact: "Forced actions, account modifications",
-    techniques: ["Token Analysis", "Request Forgery"],
-    responseTime: 2,
-    featured: true,
-  },
-  {
-    id: "RPT-1199",
-    title: "SQL Injection possibility via Search Parameter",
-    program: "DataCorp AI",
-    status: "Duplicate",
-    severity: "Critical",
-    submittedAt: "2023-10-20T08:00:00Z",
-    updatedAt: "2023-10-21T12:00:00Z",
-    description:
-      "The search functionality is vulnerable to SQL injection attacks through the 'q' parameter",
-    impact: "Database exfiltration, authentication bypass",
-    techniques: ["Error-based SQLi", "Union-based Attacks"],
-    responseTime: 28,
-  },
-  {
-    id: "RPT-1150",
-    title: "Open Redirect Vulnerability",
-    program: "FinTech Innovations",
-    status: "Informative",
-    severity: "Low",
-    submittedAt: "2023-09-15T18:30:00Z",
-    updatedAt: "2023-09-16T10:15:00Z",
-    description:
-      "The redirect parameter in the login process can be manipulated to cause redirects to external domains",
-    impact: "Phishing potential, trust exploitation",
-    techniques: ["URL Manipulation"],
-    responseTime: 16,
-  },
-  {
-    id: "RPT-1240",
-    title: "Rate Limiting Bypass on Login Endpoint",
-    program: "SecureApp",
-    status: "New",
-    severity: "Medium",
-    submittedAt: "2023-10-29T09:45:00Z",
-    updatedAt: "2023-10-29T09:45:00Z",
-    description:
-      "By manipulating request headers, the rate limiting on login attempts can be bypassed",
-    impact: "Brute force attacks, account compromise",
-    techniques: ["Header Manipulation", "IP Rotation"],
-    responseTime: 0,
-    reward: 250,
-  },
-  {
-    id: "RPT-1245",
-    title: "Authentication Bypass via JWT Manipulation",
-    program: "CloudSecure",
-    status: "Triaged",
-    severity: "Critical",
-    submittedAt: "2023-10-28T14:22:00Z",
-    updatedAt: "2023-10-29T08:10:00Z",
-    description:
-      "The JWT verification process accepts tokens with 'none' algorithm, allowing authentication bypass",
-    impact: "Unauthorized access to all accounts, full system compromise",
-    techniques: ["JWT Algorithm Confusion", "Cryptographic Weakness"],
-    responseTime: 18,
-    reward: 2500,
-    featured: true,
-  },
-  {
-    id: "RPT-1190",
-    title: "Server-Side Request Forgery in Import Feature",
-    program: "DevOps Central",
-    status: "Resolved",
-    severity: "High",
-    submittedAt: "2023-10-15T11:32:00Z",
-    updatedAt: "2023-10-18T16:40:00Z",
-    description:
-      "The import-from-URL feature allows SSRF attacks that can target internal services",
-    impact: "Internal service exploitation, data exposure",
-    techniques: ["URL Manipulation", "Service Discovery"],
-    responseTime: 72,
-    reward: 1200,
-  },
-];
-
-type ReportStatus =
-  | "New"
-  | "Triaged"
-  | "Needs More Info"
-  | "Resolved"
-  | "Duplicate"
-  | "Informative";
-type ReportSeverity = "Critical" | "High" | "Medium" | "Low";
-
-interface Report {
-  id: string;
-  title: string;
-  program: string;
-  status: ReportStatus;
-  severity: ReportSeverity;
-  submittedAt: string;
-  updatedAt: string;
-  reward?: number;
-  description?: string;
-  impact?: string;
-  techniques?: string[];
-  responseTime?: number;
-  bonusPoints?: number;
-  featured?: boolean;
-}
-
-// --- Stats Data ---
-const statsData = {
-  totalReports: mockReports.length,
-  reportsByStatus: {
-    New: mockReports.filter((r) => r.status === "New").length,
-    Triaged: mockReports.filter((r) => r.status === "Triaged").length,
-    "Needs More Info": mockReports.filter((r) => r.status === "Needs More Info")
-      .length,
-    Resolved: mockReports.filter((r) => r.status === "Resolved").length,
-    Duplicate: mockReports.filter((r) => r.status === "Duplicate").length,
-    Informative: mockReports.filter((r) => r.status === "Informative").length,
-  },
-  reportsBySeverity: {
-    Critical: mockReports.filter((r) => r.severity === "Critical").length,
-    High: mockReports.filter((r) => r.severity === "High").length,
-    Medium: mockReports.filter((r) => r.severity === "Medium").length,
-    Low: mockReports.filter((r) => r.severity === "Low").length,
-  },
-  totalRewards: mockReports.reduce(
-    (sum, report) => sum + (report.reward || 0),
-    0
-  ),
-  avgResponseTime: Math.round(
-    mockReports
-      .filter((r) => r.responseTime !== undefined)
-      .reduce((sum, report) => sum + (report.responseTime || 0), 0) /
-      mockReports.filter((r) => r.responseTime !== undefined).length
-  ),
-};
-
-// -------- Styling Helpers --------
-const getStatusStyles = (status: ReportStatus) => {
-  switch (status) {
-    case "New":
-      return {
-        icon: FileText,
-        color: "text-sky-400",
-        bgColor: "bg-sky-900/50",
-        gradient: "from-sky-900/20 to-sky-800/5",
-      };
-    case "Triaged":
-      return {
-        icon: GitBranch,
-        color: "text-blue-400",
-        bgColor: "bg-blue-900/50",
-        gradient: "from-blue-900/20 to-blue-800/5",
-      };
-    case "Needs More Info":
-      return {
-        icon: AlertTriangle,
-        color: "text-amber-400",
-        bgColor: "bg-amber-900/50",
-        gradient: "from-amber-900/20 to-amber-800/5",
-      };
-    case "Resolved":
-      return {
-        icon: CheckCircle,
-        color: "text-green-400",
-        bgColor: "bg-green-900/50",
-        gradient: "from-green-900/20 to-green-800/5",
-      };
-    case "Duplicate":
-      return {
-        icon: Users,
-        color: "text-gray-400",
-        bgColor: "bg-gray-800/50",
-        gradient: "from-gray-800/20 to-gray-700/5",
-      };
-    case "Informative":
-      return {
-        icon: Info,
-        color: "text-slate-400",
-        bgColor: "bg-slate-800/50",
-        gradient: "from-slate-800/20 to-slate-700/5",
-      };
-    default:
-      return {
-        icon: FileText,
-        color: "text-gray-400",
-        bgColor: "bg-gray-800/50",
-        gradient: "from-gray-800/20 to-gray-700/5",
-      };
-  }
-};
-
-const getSeverityStyles = (severity: ReportSeverity) => {
-  switch (severity) {
-    case "Critical":
-      return {
-        color: "text-red-400",
-        borderColor: "border-red-500",
-        bgColor: "bg-red-500/10",
-        icon: Zap,
-        glow: "shadow-red-500/20",
-      };
-    case "High":
-      return {
-        color: "text-orange-400",
-        borderColor: "border-orange-500",
-        bgColor: "bg-orange-500/10",
-        icon: AlertTriangle,
-        glow: "shadow-orange-500/20",
-      };
-    case "Medium":
-      return {
-        color: "text-yellow-400",
-        borderColor: "border-yellow-500",
-        bgColor: "bg-yellow-500/10",
-        icon: Shield,
-        glow: "shadow-yellow-500/20",
-      };
-    case "Low":
-      return {
-        color: "text-blue-400",
-        borderColor: "border-blue-500",
-        bgColor: "bg-blue-500/10",
-        icon: Info,
-        glow: "shadow-blue-500/20",
-      };
-    default:
-      return {
-        color: "text-gray-400",
-        borderColor: "border-gray-500",
-        bgColor: "bg-gray-500/10",
-        icon: Info,
-        glow: "shadow-gray-500/10",
-      };
-  }
-};
+import reportService, {
+  Report,
+  ReportStatus,
+  ReportSeverity,
+} from "@/services/reportService";
+import Link from "next/link";
 
 // -------- Main Dashboard Component --------
 export default function EnhancedReportsPage() {
+  const [reports, setReports] = useState<Report[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState<{
-    status: string | null;
-    severity: string | null;
+    status: ReportStatus | null;
+    severity: ReportSeverity | null;
     program: string | null;
   }>({
     status: null,
@@ -321,7 +47,67 @@ export default function EnhancedReportsPage() {
   const [viewMode, setViewMode] = useState<"list" | "grid" | "stats">("list");
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
 
-  const filteredReports = mockReports.filter((report) => {
+  useEffect(() => {
+    fetchMyReports();
+  }, []);
+
+  const fetchMyReports = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const reportsData = await reportService.getMyReports();
+      setReports(reportsData);
+    } catch (error: unknown) {
+      console.error("Failed to fetch reports:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to fetch reports"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Calculate stats from actual data
+  const statsData = {
+    totalReports: reports.length,
+    reportsByStatus: {
+      [ReportStatus.PENDING]: reports.filter(
+        (r) => r.status === ReportStatus.PENDING
+      ).length,
+      [ReportStatus.ACCEPTED]: reports.filter(
+        (r) => r.status === ReportStatus.ACCEPTED
+      ).length,
+      [ReportStatus.REJECTED]: reports.filter(
+        (r) => r.status === ReportStatus.REJECTED
+      ).length,
+      [ReportStatus.DUPLICATE]: reports.filter(
+        (r) => r.status === ReportStatus.DUPLICATE
+      ).length,
+      [ReportStatus.INFORMATIVE]: reports.filter(
+        (r) => r.status === ReportStatus.INFORMATIVE
+      ).length,
+      [ReportStatus.FIXED]: reports.filter(
+        (r) => r.status === ReportStatus.FIXED
+      ).length,
+    },
+    reportsBySeverity: {
+      [ReportSeverity.CRITICAL]: reports.filter(
+        (r) => r.severity === ReportSeverity.CRITICAL
+      ).length,
+      [ReportSeverity.HIGH]: reports.filter(
+        (r) => r.severity === ReportSeverity.HIGH
+      ).length,
+      [ReportSeverity.MEDIUM]: reports.filter(
+        (r) => r.severity === ReportSeverity.MEDIUM
+      ).length,
+      [ReportSeverity.LOW]: reports.filter(
+        (r) => r.severity === ReportSeverity.LOW
+      ).length,
+    },
+    avgResponseTime: 0, // Would need additional data from backend
+  };
+
+  const filteredReports = reports.filter((report) => {
     // First apply search filter
     const matchesSearch =
       report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -330,24 +116,18 @@ export default function EnhancedReportsPage() {
 
     // Then apply dropdown filters
     const matchesStatus =
-      !activeFilters.status ||
-      activeFilters.status === "All" ||
-      report.status === activeFilters.status;
+      !activeFilters.status || report.status === activeFilters.status;
     const matchesSeverity =
-      !activeFilters.severity ||
-      activeFilters.severity === "All" ||
-      report.severity === activeFilters.severity;
+      !activeFilters.severity || report.severity === activeFilters.severity;
     const matchesProgram =
-      !activeFilters.program ||
-      activeFilters.program === "All" ||
-      report.program === activeFilters.program;
+      !activeFilters.program || report.program.title === activeFilters.program;
 
     return matchesSearch && matchesStatus && matchesSeverity && matchesProgram;
   });
 
   // Get unique programs for filter dropdown
   const uniquePrograms = [
-    ...new Set(mockReports.map((report) => report.program)),
+    ...new Set(reports.map((report) => report.program.title)),
   ];
 
   // Handle filter change
@@ -371,6 +151,35 @@ export default function EnhancedReportsPage() {
     });
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="flex flex-col items-center gap-4">
+          <Loader className="animate-spin text-purple-500" size={36} />
+          <p className="text-slate-400">Loading reports...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-16">
+        <AlertCircle className="mx-auto text-red-400 mb-4" size={36} />
+        <h3 className="text-xl font-semibold text-slate-300 mb-2">
+          Error Loading Reports
+        </h3>
+        <p className="text-slate-400 max-w-lg mx-auto mb-4">{error}</p>
+        <button
+          className="px-4 py-2 bg-purple-600/30 text-purple-300 rounded-md hover:bg-purple-600/50 border border-purple-700/50"
+          onClick={fetchMyReports}
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 text-slate-200 max-w-7xl mx-auto">
       {/* Interactive Header with Dashboard Stats */}
@@ -389,7 +198,7 @@ export default function EnhancedReportsPage() {
               <h1 className="text-3xl font-bold text-slate-100 tracking-tight flex items-center gap-3">
                 Vulnerability Reports
                 <span className="text-sm font-normal bg-slate-700/50 text-slate-300 px-2 py-0.5 rounded-full">
-                  {mockReports.length} Total
+                  {reports.length} Total
                 </span>
               </h1>
               <p className="text-slate-400 mt-1">
@@ -441,7 +250,9 @@ export default function EnhancedReportsPage() {
                 size={14}
                 className="group-hover:translate-x-1 transition-transform duration-200"
               />
-              <span>New Report</span>
+              <Link href="/dashboard/hacker/reports/create">
+                <span>New Report</span>
+              </Link>
             </button>
           </div>
         </div>
@@ -462,28 +273,20 @@ export default function EnhancedReportsPage() {
                   <FileText size={20} className="text-blue-400" />
                 </div>
               </div>
-              <div className="flex items-center gap-1 mt-3 text-xs text-slate-400">
-                <TrendingUp size={14} className="text-green-400" />
-                <span className="text-green-400">+4%</span> from last month
-              </div>
             </div>
 
-            {/* Total Rewards */}
+            {/* Accepted Reports */}
             <div className="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-slate-400 text-sm">Total Rewards</p>
+                  <p className="text-slate-400 text-sm">Accepted</p>
                   <h3 className="text-3xl font-bold text-slate-100 mt-1">
-                    ${statsData.totalRewards.toLocaleString()}
+                    {statsData.reportsByStatus[ReportStatus.ACCEPTED]}
                   </h3>
                 </div>
                 <div className="p-2 bg-emerald-900/30 rounded-lg">
-                  <Award size={20} className="text-emerald-400" />
+                  <CheckCircle size={20} className="text-emerald-400" />
                 </div>
-              </div>
-              <div className="flex items-center gap-1 mt-3 text-xs text-slate-400">
-                <TrendingUp size={14} className="text-green-400" />
-                <span className="text-green-400">+12%</span> from last month
               </div>
             </div>
 
@@ -493,52 +296,36 @@ export default function EnhancedReportsPage() {
                 <div>
                   <p className="text-slate-400 text-sm">Critical/High Issues</p>
                   <h3 className="text-3xl font-bold text-slate-100 mt-1">
-                    {statsData.reportsBySeverity.Critical +
-                      statsData.reportsBySeverity.High}
+                    {(statsData.reportsBySeverity[ReportSeverity.CRITICAL] ||
+                      0) +
+                      (statsData.reportsBySeverity[ReportSeverity.HIGH] || 0)}
                   </h3>
                 </div>
                 <div className="p-2 bg-red-900/30 rounded-lg">
                   <Zap size={20} className="text-red-400" />
                 </div>
               </div>
-              <div className="flex items-center gap-1 mt-3 text-xs">
-                <span className="px-2 py-0.5 rounded-full bg-red-500/20 text-red-300">
-                  {statsData.reportsBySeverity.Critical} Critical
-                </span>
-                <span className="px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300">
-                  {statsData.reportsBySeverity.High} High
-                </span>
-              </div>
             </div>
 
-            {/* Average Response Time */}
+            {/* Pending Reports */}
             <div className="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-slate-400 text-sm">Avg Response Time</p>
+                  <p className="text-slate-400 text-sm">Pending Review</p>
                   <h3 className="text-3xl font-bold text-slate-100 mt-1">
-                    {statsData.avgResponseTime}h
+                    {statsData.reportsByStatus[ReportStatus.PENDING]}
                   </h3>
                 </div>
-                <div className="p-2 bg-purple-900/30 rounded-lg">
-                  <Clock size={20} className="text-purple-400" />
+                <div className="p-2 bg-amber-900/30 rounded-lg">
+                  <Clock size={20} className="text-amber-400" />
                 </div>
-              </div>
-              <div className="flex items-center gap-1 mt-3 text-xs text-slate-400">
-                <div className="w-full bg-slate-700/50 rounded-full h-1.5">
-                  <div
-                    className="bg-gradient-to-r from-green-500 to-emerald-500 h-1.5 rounded-full"
-                    style={{ width: "70%" }}
-                  ></div>
-                </div>
-                <span className="text-green-400 ml-1">Good</span>
               </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Search and Filter Bar - Now with active filter indicators */}
+      {/* Search and Filter Bar */}
       <div className="bg-slate-800/80 border border-slate-700/50 rounded-xl p-4 flex flex-wrap gap-4 items-center backdrop-blur-sm shadow-md">
         {/* Search Input */}
         <div className="relative flex-grow min-w-[200px] sm:min-w-[300px]">
@@ -566,12 +353,12 @@ export default function EnhancedReportsPage() {
             label="Status"
             options={[
               "All",
-              "New",
-              "Triaged",
-              "Needs More Info",
-              "Resolved",
-              "Duplicate",
-              "Informative",
+              ReportStatus.PENDING,
+              ReportStatus.ACCEPTED,
+              ReportStatus.REJECTED,
+              ReportStatus.DUPLICATE,
+              ReportStatus.INFORMATIVE,
+              ReportStatus.FIXED,
             ]}
             value={activeFilters.status || "All"}
             onChange={(value) => handleFilterChange("status", value)}
@@ -580,7 +367,13 @@ export default function EnhancedReportsPage() {
           {/* Severity Filter */}
           <FilterDropdown
             label="Severity"
-            options={["All", "Critical", "High", "Medium", "Low"]}
+            options={[
+              "All",
+              ReportSeverity.CRITICAL,
+              ReportSeverity.HIGH,
+              ReportSeverity.MEDIUM,
+              ReportSeverity.LOW,
+            ]}
             value={activeFilters.severity || "All"}
             onChange={(value) => handleFilterChange("severity", value)}
           />
@@ -593,7 +386,7 @@ export default function EnhancedReportsPage() {
             onChange={(value) => handleFilterChange("program", value)}
           />
 
-          {/* Clear Filters Button - only show if filters are active */}
+          {/* Clear Filters Button */}
           {(activeFilters.status ||
             activeFilters.severity ||
             activeFilters.program ||
@@ -608,65 +401,6 @@ export default function EnhancedReportsPage() {
         </div>
       </div>
 
-      {/* Active Filter Indicators */}
-      {(activeFilters.status ||
-        activeFilters.severity ||
-        activeFilters.program) && (
-        <div className="flex flex-wrap gap-2 items-center text-sm">
-          <span className="text-slate-400">Active filters:</span>
-
-          {activeFilters.status && (
-            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-800 text-slate-300 border border-slate-700">
-              Status: {activeFilters.status}
-              <X
-                size={14}
-                className="cursor-pointer hover:text-red-400"
-                onClick={() => handleFilterChange("status", "All")}
-              />
-            </span>
-          )}
-
-          {activeFilters.severity && (
-            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-800 text-slate-300 border border-slate-700">
-              Severity: {activeFilters.severity}
-              <X
-                size={14}
-                className="cursor-pointer hover:text-red-400"
-                onClick={() => handleFilterChange("severity", "All")}
-              />
-            </span>
-          )}
-
-          {activeFilters.program && (
-            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-800 text-slate-300 border border-slate-700">
-              Program: {activeFilters.program}
-              <X
-                size={14}
-                className="cursor-pointer hover:text-red-400"
-                onClick={() => handleFilterChange("program", "All")}
-              />
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Featured Reports - Only show in list view if there are featured reports */}
-      {viewMode === "list" && mockReports.some((r) => r.featured) && (
-        <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-slate-200 flex items-center gap-2">
-            <Star size={18} className="text-amber-400" /> Featured Reports
-          </h2>
-
-          <div className="space-y-4">
-            {mockReports
-              .filter((report) => report.featured)
-              .map((report) => (
-                <FeaturedReportCard key={report.id} report={report as Report} />
-              ))}
-          </div>
-        </div>
-      )}
-
       {/* Display Reports based on View Mode */}
       <div className="space-y-5">
         {/* Results Count */}
@@ -676,19 +410,8 @@ export default function EnhancedReportsPage() {
             <span className="text-slate-200 font-medium">
               {filteredReports.length}
             </span>{" "}
-            of {mockReports.length} reports
+            of {reports.length} reports
           </p>
-
-          {/* Sort Options - For demonstration only */}
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-slate-400">Sort by:</span>
-            <select className="bg-slate-800 border border-slate-700 rounded-md px-2 py-1 text-slate-300 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500">
-              <option>Newest</option>
-              <option>Oldest</option>
-              <option>Highest Severity</option>
-              <option>Highest Reward</option>
-            </select>
-          </div>
         </div>
 
         {/* List View */}
@@ -697,8 +420,8 @@ export default function EnhancedReportsPage() {
             {filteredReports.map((report) => (
               <ReportCard
                 key={report.id}
-                report={report as Report}
-                onClick={() => setSelectedReport(report as Report)}
+                report={report}
+                onClick={() => setSelectedReport(report)}
               />
             ))}
           </div>
@@ -710,14 +433,14 @@ export default function EnhancedReportsPage() {
             {filteredReports.map((report) => (
               <ReportGridCard
                 key={report.id}
-                report={report as Report}
-                onClick={() => setSelectedReport(report as Report)}
+                report={report}
+                onClick={() => setSelectedReport(report)}
               />
             ))}
           </div>
         )}
 
-        {/* Stats View - Additional statistics that expand on the header stats */}
+        {/* Stats View */}
         {viewMode === "stats" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Status Distribution */}
@@ -726,33 +449,33 @@ export default function EnhancedReportsPage() {
               icon={<Activity size={18} className="text-blue-400" />}
               data={[
                 {
-                  name: "New",
-                  value: statsData.reportsByStatus.New,
-                  color: "bg-sky-400",
-                },
-                {
-                  name: "Triaged",
-                  value: statsData.reportsByStatus.Triaged,
-                  color: "bg-blue-400",
-                },
-                {
-                  name: "Needs More Info",
-                  value: statsData.reportsByStatus["Needs More Info"],
+                  name: "Pending",
+                  value: statsData.reportsByStatus[ReportStatus.PENDING],
                   color: "bg-amber-400",
                 },
                 {
-                  name: "Resolved",
-                  value: statsData.reportsByStatus.Resolved,
+                  name: "Accepted",
+                  value: statsData.reportsByStatus[ReportStatus.ACCEPTED],
                   color: "bg-green-400",
                 },
                 {
+                  name: "Fixed",
+                  value: statsData.reportsByStatus[ReportStatus.FIXED],
+                  color: "bg-emerald-400",
+                },
+                {
+                  name: "Rejected",
+                  value: statsData.reportsByStatus[ReportStatus.REJECTED],
+                  color: "bg-red-400",
+                },
+                {
                   name: "Duplicate",
-                  value: statsData.reportsByStatus.Duplicate,
+                  value: statsData.reportsByStatus[ReportStatus.DUPLICATE],
                   color: "bg-gray-400",
                 },
                 {
                   name: "Informative",
-                  value: statsData.reportsByStatus.Informative,
+                  value: statsData.reportsByStatus[ReportStatus.INFORMATIVE],
                   color: "bg-slate-400",
                 },
               ]}
@@ -765,132 +488,28 @@ export default function EnhancedReportsPage() {
               data={[
                 {
                   name: "Critical",
-                  value: statsData.reportsBySeverity.Critical,
+                  value:
+                    statsData.reportsBySeverity[ReportSeverity.CRITICAL] || 0,
                   color: "bg-red-400",
                 },
                 {
                   name: "High",
-                  value: statsData.reportsBySeverity.High,
+                  value: statsData.reportsBySeverity[ReportSeverity.HIGH] || 0,
                   color: "bg-orange-400",
                 },
                 {
                   name: "Medium",
-                  value: statsData.reportsBySeverity.Medium,
+                  value:
+                    statsData.reportsBySeverity[ReportSeverity.MEDIUM] || 0,
                   color: "bg-yellow-400",
                 },
                 {
                   name: "Low",
-                  value: statsData.reportsBySeverity.Low,
+                  value: statsData.reportsBySeverity[ReportSeverity.LOW] || 0,
                   color: "bg-blue-400",
                 },
               ]}
             />
-
-            {/* Recent Program Activity */}
-            <div className="bg-slate-800/80 rounded-xl border border-slate-700/50 p-5 shadow-lg">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-semibold text-slate-200 flex items-center gap-2">
-                  <Compass size={18} className="text-purple-400" /> Recent
-                  Program Activity
-                </h3>
-                <button className="text-xs text-slate-400 hover:text-purple-400">
-                  View All
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                {mockReports.slice(0, 5).map((report, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-3 py-2 border-b border-slate-700/50 last:border-0"
-                  >
-                    <div className="w-2 h-2 rounded-full bg-purple-400"></div>
-                    <div className="flex-grow">
-                      <p className="text-sm text-slate-300">{report.program}</p>
-                      <p className="text-xs text-slate-500">
-                        {new Date(report.updatedAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs">
-                      <span
-                        className={`${
-                          getSeverityStyles(report.severity as ReportSeverity)
-                            .color
-                        } font-medium`}
-                      >
-                        {report.severity}
-                      </span>
-                      <span className="text-slate-500">•</span>
-                      <span
-                        className={`${
-                          getStatusStyles(report.status as ReportStatus).color
-                        }`}
-                      >
-                        {report.status}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Calendar/Timeline View */}
-            <div className="bg-slate-800/80 rounded-xl border border-slate-700/50 p-5 shadow-lg">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-semibold text-slate-200 flex items-center gap-2">
-                  <Calendar size={18} className="text-indigo-400" /> Submission
-                  Timeline
-                </h3>
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="inline-block w-3 h-3 rounded-full bg-emerald-400"></span>
-                  <span className="text-slate-400">Reports</span>
-                  <span className="inline-block w-3 h-3 rounded-full bg-blue-400 ml-2"></span>
-                  <span className="text-slate-400">Resolutions</span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-7 gap-1">
-                {Array.from({ length: 28 }).map((_, idx) => {
-                  const hasReport = Math.random() > 0.7;
-                  const hasResolution = Math.random() > 0.85;
-
-                  return (
-                    <div
-                      key={idx}
-                      className={`aspect-square rounded-md border border-slate-700/50 flex items-center justify-center group relative
-                                ${hasReport ? "bg-emerald-900/30" : ""}
-                                ${hasResolution ? "border-blue-500/50" : ""}`}
-                    >
-                      <span className="text-xs text-slate-400">{idx + 1}</span>
-
-                      {(hasReport || hasResolution) && (
-                        <div className="absolute bottom-1 right-1 flex gap-0.5">
-                          {hasReport && (
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
-                          )}
-                          {hasResolution && (
-                            <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
-                          )}
-                        </div>
-                      )}
-
-                      {(hasReport || hasResolution) && (
-                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 z-10 bg-slate-800/90 flex items-center justify-center transition-opacity">
-                          <div className="text-center text-xs p-1">
-                            {hasReport && (
-                              <p className="text-emerald-400">2 reports</p>
-                            )}
-                            {hasResolution && (
-                              <p className="text-blue-400">1 resolved</p>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
           </div>
         )}
 
@@ -920,157 +539,10 @@ export default function EnhancedReportsPage() {
 
       {/* Report Detail Modal */}
       {selectedReport && (
-        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-xl">
-            <div className="sticky top-0 bg-slate-900 border-b border-slate-800 p-4 flex justify-between items-center">
-              <h2 className="text-lg font-medium text-slate-200">
-                {selectedReport.id}: Report Detail
-              </h2>
-              <button
-                onClick={() => setSelectedReport(null)}
-                className="text-slate-400 hover:text-slate-200 p-1"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-6">
-              {/* Title & Severity */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
-                <h1 className="text-xl font-semibold text-slate-100">
-                  {selectedReport.title}
-                </h1>
-                <div className="flex items-center gap-2">
-                  {selectedReport.featured && (
-                    <span className="flex items-center gap-1 bg-amber-900/30 text-amber-400 text-xs px-2 py-0.5 rounded-full">
-                      <Star size={12} /> Featured
-                    </span>
-                  )}
-                  <span
-                    className={`flex items-center gap-1 ${
-                      getSeverityStyles(selectedReport.severity).bgColor
-                    } ${
-                      getSeverityStyles(selectedReport.severity).color
-                    } text-xs px-2 py-0.5 rounded-full font-medium`}
-                  >
-                    {React.createElement(
-                      getSeverityStyles(selectedReport.severity).icon,
-                      { size: 12 }
-                    )}
-                    {selectedReport.severity}
-                  </span>
-                </div>
-              </div>
-
-              {/* Meta Information */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
-                  <p className="text-xs text-slate-400 mb-1">Status</p>
-                  <p
-                    className={`flex items-center gap-1.5 ${
-                      getStatusStyles(selectedReport.status).color
-                    } font-medium`}
-                  >
-                    {React.createElement(
-                      getStatusStyles(selectedReport.status).icon,
-                      { size: 16 }
-                    )}
-                    {selectedReport.status}
-                  </p>
-                </div>
-
-                <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
-                  <p className="text-xs text-slate-400 mb-1">Program</p>
-                  <p className="text-slate-100">{selectedReport.program}</p>
-                </div>
-
-                <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
-                  <p className="text-xs text-slate-400 mb-1">Submitted</p>
-                  <p className="text-slate-100">
-                    {new Date(selectedReport.submittedAt).toLocaleDateString()}
-                  </p>
-                </div>
-
-                <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
-                  <p className="text-xs text-slate-400 mb-1">Updated</p>
-                  <p className="text-slate-100">
-                    {new Date(selectedReport.updatedAt).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-
-              {/* Description */}
-              <div>
-                <h3 className="text-slate-300 font-medium mb-2">Description</h3>
-                <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700/50">
-                  <p className="text-slate-300">{selectedReport.description}</p>
-                </div>
-              </div>
-
-              {/* Impact */}
-              {selectedReport.impact && (
-                <div>
-                  <h3 className="text-slate-300 font-medium mb-2">Impact</h3>
-                  <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700/50">
-                    <p className="text-slate-300">{selectedReport.impact}</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Techniques */}
-              {selectedReport.techniques && (
-                <div>
-                  <h3 className="text-slate-300 font-medium mb-2">
-                    Techniques Used
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedReport.techniques.map((technique, idx) => (
-                      <span
-                        key={idx}
-                        className="bg-slate-800 text-slate-300 text-xs px-3 py-1 rounded-full border border-slate-700/50"
-                      >
-                        {technique}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Reward if available */}
-              {selectedReport.reward && (
-                <div className="bg-gradient-to-r from-emerald-900/30 to-teal-900/30 p-4 rounded-lg border border-emerald-700/50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Award size={20} className="text-emerald-400" />
-                      <span className="text-slate-300">Bounty Reward</span>
-                    </div>
-                    <span className="text-xl font-bold text-emerald-300">
-                      ${selectedReport.reward.toLocaleString()}
-                    </span>
-                  </div>
-                  {selectedReport.bonusPoints && (
-                    <div className="mt-2 text-xs text-slate-400 flex items-center justify-end gap-1">
-                      <span className="text-emerald-400">
-                        +{selectedReport.bonusPoints}
-                      </span>{" "}
-                      bonus points awarded
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Buttons */}
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
-                <button className="px-4 py-2 border border-slate-700 rounded-md text-slate-300 hover:bg-slate-800">
-                  View Timeline
-                </button>
-                <button className="px-4 py-2 bg-emerald-600 text-emerald-100 rounded-md hover:bg-emerald-500">
-                  Respond
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ReportDetailModal
+          report={selectedReport}
+          onClose={() => setSelectedReport(null)}
+        />
       )}
     </div>
   );
@@ -1081,20 +553,81 @@ const ReportCard: React.FC<{ report: Report; onClick: () => void }> = ({
   report,
   onClick,
 }) => {
+  const getStatusStyles = (status: ReportStatus) => {
+    switch (status) {
+      case ReportStatus.PENDING:
+        return {
+          icon: Clock,
+          color: "text-amber-400",
+          bgColor: "bg-amber-900/50",
+        };
+      case ReportStatus.ACCEPTED:
+        return {
+          icon: CheckCircle,
+          color: "text-green-400",
+          bgColor: "bg-green-900/50",
+        };
+      case ReportStatus.REJECTED:
+        return {
+          icon: X,
+          color: "text-red-400",
+          bgColor: "bg-red-900/50",
+        };
+      case ReportStatus.DUPLICATE:
+        return {
+          icon: Users,
+          color: "text-gray-400",
+          bgColor: "bg-gray-800/50",
+        };
+      case ReportStatus.INFORMATIVE:
+        return {
+          icon: Info,
+          color: "text-slate-400",
+          bgColor: "bg-slate-800/50",
+        };
+      case ReportStatus.FIXED:
+        return {
+          icon: CheckCircle,
+          color: "text-emerald-400",
+          bgColor: "bg-emerald-900/50",
+        };
+      default:
+        return {
+          icon: FileText,
+          color: "text-gray-400",
+          bgColor: "bg-gray-800/50",
+        };
+    }
+  };
+
+  const getSeverityStyles = (severity?: ReportSeverity) => {
+    if (!severity) return { color: "text-gray-400", icon: Info };
+
+    switch (severity) {
+      case ReportSeverity.CRITICAL:
+        return { color: "text-red-400", icon: Zap };
+      case ReportSeverity.HIGH:
+        return { color: "text-orange-400", icon: AlertTriangle };
+      case ReportSeverity.MEDIUM:
+        return { color: "text-yellow-400", icon: Shield };
+      case ReportSeverity.LOW:
+        return { color: "text-blue-400", icon: Info };
+      default:
+        return { color: "text-gray-400", icon: Info };
+    }
+  };
+
   const {
     icon: StatusIcon,
     color: statusColor,
     bgColor: statusBgColor,
   } = getStatusStyles(report.status);
 
-  const {
-    color: severityColor,
-    borderColor: severityBorderColor,
-    glow: severityGlow,
-  } = getSeverityStyles(report.severity);
+  const { color: severityColor, icon: SeverityIcon } = getSeverityStyles(
+    report.severity
+  );
 
   const formatTime = (dateString: string): string => {
-    // Simple relative time formatter
     const date = new Date(dateString);
     const now = new Date();
     const diffSeconds = Math.round((now.getTime() - date.getTime()) / 1000);
@@ -1111,29 +644,15 @@ const ReportCard: React.FC<{ report: Report; onClick: () => void }> = ({
   return (
     <div
       onClick={onClick}
-      className={`
-        bg-gradient-to-br from-slate-800/80 to-slate-900/90
-        rounded-lg border border-slate-700/60 p-5 shadow-lg
-        transition-all duration-200 ease-out hover:shadow-lg ${severityGlow}
-        hover:border-purple-600/40 hover:-translate-y-0.5
-        flex flex-col md:flex-row md:items-center gap-4 md:gap-6
-        relative isolate overflow-hidden cursor-pointer
-      `}
+      className="bg-gradient-to-br from-slate-800/80 to-slate-900/90 rounded-lg border border-slate-700/60 p-5 shadow-lg transition-all duration-200 ease-out hover:shadow-lg hover:border-purple-600/40 hover:-translate-y-0.5 flex flex-col md:flex-row md:items-center gap-4 md:gap-6 relative isolate overflow-hidden cursor-pointer"
     >
       {/* Severity Indicator Bar */}
       <div
-        className={`absolute left-0 top-0 bottom-0 w-1.5 ${severityBorderColor.replace(
-          "border-",
+        className={`absolute left-0 top-0 bottom-0 w-1.5 ${severityColor.replace(
+          "text-",
           "bg-"
-        )} opacity-80 group-hover:opacity-100 transition-opacity duration-200`}
+        )} opacity-80`}
       ></div>
-
-      {/* Featured Indicator */}
-      {report.featured && (
-        <div className="absolute -right-8 top-4 bg-amber-500 text-amber-950 text-xs font-medium py-0.5 px-8 rotate-45">
-          Featured
-        </div>
-      )}
 
       {/* Main Info */}
       <div className="flex-grow pl-3 md:pl-0">
@@ -1142,25 +661,17 @@ const ReportCard: React.FC<{ report: Report; onClick: () => void }> = ({
           <h3 className="text-base font-semibold text-slate-100 hover:text-emerald-300 transition-colors duration-200 line-clamp-1">
             {report.title}
           </h3>
-
-          {report.reward && (
-            <span className="text-xs font-medium bg-emerald-900/30 text-emerald-400 px-2 py-0.5 rounded-full">
-              ${report.reward}
-            </span>
-          )}
         </div>
 
         <p className="text-xs text-slate-400 font-mono mb-2">
           ID: <span className="text-emerald-400">{report.id}</span> | Program:{" "}
-          <span className="text-slate-300">{report.program}</span>
+          <span className="text-slate-300">{report.program.title}</span>
         </p>
 
         {/* Description Excerpt */}
-        {report.description && (
-          <p className="text-sm text-slate-400 line-clamp-1 mb-2">
-            {report.description}
-          </p>
-        )}
+        <p className="text-sm text-slate-400 line-clamp-1 mb-2">
+          {report.description}
+        </p>
 
         {/* Meta Info */}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
@@ -1169,22 +680,17 @@ const ReportCard: React.FC<{ report: Report; onClick: () => void }> = ({
           >
             <StatusIcon size={12} /> {report.status}
           </span>
-          <span
-            className={`inline-flex items-center gap-1.5 font-semibold ${severityColor}`}
-          >
-            {React.createElement(getSeverityStyles(report.severity).icon, {
-              size: 12,
-            })}
-            {report.severity}
-          </span>
-          <span className="text-slate-500 flex items-center gap-1">
-            <Clock size={12} /> {formatTime(report.submittedAt)}
-          </span>
-          {report.responseTime !== undefined && (
-            <span className="text-slate-500 flex items-center gap-1">
-              <Activity size={12} /> Response: {report.responseTime}h
+          {report.severity && (
+            <span
+              className={`inline-flex items-center gap-1.5 font-semibold ${severityColor}`}
+            >
+              <SeverityIcon size={12} />
+              {report.severity}
             </span>
           )}
+          <span className="text-slate-500 flex items-center gap-1">
+            <Clock size={12} /> {formatTime(report.createdAt)}
+          </span>
         </div>
       </div>
 
@@ -1193,93 +699,6 @@ const ReportCard: React.FC<{ report: Report; onClick: () => void }> = ({
         <span className="inline-flex items-center text-sm text-purple-400 hover:text-purple-300 transition-colors duration-200">
           View Details <ChevronRight size={16} />
         </span>
-      </div>
-
-      {/* Decorative corner */}
-      <div className="absolute bottom-0 right-0 h-6 w-6 border-l border-t border-purple-800/30 rounded-tl-lg opacity-30 group-hover:opacity-70 transition-opacity duration-200"></div>
-    </div>
-  );
-};
-
-// -------- Featured Report Card --------
-const FeaturedReportCard: React.FC<{ report: Report }> = ({ report }) => {
-  const { color: severityColor, icon: SeverityIcon } = getSeverityStyles(
-    report.severity
-  );
-  const { icon: StatusIcon, color: statusColor } = getStatusStyles(
-    report.status
-  );
-
-  return (
-    <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700/70 p-5 shadow-lg hover:shadow-xl hover:shadow-emerald-500/5 transition-all duration-300">
-      {/* Background glow effect */}
-      <div className="absolute -right-20 -top-20 w-40 h-40 rounded-full bg-emerald-500/10 blur-3xl"></div>
-      <div className="absolute -left-20 -bottom-20 w-40 h-40 rounded-full bg-blue-500/10 blur-3xl"></div>
-
-      {/* Featured badge */}
-      <div className="absolute top-4 right-4 flex items-center gap-1 bg-amber-900/30 text-amber-400 text-xs px-2 py-0.5 rounded-full">
-        <Star size={12} /> Featured
-      </div>
-
-      <div className="relative z-10">
-        {/* Report ID and Program */}
-        <div className="flex items-center gap-2 text-sm text-slate-400 mb-1">
-          <span className="text-emerald-400 font-mono">{report.id}</span>
-          <span>•</span>
-          <span>{report.program}</span>
-        </div>
-
-        {/* Title */}
-        <h3 className="text-lg font-medium text-slate-100 mb-3">
-          {report.title}
-        </h3>
-
-        {/* Description */}
-        <p className="text-slate-400 text-sm mb-4 line-clamp-2">
-          {report.description}
-        </p>
-
-        {/* Stats & Meta */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-          <div className="bg-slate-800/50 rounded-lg p-2 text-center">
-            <p className="text-xs text-slate-500 mb-1">Severity</p>
-            <p
-              className={`${severityColor} font-medium flex items-center justify-center gap-1`}
-            >
-              <SeverityIcon size={14} /> {report.severity}
-            </p>
-          </div>
-
-          <div className="bg-slate-800/50 rounded-lg p-2 text-center">
-            <p className="text-xs text-slate-500 mb-1">Status</p>
-            <p
-              className={`${statusColor} font-medium flex items-center justify-center gap-1`}
-            >
-              <StatusIcon size={14} /> {report.status}
-            </p>
-          </div>
-
-          <div className="bg-slate-800/50 rounded-lg p-2 text-center">
-            <p className="text-xs text-slate-500 mb-1">Submitted</p>
-            <p className="text-slate-300">
-              {new Date(report.submittedAt).toLocaleDateString()}
-            </p>
-          </div>
-
-          <div className="bg-slate-800/50 rounded-lg p-2 text-center">
-            <p className="text-xs text-slate-500 mb-1">Reward</p>
-            <p className="text-emerald-400 font-semibold">
-              ${report.reward || "—"}
-            </p>
-          </div>
-        </div>
-
-        {/* Action Button */}
-        <div className="flex justify-end">
-          <button className="flex items-center gap-1 px-3 py-1.5 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 hover:text-emerald-300 rounded-lg transition-all duration-200 text-sm">
-            View Report <ChevronRight size={16} />
-          </button>
-        </div>
       </div>
     </div>
   );
@@ -1290,11 +709,45 @@ const ReportGridCard: React.FC<{ report: Report; onClick: () => void }> = ({
   report,
   onClick,
 }) => {
-  const {
-    icon: StatusIcon,
-    color: statusColor,
-    gradient: statusGradient,
-  } = getStatusStyles(report.status);
+  const getStatusStyles = (status: ReportStatus) => {
+    switch (status) {
+      case ReportStatus.PENDING:
+        return { icon: Clock, color: "text-amber-400" };
+      case ReportStatus.ACCEPTED:
+        return { icon: CheckCircle, color: "text-green-400" };
+      case ReportStatus.REJECTED:
+        return { icon: X, color: "text-red-400" };
+      case ReportStatus.DUPLICATE:
+        return { icon: Users, color: "text-gray-400" };
+      case ReportStatus.INFORMATIVE:
+        return { icon: Info, color: "text-slate-400" };
+      case ReportStatus.FIXED:
+        return { icon: CheckCircle, color: "text-emerald-400" };
+      default:
+        return { icon: FileText, color: "text-gray-400" };
+    }
+  };
+
+  const getSeverityStyles = (severity?: ReportSeverity) => {
+    if (!severity) return { color: "text-gray-400", icon: Info };
+
+    switch (severity) {
+      case ReportSeverity.CRITICAL:
+        return { color: "text-red-400", icon: Zap };
+      case ReportSeverity.HIGH:
+        return { color: "text-orange-400", icon: AlertTriangle };
+      case ReportSeverity.MEDIUM:
+        return { color: "text-yellow-400", icon: Shield };
+      case ReportSeverity.LOW:
+        return { color: "text-blue-400", icon: Info };
+      default:
+        return { color: "text-gray-400", icon: Info };
+    }
+  };
+
+  const { icon: StatusIcon, color: statusColor } = getStatusStyles(
+    report.status
+  );
   const { color: severityColor, icon: SeverityIcon } = getSeverityStyles(
     report.severity
   );
@@ -1302,12 +755,7 @@ const ReportGridCard: React.FC<{ report: Report; onClick: () => void }> = ({
   return (
     <div
       onClick={onClick}
-      className={`
-        bg-slate-800/80 hover:bg-gradient-to-br hover:${statusGradient}
-        rounded-xl border border-slate-700/60 p-5
-        shadow-md hover:shadow-lg transition-all duration-300
-        flex flex-col h-full cursor-pointer
-      `}
+      className="bg-slate-800/80 rounded-xl border border-slate-700/60 p-5 shadow-md hover:shadow-lg transition-all duration-300 flex flex-col h-full cursor-pointer"
     >
       {/* Header with ID and Program */}
       <div className="flex justify-between items-start mb-3">
@@ -1325,38 +773,28 @@ const ReportGridCard: React.FC<{ report: Report; onClick: () => void }> = ({
       </h3>
 
       {/* Program */}
-      <p className="text-sm text-slate-400 mb-3">{report.program}</p>
+      <p className="text-sm text-slate-400 mb-3">{report.program.title}</p>
 
       {/* Description */}
-      {report.description && (
-        <p className="text-sm text-slate-500 mb-4 line-clamp-2 flex-grow">
-          {report.description}
-        </p>
-      )}
+      <p className="text-sm text-slate-500 mb-4 line-clamp-2 flex-grow">
+        {report.description}
+      </p>
 
       {/* Footer with Meta */}
       <div className="mt-auto">
-        {/* Divider */}
         <div className="border-t border-slate-700/50 my-3"></div>
-
         <div className="flex justify-between items-center">
-          <div className="flex items-center gap-1">
-            <SeverityIcon size={16} className={severityColor} />
-            <span className={`text-xs font-medium ${severityColor}`}>
-              {report.severity}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {report.reward && (
-              <span className="text-emerald-400 font-medium">
-                ${report.reward}
+          {report.severity && (
+            <div className="flex items-center gap-1">
+              <SeverityIcon size={16} className={severityColor} />
+              <span className={`text-xs font-medium ${severityColor}`}>
+                {report.severity}
               </span>
-            )}
-            <span className="text-xs text-slate-500">
-              {new Date(report.submittedAt).toLocaleDateString()}
-            </span>
-          </div>
+            </div>
+          )}
+          <span className="text-xs text-slate-500">
+            {new Date(report.createdAt).toLocaleDateString()}
+          </span>
         </div>
       </div>
     </div>
@@ -1375,7 +813,6 @@ const StatsCard: React.FC<{
   icon: React.ReactNode;
   data: StatItem[];
 }> = ({ title, icon, data }) => {
-  // Calculate total for percentages
   const total = data.reduce((sum, item) => sum + item.value, 0);
 
   return (
@@ -1395,7 +832,7 @@ const StatsCard: React.FC<{
               <div className="flex items-center gap-2">
                 <span className="text-slate-400">{item.value}</span>
                 <span className="text-xs text-slate-500">
-                  {Math.round((item.value / total) * 100)}%
+                  {total > 0 ? Math.round((item.value / total) * 100) : 0}%
                 </span>
               </div>
             </div>
@@ -1403,7 +840,9 @@ const StatsCard: React.FC<{
             <div className="w-full bg-slate-700/50 rounded-full h-1.5">
               <div
                 className={`${item.color} h-1.5 rounded-full`}
-                style={{ width: `${(item.value / total) * 100}%` }}
+                style={{
+                  width: `${total > 0 ? (item.value / total) * 100 : 0}%`,
+                }}
               ></div>
             </div>
           </div>
@@ -1413,7 +852,7 @@ const StatsCard: React.FC<{
   );
 };
 
-// -------- Enhanced Filter Dropdown Component --------
+// -------- Filter Dropdown Component --------
 const FilterDropdown: React.FC<{
   label: string;
   options: string[];
@@ -1455,6 +894,270 @@ const FilterDropdown: React.FC<{
           ))}
         </div>
       )}
+    </div>
+  );
+};
+
+// -------- Report Detail Modal Component --------
+const ReportDetailModal: React.FC<{
+  report: Report;
+  onClose: () => void;
+}> = ({ report, onClose }) => {
+  const getSeverityStyles = (severity?: ReportSeverity) => {
+    if (!severity)
+      return { color: "text-gray-400", bgColor: "bg-gray-500/10", icon: Info };
+
+    switch (severity) {
+      case ReportSeverity.CRITICAL:
+        return { color: "text-red-400", bgColor: "bg-red-500/10", icon: Zap };
+      case ReportSeverity.HIGH:
+        return {
+          color: "text-orange-400",
+          bgColor: "bg-orange-500/10",
+          icon: AlertTriangle,
+        };
+      case ReportSeverity.MEDIUM:
+        return {
+          color: "text-yellow-400",
+          bgColor: "bg-yellow-500/10",
+          icon: Shield,
+        };
+      case ReportSeverity.LOW:
+        return {
+          color: "text-blue-400",
+          bgColor: "bg-blue-500/10",
+          icon: Info,
+        };
+      default:
+        return {
+          color: "text-gray-400",
+          bgColor: "bg-gray-500/10",
+          icon: Info,
+        };
+    }
+  };
+
+  const getStatusStyles = (status: ReportStatus) => {
+    switch (status) {
+      case ReportStatus.PENDING:
+        return {
+          color: "text-amber-400",
+          bgColor: "bg-amber-500/10",
+          icon: Clock,
+        };
+      case ReportStatus.ACCEPTED:
+        return {
+          color: "text-green-400",
+          bgColor: "bg-green-500/10",
+          icon: CheckCircle,
+        };
+      case ReportStatus.REJECTED:
+        return { color: "text-red-400", bgColor: "bg-red-500/10", icon: X };
+      case ReportStatus.DUPLICATE:
+        return {
+          color: "text-gray-400",
+          bgColor: "bg-gray-500/10",
+          icon: Users,
+        };
+      case ReportStatus.INFORMATIVE:
+        return {
+          color: "text-slate-400",
+          bgColor: "bg-slate-500/10",
+          icon: Info,
+        };
+      case ReportStatus.FIXED:
+        return {
+          color: "text-emerald-400",
+          bgColor: "bg-emerald-500/10",
+          icon: CheckCircle,
+        };
+      default:
+        return {
+          color: "text-gray-400",
+          bgColor: "bg-gray-500/10",
+          icon: FileText,
+        };
+    }
+  };
+
+  const severityStyles = getSeverityStyles(report.severity);
+  const statusStyles = getStatusStyles(report.status);
+
+  return (
+    <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-slate-900 border border-slate-700 rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-xl">
+        <div className="sticky top-0 bg-slate-900 border-b border-slate-800 p-4 flex justify-between items-center">
+          <h2 className="text-lg font-medium text-slate-200">
+            {report.id}: Report Detail
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-200 p-1"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-6">
+          {/* Title & Severity */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+            <h1 className="text-xl font-semibold text-slate-100">
+              {report.title}
+            </h1>
+            <div className="flex items-center gap-2">
+              <span
+                className={`flex items-center gap-1 ${statusStyles.bgColor} ${statusStyles.color} text-xs px-2 py-0.5 rounded-full font-medium`}
+              >
+                {React.createElement(statusStyles.icon, { size: 12 })}
+                {report.status}
+              </span>
+              {report.severity && (
+                <span
+                  className={`flex items-center gap-1 ${severityStyles.bgColor} ${severityStyles.color} text-xs px-2 py-0.5 rounded-full font-medium`}
+                >
+                  {React.createElement(severityStyles.icon, { size: 12 })}
+                  {report.severity}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Meta Information */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
+              <p className="text-xs text-slate-400 mb-1">Program</p>
+              <p className="text-slate-100">{report.program.title}</p>
+            </div>
+            <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
+              <p className="text-xs text-slate-400 mb-1">Submitted</p>
+              <p className="text-slate-100">
+                {new Date(report.createdAt).toLocaleDateString()}
+              </p>
+            </div>
+            <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
+              <p className="text-xs text-slate-400 mb-1">Updated</p>
+              <p className="text-slate-100">
+                {new Date(report.updatedAt).toLocaleDateString()}
+              </p>
+            </div>
+            <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
+              <p className="text-xs text-slate-400 mb-1">Reporter</p>
+              <p className="text-slate-100">{report.reporter.name}</p>
+            </div>
+          </div>
+
+          {/* Description */}
+          <div>
+            <h3 className="text-slate-300 font-medium mb-2">Description</h3>
+            <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700/50">
+              <p className="text-slate-300">{report.description}</p>
+            </div>
+          </div>
+
+          {/* Steps to Reproduce */}
+          <div>
+            <h3 className="text-slate-300 font-medium mb-2">
+              Steps to Reproduce
+            </h3>
+            <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700/50">
+              <p className="text-slate-300 whitespace-pre-line">
+                {report.stepsToReproduce}
+              </p>
+            </div>
+          </div>
+
+          {/* Impact */}
+          {report.impact && (
+            <div>
+              <h3 className="text-slate-300 font-medium mb-2">Impact</h3>
+              <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700/50">
+                <p className="text-slate-300">{report.impact}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Fix Recommendation */}
+          {report.fixRecommendation && (
+            <div>
+              <h3 className="text-slate-300 font-medium mb-2">
+                Fix Recommendation
+              </h3>
+              <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700/50">
+                <p className="text-slate-300">{report.fixRecommendation}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Proof URLs */}
+          {report.proofUrls && report.proofUrls.length > 0 && (
+            <div>
+              <h3 className="text-slate-300 font-medium mb-2">
+                Proof of Concept
+              </h3>
+              <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700/50">
+                <div className="space-y-2">
+                  {report.proofUrls.map((url, index) => (
+                    <a
+                      key={index}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block text-blue-400 hover:text-blue-300 underline break-all"
+                    >
+                      {url}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Review Notes */}
+          {report.reviewNotes && (
+            <div>
+              <h3 className="text-slate-300 font-medium mb-2">Review Notes</h3>
+              <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700/50">
+                <p className="text-slate-300">{report.reviewNotes}</p>
+                {report.reviewedBy && (
+                  <p className="text-xs text-slate-400 mt-2">
+                    Reviewed by: {report.reviewedBy.name}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Timestamps */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {report.reviewedAt && (
+              <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
+                <p className="text-xs text-slate-400 mb-1">Reviewed At</p>
+                <p className="text-slate-100">
+                  {new Date(report.reviewedAt).toLocaleString()}
+                </p>
+              </div>
+            )}
+            {report.fixedAt && (
+              <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
+                <p className="text-xs text-slate-400 mb-1">Fixed At</p>
+                <p className="text-slate-100">
+                  {new Date(report.fixedAt).toLocaleString()}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 border border-slate-700 rounded-md text-slate-300 hover:bg-slate-800"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

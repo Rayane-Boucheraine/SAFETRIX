@@ -8,8 +8,6 @@ import {
   Award,
   CheckCircle,
   FileText,
-  Gift,
-  MessageSquare,
   Send,
   Target,
   TrendingUp,
@@ -24,7 +22,37 @@ import {
   Lock,
   Eye,
   ExternalLink,
+  Clock,
+  Bug,
+  Info,
+  Loader,
+  AlertCircle as AlertCircleIcon,
+  X,
 } from "lucide-react";
+import Link from "next/link";
+import userService from "@/services/userService";
+import reportService, {
+  Report,
+  ReportStatus,
+  ReportSeverity,
+} from "@/services/reportService";
+import programService from "@/services/programService";
+
+interface UserProfile {
+  alias?: string;
+  username?: string;
+  name?: string;
+}
+
+interface Program {
+  id: string | number;
+  title: string;
+  status?: string;
+  scope?: string;
+  minReward: number;
+  maxReward: number;
+  rewardType?: string;
+}
 
 const hackerStats = {
   reportsSubmitted: 125,
@@ -35,92 +63,92 @@ const hackerStats = {
   programsJoined: 7,
 };
 
-const recentActivity = [
-  {
-    id: 1,
-    type: "report_update",
-    text: "Report #RPT-1234 status changed to Triaged.",
-    time: "2h ago",
-    icon: CheckCircle,
-    iconColor: "text-blue-500",
-  },
-  {
-    id: 2,
-    type: "new_message",
-    text: "New message from ACME Corp regarding Report #RPT-1230.",
-    time: "5h ago",
-    icon: MessageSquare,
-    iconColor: "text-green-500",
-  },
-  {
-    id: 3,
-    type: "reward_paid",
-    text: "Reward of $250 paid out for Report #RPT-1199.",
-    time: "1d ago",
-    icon: Gift,
-    iconColor: "text-emerald-500",
-  },
-  {
-    id: 4,
-    type: "report_update",
-    text: "Report #RPT-1235 needs more information.",
-    time: "1d ago",
-    icon: AlertTriangle,
-    iconColor: "text-yellow-500",
-  },
-  {
-    id: 5,
-    type: "new_program",
-    text: 'You were invited to the "SecureApp" private program.',
-    time: "2d ago",
-    icon: Users,
-    iconColor: "text-purple-500",
-  },
-  {
-    id: 6,
-    type: "report_update",
-    text: "Report #RPT-1235 needs more information.",
-    time: "1d ago",
-    icon: AlertTriangle,
-    iconColor: "text-yellow-500",
-  },
-];
-
-const featuredPrograms = [
-  {
-    id: 1,
-    name: "FinTech Innovations Public Program",
-    scope: "Web Application, API",
-    rewardRange: "$100 - $5,000",
-    difficulty: "Medium",
-    securityFocus: "Authentication, Data Protection",
-  },
-  {
-    id: 2,
-    name: "GamerConnect Bug Bounty",
-    scope: "Mobile App (iOS/Android)",
-    rewardRange: "$50 - $2,500",
-    difficulty: "Easy",
-    securityFocus: "Input Validation, Session Management",
-  },
-  {
-    id: 3,
-    name: "DataCorp AI Challenge",
-    scope: "API, Machine Learning Model",
-    rewardRange: "$500 - $10,000",
-    difficulty: "Hard",
-    securityFocus: "ML/AI Security, API Abuse",
-  },
-];
-
 const EnhancedDashboard = () => {
   const [isLoaded, setIsLoaded] = useState(false);
-  const hackerName = "CyberNinja";
+  const [userName, setUserName] = useState("CyberNinja"); // Default fallback
+  const [userLoading, setUserLoading] = useState(true);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [reportsLoading, setReportsLoading] = useState(true);
+  const [reportsError, setReportsError] = useState<string | null>(null);
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [programsLoading, setProgramsLoading] = useState(true);
+  const [programsError, setProgramsError] = useState<string | null>(null);
 
   // Animation effect on load
   useEffect(() => {
     setTimeout(() => setIsLoaded(true), 300);
+    fetchUserName();
+    fetchRecentReports();
+    fetchFeaturedPrograms();
   }, []);
+
+  const fetchUserName = async () => {
+    try {
+      setUserLoading(true);
+      const userProfile = await userService.getUserProfile();
+      setUserName(
+        (userProfile as UserProfile)?.alias ||
+          userProfile?.name ||
+          "Security Researcher"
+      );
+    } catch (error) {
+      console.error("Failed to fetch user name:", error);
+      // Keep default name on error
+    } finally {
+      setUserLoading(false);
+    }
+  };
+
+  const fetchRecentReports = async () => {
+    try {
+      setReportsLoading(true);
+      setReportsError(null);
+      const reportsData = await reportService.getMyReports();
+      // Get the 5 most recent reports
+      const sortedReports = reportsData.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      setReports(sortedReports.slice(0, 5));
+    } catch (error) {
+      console.error("Failed to fetch reports:", error);
+      setReportsError(
+        error instanceof Error ? error.message : "Failed to fetch reports"
+      );
+    } finally {
+      setReportsLoading(false);
+    }
+  };
+
+  const fetchFeaturedPrograms = async () => {
+    try {
+      setProgramsLoading(true);
+      setProgramsError(null);
+      const response = await programService.getActivePrograms();
+
+      // Handle different response structures
+      let programsData: Program[];
+      if (Array.isArray(response)) {
+        programsData = response;
+      } else if (response.data && Array.isArray(response.data)) {
+        programsData = response.data;
+      } else {
+        console.error("Unexpected programs response structure:", response);
+        programsData = [];
+      }
+
+      // Get the 3 most recent active programs
+      const featuredPrograms = programsData.slice(0, 3);
+      setPrograms(featuredPrograms);
+    } catch (error) {
+      console.error("Failed to fetch programs:", error);
+      setProgramsError(
+        error instanceof Error ? error.message : "Failed to fetch programs"
+      );
+    } finally {
+      setProgramsLoading(false);
+    }
+  };
 
   return (
     <div
@@ -155,7 +183,14 @@ const EnhancedDashboard = () => {
                 <h1 className="text-3xl font-bold text-purple-50">
                   Welcome back,{" "}
                   <span className="text-purple-400 inline-block relative">
-                    {hackerName}
+                    {userLoading ? (
+                      <span className="inline-flex items-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-400 mr-2"></div>
+                        Loading...
+                      </span>
+                    ) : (
+                      userName
+                    )}
                     <span className="absolute -bottom-1 left-0 w-full h-px bg-gradient-to-r from-purple-400 to-transparent"></span>
                   </span>
                 </h1>
@@ -168,23 +203,25 @@ const EnhancedDashboard = () => {
 
             {/* Action buttons with enhanced styling */}
             <div className="flex flex-col sm:flex-row gap-3">
-              <button
+              <Link
+                href="/dashboard/hacker/reports/create"
                 className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg 
                 shadow-lg hover:shadow-purple-500/20 transition-all duration-300 
                 flex items-center justify-center gap-2 group"
               >
                 <Send size={18} className="group-hover:animate-pulse" />
                 <span className="font-medium">Submit Report</span>
-              </button>
+              </Link>
 
-              <button
+              <Link
+                href="/dashboard/hacker/programs"
                 className="px-5 py-2.5 bg-transparent text-purple-400 border border-purple-500/50 
                 hover:border-purple-400 rounded-lg shadow-lg transition-all duration-300 
                 flex items-center justify-center gap-2 hover:bg-purple-900/20"
               >
                 <Eye size={18} />
                 <span className="font-medium">View Programs</span>
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -315,14 +352,14 @@ const EnhancedDashboard = () => {
         </div>
       </div>
 
-      {/* --------- Reimagined Activity Section with Timeline Style --------- */}
+      {/* --------- Reimagined Reports Section with Dynamic Data --------- */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Activity Timeline */}
+        {/* Recent Reports */}
         <div className="lg:col-span-2">
           <div className="flex items-center gap-3 mb-5">
-            <Zap size={22} className="text-purple-400" />
+            <Bug size={22} className="text-purple-400" />
             <h2 className="text-2xl font-bold text-slate-200">
-              Activity Timeline
+              Recent Reports
             </h2>
             <span className="inline-block w-24 h-0.5 bg-gradient-to-r from-purple-500 to-transparent"></span>
           </div>
@@ -332,71 +369,137 @@ const EnhancedDashboard = () => {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(147,51,234,0.1),transparent_70%)]"></div>
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-3xl"></div>
 
-            {/* Activity items with timeline visual */}
+            {/* Reports content */}
             <div className="relative z-10 flex flex-col h-full">
-              <ul className="space-y-1 flex-grow">
-                {recentActivity.map((activity, index) => (
-                  <li
-                    key={activity.id}
-                    className="relative pl-8 pb-8 last:pb-0"
-                  >
-                    {/* Timeline vertical line */}
-                    {index < recentActivity.length - 1 && (
-                      <div className="absolute left-4 top-4 bottom-0 w-0.5 bg-gradient-to-b from-slate-600/70 to-slate-700/30"></div>
-                    )}
-
-                    {/* Timeline activity */}
-                    <div className="group relative">
-                      {/* Timeline node */}
-                      <div
-                        className={`absolute -left-8 top-1 w-8 h-8 rounded-full flex items-center justify-center border-2 border-slate-800 ${activity.iconColor} bg-slate-900 shadow-lg`}
+              {reportsLoading ? (
+                <div className="flex-grow flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <Loader
+                      className="animate-spin text-purple-400"
+                      size={24}
+                    />
+                    <p className="text-slate-400 text-sm">Loading reports...</p>
+                  </div>
+                </div>
+              ) : reportsError ? (
+                <div className="flex-grow flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-3 text-center">
+                    <AlertCircleIcon className="text-red-400" size={24} />
+                    <p className="text-red-400 text-sm">
+                      Failed to load reports
+                    </p>
+                    <button
+                      onClick={fetchRecentReports}
+                      className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
+                    >
+                      Try again
+                    </button>
+                  </div>
+                </div>
+              ) : reports.length === 0 ? (
+                <div className="flex-grow flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-3 text-center">
+                    <FileText className="text-slate-500 opacity-50" size={32} />
+                    <p className="text-slate-400">No reports yet</p>
+                    <Link
+                      href="/dashboard/hacker/reports/create"
+                      className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
+                    >
+                      Submit your first report
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <ul className="space-y-1 flex-grow">
+                    {reports.map((report, index) => (
+                      <li
+                        key={report.id}
+                        className="relative pl-8 pb-6 last:pb-0"
                       >
-                        <activity.icon
-                          size={16}
-                          className={activity.iconColor}
-                        />
-                      </div>
+                        {/* Timeline vertical line */}
+                        {index < reports.length - 1 && (
+                          <div className="absolute left-4 top-4 bottom-0 w-0.5 bg-gradient-to-b from-slate-600/70 to-slate-700/30"></div>
+                        )}
 
-                      {/* Activity content */}
-                      <a
-                        href={`/activity/${activity.id}`}
-                        className="block bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700/50 p-4 transition-all duration-300 hover:border-slate-600/50 hover:shadow-lg"
-                      >
-                        <div className="flex justify-between items-start mb-1">
-                          <p className="text-sm font-medium text-slate-200">
-                            {activity.text}
-                          </p>
-                          <span className="text-xs text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded-full">
-                            {activity.time}
-                          </span>
+                        {/* Report item */}
+                        <div className="group relative">
+                          {/* Timeline node */}
+                          <div
+                            className={`absolute -left-8 top-1 w-8 h-8 rounded-full flex items-center justify-center border-2 border-slate-800 bg-slate-900 shadow-lg ${getReportStatusColor(
+                              report.status
+                            )}`}
+                          >
+                            {getReportStatusIcon(report.status, 16)}
+                          </div>
+
+                          {/* Report content */}
+                          <Link
+                            href={`/dashboard/hacker/reports`}
+                            className="block bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700/50 p-4 transition-all duration-300 hover:border-slate-600/50 hover:shadow-lg"
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <div className="flex-grow">
+                                <h4 className="text-sm font-medium text-slate-200 line-clamp-1 mb-1">
+                                  {report.title}
+                                </h4>
+                                <p className="text-xs text-slate-400 mb-1">
+                                  Program: {report.program.title}
+                                </p>
+                                <div className="flex items-center gap-2 text-xs">
+                                  <span
+                                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${getStatusBadgeStyle(
+                                      report.status
+                                    )}`}
+                                  >
+                                    {getReportStatusIcon(report.status, 10)}
+                                    {report.status}
+                                  </span>
+                                  {report.severity && (
+                                    <span
+                                      className={`inline-flex items-center gap-1 font-medium ${getSeverityColor(
+                                        report.severity
+                                      )}`}
+                                    >
+                                      {getSeverityIcon(report.severity, 10)}
+                                      {report.severity}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <span className="text-xs text-slate-500 bg-slate-800/80 px-2 py-0.5 rounded-full whitespace-nowrap">
+                                {formatTimeAgo(report.createdAt)}
+                              </span>
+                            </div>
+
+                            {/* Action indicator */}
+                            <div className="flex justify-end mt-2">
+                              <span className="text-xs text-slate-400 hover:text-purple-400 flex items-center gap-1 transition-colors duration-200">
+                                <span>View Details</span>
+                                <ChevronRight size={12} />
+                              </span>
+                            </div>
+                          </Link>
                         </div>
+                      </li>
+                    ))}
+                  </ul>
 
-                        {/* Action buttons */}
-                        <div className="flex justify-end mt-2 gap-2">
-                          <span className="text-xs text-slate-400 hover:text-purple-400 flex items-center gap-1 transition-colors duration-200">
-                            <span>Details</span>
-                            <ChevronRight size={14} />
-                          </span>
-                        </div>
-                      </a>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-
-              {/* View all link */}
-              <div className="mt-5 text-right">
-                <a
-                  href="/dashboard/hacker/activity"
-                  className="inline-flex items-center gap-1 text-purple-400 hover:text-purple-300 transition-colors duration-200 text-sm font-medium group"
-                >
-                  <span>View All Activity</span>
-                  <ArrowRight
-                    size={16}
-                    className="transform transition-transform duration-300 group-hover:translate-x-1"
-                  />
-                </a>
-              </div>
+                  {/* View all link */}
+                  <div className="mt-5 text-right">
+                    <Link
+                      href="/dashboard/hacker/reports"
+                      className="inline-flex items-center gap-1 text-purple-400 hover:text-purple-300 transition-colors duration-200 text-sm font-medium group"
+                    >
+                      <span>View All Reports</span>
+                      <ArrowRight
+                        size={16}
+                        className="transform transition-transform duration-300 group-hover:translate-x-1"
+                      />
+                    </Link>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -417,122 +520,143 @@ const EnhancedDashboard = () => {
 
             {/* Featured programs list */}
             <div className="relative z-10 space-y-4 flex flex-col h-full">
-              <div className="flex-grow space-y-4">
-                {featuredPrograms.map((program) => (
-                  <div key={program.id} className="relative group">
-                    {/* Program card with enhanced visual detail */}
-                    <a
-                      href={`/program/${program.id}`}
-                      className="block bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700/50 p-4 transition-all duration-300 
-                         hover:border-purple-500/30 hover:shadow-lg overflow-hidden"
-                    >
-                      {/* Difficulty indicator */}
-                      <div
-                        className={`absolute top-3 right-3 text-xs px-2 py-0.5 rounded-full flex items-center gap-1
-                        ${
-                          program.difficulty === "Easy"
-                            ? "bg-emerald-900/70 text-emerald-300"
-                            : program.difficulty === "Medium"
-                            ? "bg-amber-900/70 text-amber-300"
-                            : "bg-red-900/70 text-red-300"
-                        }`}
-                      >
-                        <span
-                          className={`w-1.5 h-1.5 rounded-full ${
-                            program.difficulty === "Easy"
-                              ? "bg-emerald-300"
-                              : program.difficulty === "Medium"
-                              ? "bg-amber-300"
-                              : "bg-red-300"
-                          }`}
-                        ></span>
-                        {program.difficulty}
-                      </div>
-
-                      {/* Program name with animation */}
-                      <h3 className="font-medium text-slate-100 pr-24 mb-3 group-hover:text-purple-300 transition-colors duration-300">
-                        {program.name}
-                      </h3>
-
-                      {/* Program details */}
-                      <div className="space-y-2 text-sm">
-                        <div className="flex items-center gap-2">
-                          <Code size={14} className="text-slate-400" />
-                          <span className="text-slate-300">
-                            {program.scope}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <Award size={14} className="text-emerald-400" />
-                          <span className="text-emerald-300 font-medium">
-                            {program.rewardRange}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <Lock size={14} className="text-slate-400" />
-                          <span className="text-slate-300">
-                            {program.securityFocus}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* View program button - now part of the anchor tag */}
-                      <div className="mt-4 flex justify-end">
-                        <span className="flex items-center gap-1.5 text-xs text-purple-400 hover:text-purple-300 transition-colors duration-200">
-                          <span>View Program</span>
-                          <ExternalLink size={12} />
-                        </span>
-                      </div>
-
-                      {/* Decorative circuit pattern */}
-                      <div className="absolute -bottom-6 -right-6 w-24 h-24 opacity-5">
-                        <svg
-                          viewBox="0 0 100 100"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <circle
-                            cx="50"
-                            cy="50"
-                            r="40"
-                            stroke="currentColor"
-                            strokeWidth="0.5"
-                            fill="none"
-                          />
-                          <path
-                            d="M30,50 L70,50 M50,30 L50,70"
-                            stroke="currentColor"
-                            strokeWidth="0.5"
-                          />
-                          <circle
-                            cx="50"
-                            cy="50"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="0.5"
-                            fill="none"
-                          />
-                        </svg>
-                      </div>
-                    </a>
+              {programsLoading ? (
+                <div className="flex-grow flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <Loader
+                      className="animate-spin text-purple-400"
+                      size={24}
+                    />
+                    <p className="text-slate-400 text-sm">
+                      Loading programs...
+                    </p>
                   </div>
-                ))}
-              </div>
+                </div>
+              ) : programsError ? (
+                <div className="flex-grow flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-3 text-center">
+                    <AlertCircleIcon className="text-red-400" size={24} />
+                    <p className="text-red-400 text-sm">
+                      Failed to load programs
+                    </p>
+                    <button
+                      onClick={fetchFeaturedPrograms}
+                      className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
+                    >
+                      Try again
+                    </button>
+                  </div>
+                </div>
+              ) : programs.length === 0 ? (
+                <div className="flex-grow flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-3 text-center">
+                    <Shield className="text-slate-500 opacity-50" size={32} />
+                    <p className="text-slate-400">No programs available</p>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="flex-grow space-y-4">
+                    {programs.map((program) => (
+                      <div key={program.id} className="relative group">
+                        {/* Program card with enhanced visual detail */}
+                        <Link
+                          href={`/dashboard/hacker/programs/${program.id}`}
+                          className="block bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700/50 p-4 transition-all duration-300 
+                           hover:border-purple-500/30 hover:shadow-lg overflow-hidden"
+                        >
+                          {/* Status indicator */}
+                          <div className="absolute top-3 right-3 text-xs px-2 py-0.5 rounded-full flex items-center gap-1 bg-emerald-900/70 text-emerald-300">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-300"></span>
+                            {program.status || "Active"}
+                          </div>
 
-              {/* View all link */}
-              <div className="mt-5 text-right">
-                <a
-                  href="/programs"
-                  className="inline-flex items-center gap-1 text-purple-400 hover:text-purple-300 transition-colors duration-200 text-sm font-medium group"
-                >
-                  <span>Explore All Programs</span>
-                  <ArrowRight
-                    size={16}
-                    className="transform transition-transform duration-300 group-hover:translate-x-1"
-                  />
-                </a>
-              </div>
+                          {/* Program name with animation */}
+                          <h3 className="font-medium text-slate-100 pr-24 mb-3 group-hover:text-purple-300 transition-colors duration-300">
+                            {program.title}
+                          </h3>
+
+                          {/* Program details */}
+                          <div className="space-y-2 text-sm">
+                            <div className="flex items-center gap-2">
+                              <Code size={14} className="text-slate-400" />
+                              <span className="text-slate-300 line-clamp-1">
+                                {program.scope || "Web Application"}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <Award size={14} className="text-emerald-400" />
+                              <span className="text-emerald-300 font-medium">
+                                ${program.minReward} - ${program.maxReward}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <Lock size={14} className="text-slate-400" />
+                              <span className="text-slate-300 line-clamp-1">
+                                {program.rewardType || "Cash Rewards"}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* View program button */}
+                          <div className="mt-4 flex justify-end">
+                            <span className="flex items-center gap-1.5 text-xs text-purple-400 hover:text-purple-300 transition-colors duration-200">
+                              <span>View Program</span>
+                              <ExternalLink size={12} />
+                            </span>
+                          </div>
+
+                          {/* Decorative circuit pattern */}
+                          <div className="absolute -bottom-6 -right-6 w-24 h-24 opacity-5">
+                            <svg
+                              viewBox="0 0 100 100"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <circle
+                                cx="50"
+                                cy="50"
+                                r="40"
+                                stroke="currentColor"
+                                strokeWidth="0.5"
+                                fill="none"
+                              />
+                              <path
+                                d="M30,50 L70,50 M50,30 L50,70"
+                                stroke="currentColor"
+                                strokeWidth="0.5"
+                              />
+                              <circle
+                                cx="50"
+                                cy="50"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="0.5"
+                                fill="none"
+                              />
+                            </svg>
+                          </div>
+                        </Link>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* View all link */}
+                  <div className="mt-5 text-right">
+                    <Link
+                      href="/dashboard/hacker/programs"
+                      className="inline-flex items-center gap-1 text-purple-400 hover:text-purple-300 transition-colors duration-200 text-sm font-medium group"
+                    >
+                      <span>Explore All Programs</span>
+                      <ArrowRight
+                        size={16}
+                        className="transform transition-transform duration-300 group-hover:translate-x-1"
+                      />
+                    </Link>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -552,21 +676,14 @@ const EnhancedDashboard = () => {
             </div>
 
             <div className="flex flex-wrap gap-3 justify-center sm:justify-end">
-              <button
+              <Link
+                href="/dashboard/hacker/programs"
                 className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg 
                 shadow-lg transition-all duration-300 text-sm flex items-center gap-2"
               >
                 <Target size={16} />
                 <span>Find New Programs</span>
-              </button>
-
-              <button
-                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg 
-                shadow-lg transition-all duration-300 text-sm flex items-center gap-2"
-              >
-                <MessageSquare size={16} />
-                <span>Messages</span>
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -723,6 +840,112 @@ const StatCard = ({
       </div>
     </div>
   );
+};
+
+// Helper functions for report status and severity styling
+const getReportStatusColor = (status: ReportStatus): string => {
+  switch (status) {
+    case ReportStatus.PENDING:
+      return "text-amber-400";
+    case ReportStatus.ACCEPTED:
+      return "text-green-400";
+    case ReportStatus.REJECTED:
+      return "text-red-400";
+    case ReportStatus.DUPLICATE:
+      return "text-gray-400";
+    case ReportStatus.INFORMATIVE:
+      return "text-slate-400";
+    case ReportStatus.FIXED:
+      return "text-emerald-400";
+    default:
+      return "text-gray-400";
+  }
+};
+
+const getReportStatusIcon = (status: ReportStatus, size: number) => {
+  const iconProps = { size, className: getReportStatusColor(status) };
+
+  switch (status) {
+    case ReportStatus.PENDING:
+      return <Clock {...iconProps} />;
+    case ReportStatus.ACCEPTED:
+      return <CheckCircle {...iconProps} />;
+    case ReportStatus.REJECTED:
+      return <X {...iconProps} />;
+    case ReportStatus.DUPLICATE:
+      return <Users {...iconProps} />;
+    case ReportStatus.INFORMATIVE:
+      return <Info {...iconProps} />;
+    case ReportStatus.FIXED:
+      return <CheckCircle {...iconProps} />;
+    default:
+      return <FileText {...iconProps} />;
+  }
+};
+
+const getStatusBadgeStyle = (status: ReportStatus): string => {
+  switch (status) {
+    case ReportStatus.PENDING:
+      return "bg-amber-900/50 text-amber-300";
+    case ReportStatus.ACCEPTED:
+      return "bg-green-900/50 text-green-300";
+    case ReportStatus.REJECTED:
+      return "bg-red-900/50 text-red-300";
+    case ReportStatus.DUPLICATE:
+      return "bg-gray-800/50 text-gray-300";
+    case ReportStatus.INFORMATIVE:
+      return "bg-slate-800/50 text-slate-300";
+    case ReportStatus.FIXED:
+      return "bg-emerald-900/50 text-emerald-300";
+    default:
+      return "bg-gray-800/50 text-gray-300";
+  }
+};
+
+const getSeverityColor = (severity: ReportSeverity): string => {
+  switch (severity) {
+    case ReportSeverity.CRITICAL:
+      return "text-red-400";
+    case ReportSeverity.HIGH:
+      return "text-orange-400";
+    case ReportSeverity.MEDIUM:
+      return "text-yellow-400";
+    case ReportSeverity.LOW:
+      return "text-blue-400";
+    default:
+      return "text-gray-400";
+  }
+};
+
+const getSeverityIcon = (severity: ReportSeverity, size: number) => {
+  const iconProps = { size, className: getSeverityColor(severity) };
+
+  switch (severity) {
+    case ReportSeverity.CRITICAL:
+      return <Zap {...iconProps} />;
+    case ReportSeverity.HIGH:
+      return <AlertTriangle {...iconProps} />;
+    case ReportSeverity.MEDIUM:
+      return <Shield {...iconProps} />;
+    case ReportSeverity.LOW:
+      return <Info {...iconProps} />;
+    default:
+      return <Info {...iconProps} />;
+  }
+};
+
+const formatTimeAgo = (dateString: string): string => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffSeconds = Math.round((now.getTime() - date.getTime()) / 1000);
+  const diffMinutes = Math.round(diffSeconds / 60);
+  const diffHours = Math.round(diffMinutes / 60);
+  const diffDays = Math.round(diffHours / 24);
+
+  if (diffSeconds < 60) return `${diffSeconds}s ago`;
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return `${diffDays}d ago`;
 };
 
 export default EnhancedDashboard;

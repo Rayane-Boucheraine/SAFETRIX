@@ -1,155 +1,26 @@
 "use client";
 
-import React, { useState } from "react";
-import Link from "next/link";
+import React, { useState, useEffect } from "react";
 import {
   Search,
-  ChevronDown,
+  Filter,
   X,
-  Compass,
-  Lock,
-  Globe,
-  DollarSign,
-  Cpu,
-  Layers,
+  ChevronDown,
   CheckCircle,
-  Star,
-  Tag,
-  Clock,
+  Shield,
   Award,
-  GitCommit,
-  Gauge,
+  Target,
+  Code,
+  ExternalLink,
+  Users,
+  Loader,
+  AlertCircle,
 } from "lucide-react";
+import Link from "next/link";
+import programService from "@/services/programService";
+import { Program, ProgramStatus } from "@/types/program";
 
-const mockPrograms: Program[] = [
-  {
-    id: "prog-fintech-01",
-    name: "FinTech Innovations Core Banking",
-    type: "Public",
-    company: "FinBank Corp",
-    scope:
-      "Web Application (core.finbank.com), API (api.finbank.com/v3), Internal Dashboard (Requires Invite)",
-    rewardRange: "$100 - $15,000+",
-    avgReward: 1250,
-    avgResponseTime: 48,
-    reportsResolved: 235,
-    acceptanceRate: 78,
-    targets: ["Web App", "API", "Cloud Config", "Source Code Review"],
-    tags: ["finance", "owasp-top-10", "pci-dss", "ssr", "critical"],
-    vrt: "Financial Services",
-    lastActivity: "2023-10-28T10:00:00Z",
-    featured: true,
-    payoutPolicy: "CVSS v3.1 Based",
-    accepts: ["XSS", "SQLi", "Auth Bypass", "IDOR", "SSRF", "RCE"],
-  },
-  {
-    id: "prog-gamer-net",
-    name: "GamerConnect Social Platform",
-    type: "Public",
-    company: "Playco",
-    scope: "Mobile App (iOS/Android), Backend API (api.gamerconnect.gg)",
-    rewardRange: "$50 - $2,500",
-    avgReward: 300,
-    avgResponseTime: 72,
-    reportsResolved: 152,
-    acceptanceRate: 65,
-    targets: ["Mobile App", "API", "Websocket"],
-    tags: ["gaming", "social", "ios", "android", "privacy", "gdpr"],
-    vrt: "Social Media & Platforms",
-    lastActivity: "2023-10-25T14:00:00Z",
-    payoutPolicy: "Tiered - Severity",
-    accepts: ["Data Exposure", "Account Takeover", "Abuse", "Cheating"],
-  },
-  {
-    id: "prog-ai-core",
-    name: "DataCorp AI Inference Engine",
-    type: "Private",
-    company: "DataCorp",
-    scope: "API (ai.datacorp.io/v2/inference), Model Access (API)",
-    rewardRange: "$500 - $25,000",
-    avgReward: 4500,
-    avgResponseTime: 24,
-    reportsResolved: 45,
-    acceptanceRate: 92,
-    targets: ["API", "ML/AI"],
-    tags: ["ai", "ml", "api-security", "python", "confidential", "beta"],
-    vrt: "AI & Machine Learning",
-    lastActivity: "2023-10-29T08:00:00Z",
-    payoutPolicy: "Impact & Novelty",
-    accepts: [
-      "Model Evasion",
-      "Data Poisoning",
-      "Prompt Injection",
-      "Auth Flaws",
-    ],
-  },
-  {
-    id: "prog-iot-fw",
-    name: "SmartHome Connect Firmware",
-    type: "Public",
-    company: "HomeSys Inc.",
-    scope: "IoT Device Firmware (Model SHC-V3), Control Hub API",
-    rewardRange: "$200 - $8,000",
-    avgReward: 1500,
-    avgResponseTime: 96,
-    reportsResolved: 88,
-    acceptanceRate: 71,
-    targets: ["IoT", "Firmware", "API", "Hardware"],
-    tags: ["iot", "hardware", "embedded", "mqtt"],
-    vrt: "IoT Devices",
-    lastActivity: "2023-10-22T11:00:00Z",
-    payoutPolicy: "CVSS + Device Impact",
-    accepts: ["RCE", "Auth Bypass", "Device Tampering"],
-  },
-  {
-    id: "prog-cloudsec-k8s",
-    name: "SecureApp Cloud Infra Audit",
-    type: "Private",
-    company: "SecureApp Ltd.",
-    scope: "AWS/GCP Configuration, Kubernetes Cluster (*.secureapp.cloud)",
-    rewardRange: "$1,000 - $20,000",
-    avgReward: 6000,
-    avgResponseTime: 36,
-    reportsResolved: 62,
-    acceptanceRate: 85,
-    targets: ["Cloud Config", "Kubernetes", "Infra"],
-    tags: [
-      "cloud",
-      "aws",
-      "gcp",
-      "k8s",
-      "devsecops",
-      "terraform",
-      "high-impact",
-    ],
-    vrt: "Cloud Infrastructure",
-    lastActivity: "2023-10-29T12:00:00Z",
-    featured: true,
-    payoutPolicy: "Severity & Scope",
-    accepts: ["Misconfiguration", "IAM Escalation", "Container Escape"],
-  },
-];
-interface Program {
-  id: string;
-  name: string;
-  type: ProgramType;
-  company: string;
-  scope: string;
-  rewardRange: string;
-  avgReward: number;
-  avgResponseTime: number;
-  reportsResolved: number;
-  acceptanceRate: number;
-  targets: string[];
-  tags: string[];
-  vrt: string;
-  lastActivity: string;
-  featured?: boolean;
-  payoutPolicy?: string;
-  accepts?: string[];
-}
-type ProgramType = "Public" | "Private";
-
+// Helper functions
 const formatTimeAgo = (dateString: string): string => {
   const date = new Date(dateString);
   const now = new Date();
@@ -172,24 +43,12 @@ const getResponseTypeIndicator = (hours: number): React.ReactNode => {
       className="flex items-center gap-1.5 group relative"
       title={`Avg Response: ${hours}h`}
     >
-      <span
-        className={`inline-block w-2 h-2 rounded-full ${color} opacity-50 group-hover:opacity-100 transition-opacity`}
-      ></span>
-      <span
-        className={`inline-block w-2 h-2 rounded-full ${color} ${
-          hours <= 72 ? "opacity-50" : "opacity-20"
-        } group-hover:opacity-100 transition-opacity delay-75`}
-      ></span>
-      <span
-        className={`inline-block w-2 h-2 rounded-full ${color} ${
-          hours <= 36 ? "opacity-50" : "opacity-20"
-        } group-hover:opacity-100 transition-opacity delay-150`}
-      ></span>
-      {/* Optional: Show time on hover */}
-      {/* <span className="absolute -top-6 left-1/2 -translate-x-1/2 hidden group-hover:block bg-slate-900 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap">{hours}h</span> */}
+      <div className={`w-2 h-2 rounded-full ${color}`}></div>
+      <span className="text-xs text-slate-400">{hours}h</span>
     </div>
   );
 };
+
 const getAcceptanceRateIndicator = (rate: number): React.ReactNode => {
   let color = "bg-red-500"; // Low
   if (rate >= 65) color = "bg-yellow-500"; // Medium
@@ -201,15 +60,9 @@ const getAcceptanceRateIndicator = (rate: number): React.ReactNode => {
       title={`Acceptance Rate: ${rate}%`}
     >
       <div
-        className={`h-full ${color} rounded-full transition-all duration-500 group-hover:shadow-[0_0_5px_1px_var(--bg-color)]`}
-        style={{
-          width: width,
-          ...({
-            "--bg-color": color.replace("bg-", "rgba(").replace("-500", ", 1)"),
-          } as React.CSSProperties),
-        }}
+        className={`h-full ${color} transition-all duration-300`}
+        style={{ width }}
       ></div>
-      {/* <span className="absolute -top-6 left-1/2 -translate-x-1/2 hidden group-hover:block bg-slate-900 text-white text-xs px-2 py-1 rounded shadow-lg">{rate}%</span> */}
     </div>
   );
 };
@@ -218,34 +71,97 @@ const getAcceptanceRateIndicator = (rate: number): React.ReactNode => {
 export default function CreativeProgramsPageV2() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState<{
-    type: ProgramType | null;
+    type: "Public" | "Private" | null;
     vrt: string | null;
     target: string | null;
   }>({ type: null, vrt: null, target: null });
 
-  const filteredPrograms = mockPrograms.filter((program) => {
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [statusFilter] = useState<ProgramStatus | null>(
+    ProgramStatus.ACTIVE
+  );
+
+  useEffect(() => {
+    const fetchPrograms = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await programService.getAllPrograms(
+          statusFilter || undefined
+        );
+
+        // Handle different response structures
+        let programsData: Program[];
+        if (Array.isArray(response)) {
+          programsData = response;
+        } else if (response?.data && Array.isArray(response.data)) {
+          programsData = response.data;
+        } else {
+          console.error("Unexpected programs response structure:", response);
+          programsData = [];
+        }
+
+        // Map backend data to frontend format for compatibility
+        const mappedPrograms = programsData.map((program) => ({
+          ...program,
+          name: program.title,
+          company: program.startup?.name || "Unknown Company",
+          rewardRange: `$${program.minReward} - $${program.maxReward}`,
+          type: "Public" as const,
+          targets: [program.scope],
+          tags: program.vulnerabilityTypes || [],
+          vrt: program.vulnerabilityTypes?.[0] || "General",
+          featured: false,
+          avgReward: Math.floor((program.minReward + program.maxReward) / 2),
+          avgResponseTime: Math.floor(Math.random() * 120) + 24, // Mock data
+          reportsResolved: Math.floor(Math.random() * 50) + 10, // Mock data
+          acceptanceRate: Math.floor(Math.random() * 40) + 60, // Mock data
+        }));
+
+        setPrograms(mappedPrograms);
+      } catch (error) {
+        console.error("Failed to fetch programs:", error);
+        setError(
+          error instanceof Error ? error.message : "Failed to fetch programs"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPrograms();
+  }, [statusFilter]);
+
+  // Filter programs based on search and filter criteria
+  const filteredPrograms = programs.filter((program) => {
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch =
       !searchTerm ||
-      program.name.toLowerCase().includes(searchLower) ||
-      program.company.toLowerCase().includes(searchLower) ||
-      program.scope.toLowerCase().includes(searchLower) ||
-      program.tags.some((tag) => tag.toLowerCase().includes(searchLower)) ||
-      program.vrt.toLowerCase().includes(searchLower);
+      program.name?.toLowerCase().includes(searchLower) ||
+      program.company?.toLowerCase().includes(searchLower) ||
+      program.title?.toLowerCase().includes(searchLower) ||
+      program.scope?.toLowerCase().includes(searchLower) ||
+      program.tags?.some((tag) => tag.toLowerCase().includes(searchLower)) ||
+      program.vrt?.toLowerCase().includes(searchLower);
+
     const matchesType =
       !activeFilters.type || program.type === activeFilters.type;
     const matchesVrt = !activeFilters.vrt || program.vrt === activeFilters.vrt;
     const matchesTarget =
       !activeFilters.target ||
-      program.targets.some(
-        (t) => t.toLowerCase() === activeFilters.target?.toLowerCase()
+      program.targets?.some((target) =>
+        target.toLowerCase().includes(activeFilters.target!.toLowerCase())
       );
+
     return matchesSearch && matchesType && matchesVrt && matchesTarget;
   });
 
-  const uniqueTypes: ProgramType[] = ["Public", "Private"];
-  const uniqueVRTs = [...new Set(mockPrograms.map((p) => p.vrt))];
-  const uniqueTargets = [...new Set(mockPrograms.flatMap((p) => p.targets))];
+  // Get unique values for filters
+  const uniqueTypes = ["Public", "Private"];
+  const uniqueVRTs = [...new Set(programs.map((p) => p.vrt || "General"))];
+  const uniqueTargets = [...new Set(programs.flatMap((p) => p.targets || []))];
 
   const handleFilterChange = (
     filterType: keyof typeof activeFilters,
@@ -255,129 +171,128 @@ export default function CreativeProgramsPageV2() {
       ...prev,
       [filterType]: value === "All" ? null : value,
     }));
+
   const clearFilters = () => {
     setSearchTerm("");
     setActiveFilters({ type: null, vrt: null, target: null });
   };
 
-  const themeAccentText = `text-purple-400`;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="flex flex-col items-center gap-4">
+          <Loader className="animate-spin text-purple-500" size={36} />
+          <p className="text-slate-400">Loading programs...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-16">
+        <AlertCircle className="mx-auto text-red-400 mb-4" size={36} />
+        <h3 className="text-xl font-semibold text-slate-300 mb-2">
+          Error Loading Programs
+        </h3>
+        <p className="text-slate-400 max-w-lg mx-auto mb-4">{error}</p>
+        <button
+          className="px-4 py-2 bg-purple-600/30 text-purple-300 rounded-md hover:bg-purple-600/50 border border-purple-700/50"
+          onClick={() => window.location.reload()}
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 text-slate-200 max-w-7xl mx-auto">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 border-b border-purple-900/50 pb-8 relative">
-        {/* Background decoration */}
-        <div className="absolute -top-4 -left-4 w-48 h-48 bg-gradient-to-br from-purple-950/30 via-black/10 to-transparent rounded-full blur-2xl opacity-40 pointer-events-none"></div>
-        <div className="flex items-center gap-4 z-10">
-          <div className="p-3 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl border border-purple-700/30 shadow-lg">
-            <Compass
-              size={28}
-              className={`${themeAccentText} drop-shadow-[0_0_5px_rgba(147,51,234,0.5)]`}
-            />
-          </div>
-          <div>
-            <h1 className="text-4xl font-bold text-slate-100 tracking-tight leading-tight">
-              Program Database
-            </h1>
-            <p className="text-slate-400 mt-1 text-sm">
-              Catalog of active bounty & disclosure targets.
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-4 text-sm shrink-0 z-10 p-3 bg-slate-800/50 border border-slate-700/50 rounded-lg backdrop-blur-sm">
-          <div className="text-center border-r border-slate-700 pr-4">
-            <p className="text-slate-400 text-xs uppercase tracking-wider">
-              Targets
-            </p>
-            <p className="text-2xl font-semibold text-white">
-              {mockPrograms.length}
-            </p>
-          </div>
-          <div className="text-center border-r border-slate-700 pr-4">
-            <p className="text-slate-400 text-xs uppercase tracking-wider">
-              Public
-            </p>
-            <p className="text-2xl font-semibold text-white">
-              {mockPrograms.filter((p) => p.type === "Public").length}
-            </p>
-          </div>
-          <div className="text-center">
-            <p className="text-slate-400 text-xs uppercase tracking-wider">
-              Featured
-            </p>
-            <p className="text-2xl font-semibold text-amber-400">
-              {mockPrograms.filter((p) => p.featured).length}
-            </p>
+      {/* Header */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-purple-700/50 p-6 shadow-lg">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-purple-900/30 rounded-lg border border-purple-500/30">
+              <Shield size={26} className="text-purple-400" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-slate-100 tracking-tight">
+                Bug Bounty Programs
+                <span className="text-sm font-normal bg-slate-700/50 text-slate-300 px-2 py-0.5 rounded-full ml-3">
+                  {filteredPrograms.length} Available
+                </span>
+              </h1>
+              <p className="text-slate-400 mt-1">
+                Discover and participate in security programs
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Search and Filter Bar */}
-      <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl p-4 flex flex-wrap gap-4 items-center backdrop-blur-md shadow-lg relative z-10">
-        <div className="relative flex-grow w-full md:w-auto">
+      {/* Search and Filters */}
+      <div className="bg-slate-800/80 border border-slate-700/50 rounded-xl p-4 flex flex-wrap gap-4 items-center backdrop-blur-sm shadow-md">
+        {/* Search Input */}
+        <div className="relative flex-grow min-w-[200px] sm:min-w-[300px]">
           <input
             type="text"
-            placeholder="Scan for programs (name, company, tag...)"
+            placeholder="Search programs..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-700/80 border border-slate-600/70 rounded-lg py-2.5 pl-11 pr-4 text-slate-100 placeholder-slate-400/80 focus:outline-none focus:ring-2 focus:ring-emerald-500/70 focus:border-transparent text-sm shadow-inner focus:bg-slate-700"
+            className="w-full bg-slate-700/70 border border-slate-600 rounded-lg py-2.5 pl-10 pr-4 text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-transparent text-sm"
           />
           <Search
             size={18}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none peer-focus:text-emerald-400 transition-colors"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
           />
         </div>
-        <div className="flex flex-wrap gap-2 items-center shrink-0">
+
+        {/* Filters */}
+        <div className="flex flex-wrap gap-3 items-center">
+          <div className="hidden sm:flex items-center text-slate-400 mr-1">
+            <Filter size={16} className="mr-1.5" /> Filters:
+          </div>
+
           <CreativeFilterDropdownV2
             label="Type"
             options={["All", ...uniqueTypes]}
             value={activeFilters.type || "All"}
-            onChange={(v) => handleFilterChange("type", v)}
-            icon={<Layers size={14} />}
+            onChange={(value) => handleFilterChange("type", value)}
+            icon={<Shield size={14} />}
           />
+
           <CreativeFilterDropdownV2
             label="VRT"
             options={["All", ...uniqueVRTs]}
             value={activeFilters.vrt || "All"}
-            onChange={(v) => handleFilterChange("vrt", v)}
-            icon={<Tag size={14} />}
+            onChange={(value) => handleFilterChange("vrt", value)}
+            icon={<Code size={14} />}
           />
+
           <CreativeFilterDropdownV2
             label="Target"
-            options={["All", ...uniqueTargets]}
+            options={["All", ...uniqueTargets.slice(0, 10)]}
             value={activeFilters.target || "All"}
-            onChange={(v) => handleFilterChange("target", v)}
-            icon={<Cpu size={14} />}
+            onChange={(value) => handleFilterChange("target", value)}
+            icon={<Target size={14} />}
           />
+
           {(activeFilters.type ||
             activeFilters.vrt ||
             activeFilters.target ||
             searchTerm) && (
             <button
               onClick={clearFilters}
-              title="Clear Filters"
-              className="p-2 rounded-md bg-slate-700/60 text-slate-400 hover:bg-red-900/50 hover:text-red-400 border border-slate-600/60 hover:border-red-700/70 transition-all duration-150"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 border border-slate-600/50 text-xs"
             >
-              <X size={16} />
+              <X size={14} /> Clear
             </button>
           )}
         </div>
       </div>
 
-      {/* Results Info */}
-      <div className="flex justify-between items-center">
-        <p className="text-slate-400 text-sm">
-          Found{" "}
-          <span className="font-semibold text-emerald-300">
-            {filteredPrograms.length}
-          </span>{" "}
-          active programs based on current query.
-        </p>
-        {/* Future: Add sort control here */}
-      </div>
-
-      {/* Program Cards Grid */}
-      <div>
+      {/* Programs Grid */}
+      <div className="space-y-5">
         {filteredPrograms.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {filteredPrograms.map((program) => (
@@ -385,24 +300,22 @@ export default function CreativeProgramsPageV2() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-16 bg-gradient-to-b from-slate-800/50 to-slate-900/60 rounded-lg border border-slate-700/50 backdrop-blur-sm shadow-inner">
-            <Compass
-              size={56}
-              strokeWidth={1}
-              className="mx-auto text-slate-600 mb-4 opacity-50"
+          <div className="text-center py-16 bg-slate-800/50 rounded-lg border border-slate-700/50">
+            <Shield
+              size={48}
+              className="mx-auto text-slate-500 mb-3 opacity-50"
             />
-            <h3 className="text-xl font-semibold text-slate-300 mb-2">
-              No Programs Match Query
+            <h3 className="text-xl font-medium text-slate-300 mb-2">
+              No programs found
             </h3>
-            <p className="text-slate-400 max-w-lg mx-auto">
-              The target grid yielded no results for the specified parameters.
-              Consider adjusting your search query or filter configuration.
+            <p className="text-slate-400 max-w-md mx-auto">
+              We couldn&apos;t find any programs matching your criteria.
             </p>
             <button
               onClick={clearFilters}
-              className="mt-6 px-5 py-2 bg-purple-600/30 text-purple-300 rounded-md hover:bg-purple-600/50 border border-purple-700/50 hover:border-purple-600/80 transition-all text-sm shadow-md"
+              className="mt-4 px-4 py-2 bg-purple-600/30 text-purple-300 rounded-md hover:bg-purple-600/50 transition-colors"
             >
-              Reset Parameters
+              Clear Filters
             </button>
           </div>
         )}
@@ -411,128 +324,79 @@ export default function CreativeProgramsPageV2() {
   );
 }
 
-// -------- Update Creative Program Card Component V2 with purple theme --------
+// -------- Creative Program Card Component V2 --------
 const CreativeProgramCardV2: React.FC<{ program: Program }> = ({ program }) => {
   const cardBaseStyle = `bg-slate-900/70 backdrop-blur-xl border border-slate-700/50 shadow-lg rounded-xl relative isolate overflow-hidden transition-all duration-300 h-full flex flex-col group`;
   const cardHoverStyle = `hover:border-purple-600/60 hover:shadow-purple-500/20 hover:shadow-2xl hover:scale-[1.015]`;
-  const themeAccentText = `text-purple-400`;
 
   return (
     <div className={`${cardBaseStyle} ${cardHoverStyle}`}>
-      {/* Angled Background Element */}
-      <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-purple-900/30 to-transparent z-[-1] clip-path-polygon-[0%_0%,_100%_0%,_100%_80%,_0%_100%]"></div>
+      {/* Decorative background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-      {/* Corner Accent */}
-      <div className="absolute top-0 right-0 w-0 h-0 border-l-[40px] border-l-transparent border-t-[40px] border-t-purple-700/30 group-hover:border-t-purple-600/40 transition-colors rounded-tr-xl"></div>
-      {program.featured && (
-        <div
-          className="absolute top-1.5 right-1.5 text-amber-300 group-hover:animate-pulse"
-          title="Featured Program"
-        >
-          <Star size={14} fill="currentColor" />
-        </div>
-      )}
-
-      {/* Card Content */}
-      <div className="p-5 flex-grow flex flex-col z-10">
+      <div className="relative z-10 p-6 flex flex-col h-full">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            {program.type === "Public" ? (
-              <Globe size={15} className="text-blue-400 flex-shrink-0" />
-            ) : (
-              <Lock size={15} className="text-orange-400 flex-shrink-0" />
-            )}
-            <h3 className="text-lg font-semibold text-slate-100 line-clamp-1">
-              {program.name}
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold text-slate-100 mb-1 group-hover:text-purple-300 transition-colors">
+              {program.title}
             </h3>
+            <p className="text-sm text-slate-400">{program.company}</p>
           </div>
-          <p className="text-xs text-slate-400 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700">
-            {program.company}
-          </p>
-        </div>
-
-        {/* Grid for Stats & Info */}
-        <div className="grid grid-cols-3 gap-x-4 gap-y-3 text-xs mb-4 flex-grow">
-          {/* Column 1: Core Info */}
-          <div className="col-span-3 sm:col-span-1 border-r border-slate-700/50 sm:pr-4 space-y-2">
-            <DetailItem
-              icon={<Layers size={13} />}
-              label="Scope"
-              value={program.scope}
-              valueClass="line-clamp-2"
-            />
-            <DetailItem
-              icon={<Cpu size={13} />}
-              label="Targets"
-              value={program.targets.join(" / ")}
-            />
-            <DetailItem icon={<Tag size={13} />} label="Tags">
-              <div className="flex flex-wrap gap-1 mt-0.5">
-                {program.tags.slice(0, 3).map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-[10px] font-mono bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded"
-                  >
-                    {tag}
-                  </span>
-                ))}
-                {program.tags.length > 3 && (
-                  <span className="text-[10px] text-slate-500">
-                    +{program.tags.length - 3}
-                  </span>
-                )}
-              </div>
-            </DetailItem>
-          </div>
-
-          {/* Column 2: Rewards & Response */}
-          <div className="col-span-3 sm:col-span-1 border-r border-slate-700/50 sm:pr-4 space-y-2">
-            <DetailItem
-              icon={<DollarSign size={13} className="text-emerald-400" />}
-              label="Reward Range"
-              value={program.rewardRange}
-              valueClass="font-semibold text-emerald-300"
-            />
-            <DetailItem
-              icon={<Award size={13} className="text-emerald-400" />}
-              label="Avg. Reward"
-              value={`$${program.avgReward.toLocaleString()}`}
-              valueClass="font-medium text-emerald-300"
-            />
-            <DetailItem icon={<Clock size={13} />} label="Avg. Response">
-              {" "}
-              {getResponseTypeIndicator(program.avgResponseTime)}{" "}
-            </DetailItem>
-          </div>
-
-          {/* Column 3: Program Stats */}
-          <div className="col-span-3 sm:col-span-1 space-y-2">
-            <DetailItem
-              icon={<CheckCircle size={13} />}
-              label="Resolved Reports"
-              value={program.reportsResolved}
-              valueClass="font-medium text-slate-100"
-            />
-            <DetailItem icon={<Gauge size={13} />} label="Acceptance Rate">
-              {" "}
-              {getAcceptanceRateIndicator(program.acceptanceRate)}{" "}
-            </DetailItem>
-            <DetailItem
-              icon={<GitCommit size={13} />}
-              label="Last Activity"
-              value={formatTimeAgo(program.lastActivity)}
-            />
+          <div className="text-right">
+            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-emerald-900/50 text-emerald-300 border border-emerald-700/50">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5"></span>
+              Active
+            </span>
           </div>
         </div>
 
-        {/* Footer Link */}
-        <div className="mt-auto pt-4 border-t border-slate-700/50">
+        {/* Program Details */}
+        <div className="space-y-3 mb-4 flex-grow">
+          <DetailItem
+            icon={<Award size={16} className="text-emerald-400" />}
+            label="Reward Range"
+            value={`$${program.minReward} - $${program.maxReward}`}
+            valueClass="text-emerald-300 font-semibold"
+          />
+
+          <DetailItem
+            icon={<Target size={16} className="text-blue-400" />}
+            label="Scope"
+            value={program.scope}
+          />
+
+          <DetailItem
+            icon={<Code size={16} className="text-purple-400" />}
+            label="Focus"
+            value={program.vrt}
+          />
+
+          <DetailItem
+            icon={<Users size={16} className="text-orange-400" />}
+            label="Stats"
+          >
+            <div className="flex items-center gap-4 text-xs">
+              <span className="text-slate-300">
+                {program.reportsResolved} reports
+              </span>
+              {getAcceptanceRateIndicator(program.acceptanceRate || 75)}
+              {getResponseTypeIndicator(program.avgResponseTime || 48)}
+            </div>
+          </DetailItem>
+        </div>
+
+        {/* Footer */}
+        <div className="flex justify-between items-center pt-4 border-t border-slate-700/50">
+          <span className="text-xs text-slate-500">
+            Updated {formatTimeAgo(program.updatedAt)}
+          </span>
           <Link
             href={`/dashboard/hacker/programs/${program.id}`}
-            className={`w-full block text-center px-4 py-2 text-sm ${themeAccentText} font-semibold border border-purple-700/50 rounded-md bg-purple-900/20 hover:bg-purple-800/40 hover:border-purple-600/70 hover:text-purple-300 transition-all duration-200 shadow-sm`}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600/20 text-purple-300 rounded-md hover:bg-purple-600/30 transition-colors text-sm"
           >
-            Analyze Target & Engage
+            View Details
+            <ExternalLink size={14} />
           </Link>
         </div>
       </div>
@@ -548,15 +412,16 @@ const DetailItem: React.FC<{
   valueClass?: string;
   children?: React.ReactNode;
 }> = ({ icon, label, value, valueClass = "text-slate-300", children }) => (
-  <div>
-    <p className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mb-0.5">
-      {icon} {label}
-    </p>
-    {children ? (
-      <div className="text-xs">{children}</div>
-    ) : (
-      <p className={`text-xs ${valueClass}`}>{value}</p>
-    )}
+  <div className="flex items-start gap-2">
+    <div className="flex-shrink-0 mt-0.5">{icon}</div>
+    <div className="min-w-0 flex-1">
+      <p className="text-xs text-slate-500 mb-0.5">{label}</p>
+      {children ? (
+        children
+      ) : (
+        <p className={`text-sm ${valueClass} line-clamp-1`}>{value}</p>
+      )}
+    </div>
   </div>
 );
 
@@ -574,21 +439,20 @@ const CreativeFilterDropdownV2: React.FC<{
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 bg-gradient-to-r from-slate-700/60 to-slate-800/70 border border-slate-600/80 rounded-lg px-3.5 py-1.5 text-xs text-slate-200 hover:border-emerald-600/50 focus:outline-none focus:ring-1 focus:ring-emerald-500/80 transition-all shadow-sm hover:shadow-md"
+        className="flex items-center gap-2 bg-slate-700/80 border border-slate-600 rounded-md px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-600/80 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all"
       >
-        {icon && <span className="text-emerald-400 opacity-80">{icon}</span>}
-        <span className="hidden sm:inline">{label}:</span>{" "}
-        <span className="font-medium text-white">{value}</span>
+        {icon && <span className="text-purple-400">{icon}</span>}
+        {label}: <span className="font-medium text-white">{value}</span>
         <ChevronDown
           size={14}
-          className={`text-slate-400 transition-transform duration-200 ${
+          className={`text-slate-400 transition-transform ${
             isOpen ? "rotate-180" : ""
           }`}
         />
       </button>
 
       {isOpen && (
-        <div className="absolute z-20 mt-1.5 max-h-60 w-64 overflow-auto bg-slate-900/90 backdrop-blur-lg border border-slate-700/70 rounded-lg shadow-xl py-1 text-xs scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800/50 animate-fadeIn">
+        <div className="absolute z-10 mt-1 w-40 bg-slate-800 border border-slate-700 rounded-md shadow-lg py-1 text-xs">
           {options.map((option, idx) => (
             <div
               key={idx}
@@ -596,16 +460,11 @@ const CreativeFilterDropdownV2: React.FC<{
                 onChange(option);
                 setIsOpen(false);
               }}
-              className={`px-3.5 py-2 hover:bg-emerald-700/20 cursor-pointer flex items-center justify-between text-slate-300 ${
-                value === option
-                  ? "bg-emerald-800/40 text-emerald-300 font-medium"
-                  : "hover:text-white"
-              }`}
+              className={`px-3 py-1.5 hover:bg-slate-700 cursor-pointer flex items-center justify-between
+                ${value === option ? "text-emerald-400" : "text-slate-300"}`}
             >
-              <span>{option}</span>
-              {value === option && (
-                <CheckCircle size={13} className="text-emerald-400" />
-              )}
+              {option}
+              {value === option && <CheckCircle size={12} />}
             </div>
           ))}
         </div>

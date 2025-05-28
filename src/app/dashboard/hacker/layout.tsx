@@ -105,7 +105,7 @@ export default function HackerLayout({
                 size={20}
                 className="transition-transform duration-200 group-hover:scale-105"
               />
-              <span className="tracking-normal font-normal">Déconnexion</span>
+              <span className="tracking-normal font-normal">Logout</span>
             </button>
           </div>
         </div>

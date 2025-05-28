@@ -8,11 +8,10 @@ import {
   ShieldCheck,
   Bug,
   Award,
-  Users,
   Settings,
-  ScrollText,
   GitCompareArrows,
   LogOut,
+  Search,
 } from "lucide-react";
 import Image from "next/image";
 import logo from "../../../../public/Logo.svg";
@@ -20,6 +19,7 @@ import logo from "../../../../public/Logo.svg";
 const navItems = [
   { name: "Overview", path: "/dashboard/startup", icon: LayoutGrid },
   { name: "Programs", path: "/dashboard/startup/programs", icon: ShieldCheck },
+  { name: "Testing", path: "/dashboard/startup/testing", icon: Search },
   { name: "Reports", path: "/dashboard/startup/reports", icon: Bug },
   { name: "Rewards", path: "/dashboard/startup/rewards", icon: Award },
   {
@@ -27,8 +27,6 @@ const navItems = [
     path: "/dashboard/startup/engagement",
     icon: GitCompareArrows,
   },
-  { name: "Team", path: "/dashboard/startup/team", icon: Users },
-  { name: "Logs", path: "/dashboard/startup/logs", icon: ScrollText },
   { name: "Settings", path: "/dashboard/startup/settings", icon: Settings },
 ];
 
