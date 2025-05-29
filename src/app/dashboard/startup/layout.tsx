@@ -9,7 +9,6 @@ import {
   Bug,
   Award,
   Settings,
-  GitCompareArrows,
   LogOut,
   Search,
 } from "lucide-react";
@@ -22,11 +21,6 @@ const navItems = [
   { name: "Testing", path: "/dashboard/startup/testing", icon: Search },
   { name: "Reports", path: "/dashboard/startup/reports", icon: Bug },
   { name: "Rewards", path: "/dashboard/startup/rewards", icon: Award },
-  {
-    name: "Engagement",
-    path: "/dashboard/startup/engagement",
-    icon: GitCompareArrows,
-  },
   { name: "Settings", path: "/dashboard/startup/settings", icon: Settings },
 ];
 

@@ -1,5 +1,6 @@
 import BaseUrl from "@/components/BaseUrl";
 
+// Enums matching the backend
 export enum ReportStatus {
   PENDING = "PENDING",
   ACCEPTED = "ACCEPTED",
@@ -10,50 +11,18 @@ export enum ReportStatus {
 }
 
 export enum ReportSeverity {
-  LOW = "LOW",
-  MEDIUM = "MEDIUM",
-  HIGH = "HIGH",
   CRITICAL = "CRITICAL",
+  HIGH = "HIGH",
+  MEDIUM = "MEDIUM",
+  LOW = "LOW",
 }
 
-export interface Report {
-  id: string;
-  title: string;
-  description: string;
-  status: ReportStatus;
-  severity?: ReportSeverity;
-  impact?: string;
-  stepsToReproduce: string;
-  proofUrls?: string[];
-  fixRecommendation?: string;
-  reviewedAt?: string;
-  fixedAt?: string;
-  reviewNotes?: string;
-  createdAt: string;
-  updatedAt: string;
-  program: {
-    id: string;
-    title: string;
-    startup: {
-      id: string;
-      name: string;
-    };
-  };
-  reporter: {
-    id: string;
-    name: string;
-  };
-  reviewedBy?: {
-    id: string;
-    name: string;
-  };
-}
-
+// Interfaces matching backend DTOs
 export interface CreateReportDto {
   title: string;
   description: string;
   programId: string;
-  severity?: ReportSeverity;
+  severity: ReportSeverity;
   impact?: string;
   stepsToReproduce: string;
   proofUrls?: string[];
@@ -72,115 +41,137 @@ export interface UpdateReportDto {
   reviewNotes?: string;
 }
 
-export interface ReportResponse {
+export interface UpdateReportStatusParams {
+  status: ReportStatus;
+  reviewNotes: string;
+  rewardAmount?: number;
+}
+
+// Report data structure matching backend entity
+export interface Report {
+  id: string;
+  title: string;
+  description: string;
+  severity: ReportSeverity;
+  impact?: string;
+  stepsToReproduce: string;
+  proofUrls?: string[];
+  fixRecommendation?: string;
+  status: ReportStatus;
+  reviewNotes?: string;
+  createdAt: string;
+  updatedAt: string;
+  reviewedAt?: string;
+  fixedAt?: string;
+  reporter: {
+    id: string;
+    username?: string;
+    alias?: string;
+  };
+  program: {
+    id: string;
+    title: string;
+    startup?: {
+      id: string;
+      name?: string;
+    };
+  };
+}
+
+// Data shape for the API response
+interface ApiResponse<T> {
   message: string;
   status: number;
-  data: Report | Report[];
+  data: T;
 }
 
-export interface IReportService {
-  getMyReports(): Promise<Report[]>;
-  getAllReports(status?: ReportStatus): Promise<Report[]>;
-  getReportsByProgram(programId: string): Promise<Report[]>;
-  getReportById(id: string): Promise<Report>;
-  createReport(reportData: CreateReportDto): Promise<Report>;
-  updateReport(id: string, reportData: UpdateReportDto): Promise<Report>;
-  updateReportStatus(
+// Type alias for CreateReportData to match the CreateReportDto
+export type CreateReportData = CreateReportDto;
+
+class ReportService {
+  async createReport(
+    reportData: CreateReportData
+  ): Promise<ApiResponse<Report>> {
+    const response = await BaseUrl.post("/reports", reportData);
+    return response.data;
+  }
+
+  // Get all reports with optional status filter
+  async getReports(status?: ReportStatus): Promise<ApiResponse<Report[]>> {
+    const params = status ? `?status=${status}` : "";
+    const response = await BaseUrl.get(`/reports${params}`);
+    return response.data;
+  }
+
+  // Get reports submitted by current user
+  async getMyReports(): Promise<ApiResponse<Report[]>> {
+    const response = await BaseUrl.get("/reports/my-reports");
+    return response.data;
+  }
+
+  // Get reports for a specific startup's programs
+  async getStartupReports(): Promise<ApiResponse<Report[]>> {
+    const response = await BaseUrl.get("/reports/startup");
+    return response.data;
+  }
+
+  // Get reports for a specific program
+  async getProgramReports(programId: string): Promise<ApiResponse<Report[]>> {
+    const response = await BaseUrl.get(`/reports/program/${programId}`);
+    return response.data;
+  }
+
+  // Get a specific report by ID
+  async getReport(id: string): Promise<ApiResponse<Report>> {
+    const response = await BaseUrl.get(`/reports/${id}`);
+    return response.data;
+  }
+
+  // Update a report
+  async updateReport(
     id: string,
-    status: ReportStatus,
-    reviewNotes?: string
-  ): Promise<Report>;
-  deleteReport(id: string): Promise<void>;
-}
-
-class ReportService implements IReportService {
-  async getMyReports(): Promise<Report[]> {
-    try {
-      const response = await BaseUrl.get("/reports/my-reports");
-      return response.data.data;
-    } catch (error) {
-      console.error("Error fetching my reports:", error);
-      throw error;
-    }
+    updateData: UpdateReportDto
+  ): Promise<ApiResponse<Report>> {
+    const response = await BaseUrl.patch(`/reports/${id}`, updateData);
+    return response.data;
   }
 
-  async getAllReports(status?: ReportStatus): Promise<Report[]> {
-    try {
-      const params = status ? `?status=${status}` : "";
-      const response = await BaseUrl.get(`/reports${params}`);
-      return response.data.data;
-    } catch (error) {
-      console.error("Error fetching reports:", error);
-      throw error;
-    }
-  }
-
-  async getReportsByProgram(programId: string): Promise<Report[]> {
-    try {
-      const response = await BaseUrl.get(`/reports/program/${programId}`);
-      return response.data.data;
-    } catch (error) {
-      console.error(`Error fetching reports for program ${programId}:`, error);
-      throw error;
-    }
-  }
-
-  async getReportById(id: string): Promise<Report> {
-    try {
-      const response = await BaseUrl.get(`/reports/${id}`);
-      return response.data.data;
-    } catch (error) {
-      console.error(`Error fetching report with id ${id}:`, error);
-      throw error;
-    }
-  }
-
-  async createReport(reportData: CreateReportDto): Promise<Report> {
-    try {
-      const response = await BaseUrl.post("/reports", reportData);
-      return response.data.data;
-    } catch (error) {
-      console.error("Error creating report:", error);
-      throw error;
-    }
-  }
-
-  async updateReport(id: string, reportData: UpdateReportDto): Promise<Report> {
-    try {
-      const response = await BaseUrl.patch(`/reports/${id}`, reportData);
-      return response.data.data;
-    } catch (error) {
-      console.error(`Error updating report with id ${id}:`, error);
-      throw error;
-    }
-  }
-
+  // Update report status
   async updateReportStatus(
-    id: string,
+    reportId: string,
     status: ReportStatus,
-    reviewNotes?: string
-  ): Promise<Report> {
+    reviewNotes: string,
+    rewardAmount?: number
+  ): Promise<any> {
     try {
-      const response = await BaseUrl.patch(`/reports/${id}/status`, {
+      const response = await BaseUrl.patch(`/reports/${reportId}/status`, {
         status,
         reviewNotes,
+        rewardAmount,
       });
-      return response.data.data;
+      return response.data;
     } catch (error) {
-      console.error(`Error updating report status with id ${id}:`, error);
+      console.error("Error updating report status:", error);
       throw error;
     }
   }
 
-  async deleteReport(id: string): Promise<void> {
+  async payReward(reportId: string): Promise<any> {
     try {
-      await BaseUrl.delete(`/reports/${id}`);
+      const response = await BaseUrl.patch(`/reports/${reportId}/pay-reward`);
+      return response.data;
     } catch (error) {
-      console.error(`Error deleting report with id ${id}:`, error);
+      console.error("Error paying reward for report:", error);
       throw error;
     }
+  }
+
+  // Delete a report
+  async deleteReport(id: string): Promise<ApiResponse<void>> {
+    const response = await BaseUrl.delete(`/reports/${id}`);
+    return response.data;
   }
 }
 
-export const reportService = new ReportService();
+const reportService = new ReportService();
 export default reportService;

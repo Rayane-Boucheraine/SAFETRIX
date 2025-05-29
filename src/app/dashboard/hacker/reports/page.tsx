@@ -27,6 +27,7 @@ import reportService, {
   ReportStatus,
   ReportSeverity,
 } from "@/services/reportService";
+import rewardService from "@/services/rewardService";
 import Link from "next/link";
 
 // -------- Main Dashboard Component --------
@@ -55,8 +56,18 @@ export default function EnhancedReportsPage() {
     try {
       setLoading(true);
       setError(null);
+
       const reportsData = await reportService.getMyReports();
-      setReports(reportsData);
+      // Ensure reportsData is always an array
+      let reportsArray: Report[] = [];
+      if (Array.isArray(reportsData)) {
+        reportsArray = reportsData;
+      } else if (reportsData?.data && Array.isArray(reportsData.data)) {
+        reportsArray = reportsData.data;
+      } else {
+        reportsArray = [];
+      }
+      setReports(reportsArray);
     } catch (error: unknown) {
       console.error("Failed to fetch reports:", error);
       setError(
@@ -120,14 +131,19 @@ export default function EnhancedReportsPage() {
     const matchesSeverity =
       !activeFilters.severity || report.severity === activeFilters.severity;
     const matchesProgram =
-      !activeFilters.program || report.program.title === activeFilters.program;
+      !activeFilters.program ||
+      (report.program && report.program.title === activeFilters.program);
 
     return matchesSearch && matchesStatus && matchesSeverity && matchesProgram;
   });
 
   // Get unique programs for filter dropdown
   const uniquePrograms = [
-    ...new Set(reports.map((report) => report.program.title)),
+    ...new Set(
+      reports
+        .filter((report) => report.program && report.program.title)
+        .map((report) => report.program.title)
+    ),
   ];
 
   // Handle filter change
@@ -665,7 +681,9 @@ const ReportCard: React.FC<{ report: Report; onClick: () => void }> = ({
 
         <p className="text-xs text-slate-400 font-mono mb-2">
           ID: <span className="text-emerald-400">{report.id}</span> | Program:{" "}
-          <span className="text-slate-300">{report.program.title}</span>
+          <span className="text-slate-300">
+            {report.program?.title || "Unknown"}
+          </span>
         </p>
 
         {/* Description Excerpt */}
@@ -903,6 +921,35 @@ const ReportDetailModal: React.FC<{
   report: Report;
   onClose: () => void;
 }> = ({ report, onClose }) => {
+  const [rewards, setRewards] = useState<any[]>([]);
+  const [loadingRewards, setLoadingRewards] = useState(false);
+
+  useEffect(() => {
+    fetchReportRewards();
+  }, [report.id]);
+
+  const fetchReportRewards = async () => {
+    try {
+      setLoadingRewards(true);
+      const response = await rewardService.getRewardsByReportId(report.id);
+
+      let rewardsData: any[] = [];
+      if (Array.isArray(response)) {
+        rewardsData = response;
+      } else if (response?.data && Array.isArray(response.data)) {
+        rewardsData = response.data;
+      } else {
+        rewardsData = [];
+      }
+
+      setRewards(rewardsData);
+    } catch (error) {
+      console.error("Failed to fetch rewards:", error);
+    } finally {
+      setLoadingRewards(false);
+    }
+  };
+
   const getSeverityStyles = (severity?: ReportSeverity) => {
     if (!severity)
       return { color: "text-gray-400", bgColor: "bg-gray-500/10", icon: Info };
@@ -1026,7 +1073,9 @@ const ReportDetailModal: React.FC<{
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
               <p className="text-xs text-slate-400 mb-1">Program</p>
-              <p className="text-slate-100">{report.program.title}</p>
+              <p className="text-slate-100">
+                {report.program?.title || "Unknown"}
+              </p>
             </div>
             <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
               <p className="text-xs text-slate-400 mb-1">Submitted</p>
@@ -1042,7 +1091,9 @@ const ReportDetailModal: React.FC<{
             </div>
             <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
               <p className="text-xs text-slate-400 mb-1">Reporter</p>
-              <p className="text-slate-100">{report.reporter.name}</p>
+              <p className="text-slate-100">
+                {report.reporter?.name || "Unknown"}
+              </p>
             </div>
           </div>
 
@@ -1120,8 +1171,62 @@ const ReportDetailModal: React.FC<{
                 <p className="text-slate-300">{report.reviewNotes}</p>
                 {report.reviewedBy && (
                   <p className="text-xs text-slate-400 mt-2">
-                    Reviewed by: {report.reviewedBy.name}
+                    Reviewed by: {report.reviewedBy.name || "Unknown"}
                   </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Rewards Section - Only show if rewards exist */}
+          {rewards.length > 0 && (
+            <div>
+              <h3 className="text-slate-300 font-medium mb-2 flex items-center gap-2">
+                <Award size={18} className="text-purple-400" />
+                Rewards
+              </h3>
+              <div className="bg-slate-800/50 p-4 rounded-lg border border-purple-700/30">
+                {loadingRewards ? (
+                  <div className="flex justify-center py-4">
+                    <Loader className="animate-spin text-purple-500" size={24} />
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {rewards.map((reward) => (
+                      <div
+                        key={reward.id}
+                        className="bg-slate-800/80 border border-slate-700/50 rounded-lg p-3"
+                      >
+                        <div className="flex justify-between items-center mb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg font-semibold text-purple-300">
+                              ${reward.amount?.toLocaleString()}
+                            </span>
+                            <span
+                              className={`text-xs px-2 py-0.5 rounded-full ${
+                                reward.status === "approved"
+                                  ? "bg-green-900/30 text-green-400"
+                                  : reward.status === "paid"
+                                  ? "bg-emerald-900/30 text-emerald-400"
+                                  : reward.status === "rejected"
+                                  ? "bg-red-900/30 text-red-400"
+                                  : "bg-amber-900/30 text-amber-400"
+                              }`}
+                            >
+                              {reward.status.charAt(0).toUpperCase() +
+                                reward.status.slice(1)}
+                            </span>
+                          </div>
+                        </div>
+                        <p className="text-sm text-slate-300">
+                          {reward.description}
+                        </p>
+                        <div className="text-xs text-slate-500 mt-2">
+                          {new Date(reward.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>

@@ -10,164 +10,99 @@ export enum RewardStatus {
 export interface Reward {
   id: string;
   amount: number;
+  description: string;
   status: RewardStatus;
-  description?: string;
-  approvalNote?: string;
-  rejectionReason?: string;
-  createdAt: string;
-  updatedAt: string;
-  approvedAt?: string;
+  reportId: string;
   program: {
     id: string;
     title: string;
-    startup: {
-      id: string;
-      name: string;
-    };
   };
   reporter: {
     id: string;
-    name: string;
+    username?: string;
+    alias?: string;
   };
   approvedBy?: {
     id: string;
-    name: string;
+    username?: string;
   };
-}
-
-export interface CreateRewardDto {
-  amount: number;
-  programId: string;
-  description?: string;
-}
-
-export interface UpdateRewardDto {
-  amount?: number;
-  status?: RewardStatus;
-  description?: string;
+  approvedAt?: string;
+  createdAt: string;
+  updatedAt: string;
   approvalNote?: string;
   rejectionReason?: string;
 }
 
-export interface RewardResponse {
-  message: string;
-  status: number;
-  data: Reward | Reward[];
+export interface CreateRewardData {
+  amount: number;
+  description: string;
+  reportId: string;
+  programId: string;
 }
 
-export interface IRewardService {
-  getMyRewards(): Promise<Reward[]>;
-  getAllRewards(status?: RewardStatus, programId?: string): Promise<Reward[]>;
-  getRewardById(id: string): Promise<Reward>;
-  createReward(rewardData: CreateRewardDto): Promise<Reward>;
-  updateReward(id: string, rewardData: UpdateRewardDto): Promise<Reward>;
-  approveReward(id: string, approvalNote: string): Promise<Reward>;
-  rejectReward(id: string, rejectionReason: string): Promise<Reward>;
-  markAsPaid(id: string): Promise<Reward>;
-  deleteReward(id: string): Promise<void>;
-}
-
-class RewardService implements IRewardService {
-  async getMyRewards(): Promise<Reward[]> {
-    try {
-      const response = await BaseUrl.get("/rewards/my-rewards");
-      return response.data.data;
-    } catch (error) {
-      console.error("Error fetching my rewards:", error);
-      throw error;
-    }
+class RewardService {
+  async createReward(data: CreateRewardData) {
+    const response = await BaseUrl.post("/rewards", data);
+    return response.data;
   }
 
-  async getAllRewards(
-    status?: RewardStatus,
-    programId?: string
-  ): Promise<Reward[]> {
-    try {
-      const params = new URLSearchParams();
-      if (status) params.append("status", status);
-      if (programId) params.append("programId", programId);
+  async getRewards(filters?: { status?: RewardStatus; programId?: string }) {
+    const params = new URLSearchParams();
+    if (filters?.status) params.append("status", filters.status);
+    if (filters?.programId) params.append("programId", filters.programId);
 
-      const response = await BaseUrl.get(`/rewards?${params.toString()}`);
-      return response.data.data;
-    } catch (error) {
-      console.error("Error fetching rewards:", error);
-      throw error;
-    }
+    const response = await BaseUrl.get(`/rewards?${params.toString()}`);
+    return response.data;
   }
 
-  async getRewardById(id: string): Promise<Reward> {
-    try {
-      const response = await BaseUrl.get(`/rewards/${id}`);
-      return response.data.data;
-    } catch (error) {
-      console.error(`Error fetching reward with id ${id}:`, error);
-      throw error;
-    }
+  async getMyRewards() {
+    const response = await BaseUrl.get("/rewards/my-rewards");
+    return response.data;
   }
 
-  async createReward(rewardData: CreateRewardDto): Promise<Reward> {
-    try {
-      const response = await BaseUrl.post("/rewards", rewardData);
-      return response.data.data;
-    } catch (error) {
-      console.error("Error creating reward:", error);
-      throw error;
-    }
+  async getReward(id: string) {
+    const response = await BaseUrl.get(`/rewards/${id}`);
+    return response.data;
   }
 
-  async updateReward(id: string, rewardData: UpdateRewardDto): Promise<Reward> {
-    try {
-      const response = await BaseUrl.patch(`/rewards/${id}`, rewardData);
-      return response.data.data;
-    } catch (error) {
-      console.error(`Error updating reward with id ${id}:`, error);
-      throw error;
-    }
+  async approveReward(id: string, approvalNote: string) {
+    const response = await BaseUrl.patch(`/rewards/${id}/approve`, {
+      approvalNote,
+    });
+    return response.data;
   }
 
-  async approveReward(id: string, approvalNote: string): Promise<Reward> {
-    try {
-      const response = await BaseUrl.patch(`/rewards/${id}/approve`, {
-        approvalNote,
-      });
-      return response.data.data;
-    } catch (error) {
-      console.error(`Error approving reward with id ${id}:`, error);
-      throw error;
-    }
+  async rejectReward(id: string, rejectionReason: string) {
+    const response = await BaseUrl.patch(`/rewards/${id}/reject`, {
+      rejectionReason,
+    });
+    return response.data;
   }
 
-  async rejectReward(id: string, rejectionReason: string): Promise<Reward> {
-    try {
-      const response = await BaseUrl.patch(`/rewards/${id}/reject`, {
-        rejectionReason,
-      });
-      return response.data.data;
-    } catch (error) {
-      console.error(`Error rejecting reward with id ${id}:`, error);
-      throw error;
-    }
+  async markAsPaid(id: string) {
+    const response = await BaseUrl.patch(`/rewards/${id}/mark-as-paid`);
+    return response.data;
   }
 
-  async markAsPaid(id: string): Promise<Reward> {
-    try {
-      const response = await BaseUrl.patch(`/rewards/${id}/mark-as-paid`);
-      return response.data.data;
-    } catch (error) {
-      console.error(`Error marking reward as paid with id ${id}:`, error);
-      throw error;
-    }
+  async updateReward(id: string, data: Partial<CreateRewardData>) {
+    const response = await BaseUrl.patch(`/rewards/${id}`, data);
+    return response.data;
   }
 
-  async deleteReward(id: string): Promise<void> {
+  async deleteReward(id: string) {
+    const response = await BaseUrl.delete(`/rewards/${id}`);
+    return response.data;
+  }
+
+  async getRewardsByReportId(reportId: string): Promise<any> {
     try {
-      await BaseUrl.delete(`/rewards/${id}`);
+      const response = await BaseUrl.get(`/rewards/by-report/${reportId}`);
+      return response.data;
     } catch (error) {
-      console.error(`Error deleting reward with id ${id}:`, error);
+      console.error("Error fetching rewards for report:", error);
       throw error;
     }
   }
 }
 
-export const rewardService = new RewardService();
-export default rewardService;
+export default new RewardService();

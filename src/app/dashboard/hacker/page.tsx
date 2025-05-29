@@ -1,35 +1,33 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  Activity,
-  AlertTriangle,
-  ArrowRight,
-  Award,
-  CheckCircle,
-  FileText,
-  Send,
-  Target,
-  TrendingUp,
-  Users,
-  Shield,
-  Zap,
-  Sparkles,
-  Code,
-  ChevronRight,
-  BarChart3,
-  Terminal,
-  Lock,
-  Eye,
-  ExternalLink,
-  Clock,
-  Bug,
-  Info,
-  Loader,
-  AlertCircle as AlertCircleIcon,
-  X,
-} from "lucide-react";
 import Link from "next/link";
+import {
+  Terminal,
+  Send,
+  Eye,
+  FileText,
+  CheckCircle,
+  Award,
+  TrendingUp,
+  Target,
+  BarChart3,
+  Bug,
+  Sparkles,
+  Clock,
+  Activity,
+  Zap,
+  AlertTriangle,
+  Shield,
+  Info,
+  Users,
+  X,
+  Loader,
+  ChevronRight,
+  Code,
+  Lock,
+  ExternalLink,
+} from "lucide-react";
 import userService from "@/services/userService";
 import reportService, {
   Report,
@@ -104,9 +102,21 @@ const EnhancedDashboard = () => {
       setReportsLoading(true);
       setReportsError(null);
       const reportsData = await reportService.getMyReports();
+
+      // Handle different response structures
+      let reportsArray: Report[] = [];
+      if (Array.isArray(reportsData)) {
+        reportsArray = reportsData;
+      } else if (reportsData?.data && Array.isArray(reportsData.data)) {
+        reportsArray = reportsData.data;
+      } else {
+        console.error("Unexpected reports response structure:", reportsData);
+        reportsArray = [];
+      }
+
       // Get the 5 most recent reports
-      const sortedReports = reportsData.sort(
-        (a, b) =>
+      const sortedReports = reportsArray.sort(
+        (a: Report, b: Report) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
       setReports(sortedReports.slice(0, 5));
@@ -115,6 +125,7 @@ const EnhancedDashboard = () => {
       setReportsError(
         error instanceof Error ? error.message : "Failed to fetch reports"
       );
+      setReports([]); // Set empty array on error
     } finally {
       setReportsLoading(false);
     }
@@ -130,7 +141,7 @@ const EnhancedDashboard = () => {
       let programsData: Program[];
       if (Array.isArray(response)) {
         programsData = response;
-      } else if (response.data && Array.isArray(response.data)) {
+      } else if (response?.data && Array.isArray(response.data)) {
         programsData = response.data;
       } else {
         console.error("Unexpected programs response structure:", response);
@@ -145,6 +156,7 @@ const EnhancedDashboard = () => {
       setProgramsError(
         error instanceof Error ? error.message : "Failed to fetch programs"
       );
+      setPrograms([]); // Set empty array on error
     } finally {
       setProgramsLoading(false);
     }
@@ -384,7 +396,7 @@ const EnhancedDashboard = () => {
               ) : reportsError ? (
                 <div className="flex-grow flex items-center justify-center">
                   <div className="flex flex-col items-center gap-3 text-center">
-                    <AlertCircleIcon className="text-red-400" size={24} />
+                    <AlertTriangle className="text-red-400" size={24} />
                     <p className="text-red-400 text-sm">
                       Failed to load reports
                     </p>
@@ -417,70 +429,52 @@ const EnhancedDashboard = () => {
                         key={report.id}
                         className="relative pl-8 pb-6 last:pb-0"
                       >
-                        {/* Timeline vertical line */}
+                        {/* Timeline dot */}
+                        <div className="absolute left-0 top-1 w-3 h-3 rounded-full bg-purple-500 border-2 border-slate-800 shadow-lg"></div>
+                        {/* Timeline line */}
                         {index < reports.length - 1 && (
-                          <div className="absolute left-4 top-4 bottom-0 w-0.5 bg-gradient-to-b from-slate-600/70 to-slate-700/30"></div>
+                          <div className="absolute left-1.5 top-4 bottom-0 w-0.5 bg-slate-700"></div>
                         )}
 
-                        {/* Report item */}
-                        <div className="group relative">
-                          {/* Timeline node */}
-                          <div
-                            className={`absolute -left-8 top-1 w-8 h-8 rounded-full flex items-center justify-center border-2 border-slate-800 bg-slate-900 shadow-lg ${getReportStatusColor(
-                              report.status
-                            )}`}
-                          >
-                            {getReportStatusIcon(report.status, 16)}
+                        <Link
+                          href={`/dashboard/hacker/reports`}
+                          className="block bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 hover:bg-slate-800/70 transition-all duration-200 border border-slate-700/50 hover:border-purple-600/40"
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <h4 className="font-medium text-slate-200 line-clamp-1">
+                              {report.title}
+                            </h4>
+                            <span
+                              className={`text-xs px-2 py-0.5 rounded-full ${getStatusBadgeStyle(
+                                report.status
+                              )}`}
+                            >
+                              {report.status}
+                            </span>
                           </div>
-
-                          {/* Report content */}
-                          <Link
-                            href={`/dashboard/hacker/reports`}
-                            className="block bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700/50 p-4 transition-all duration-300 hover:border-slate-600/50 hover:shadow-lg"
-                          >
-                            <div className="flex justify-between items-start mb-2">
-                              <div className="flex-grow">
-                                <h4 className="text-sm font-medium text-slate-200 line-clamp-1 mb-1">
-                                  {report.title}
-                                </h4>
-                                <p className="text-xs text-slate-400 mb-1">
-                                  Program: {report.program.title}
-                                </p>
-                                <div className="flex items-center gap-2 text-xs">
-                                  <span
-                                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${getStatusBadgeStyle(
-                                      report.status
-                                    )}`}
-                                  >
-                                    {getReportStatusIcon(report.status, 10)}
-                                    {report.status}
-                                  </span>
-                                  {report.severity && (
-                                    <span
-                                      className={`inline-flex items-center gap-1 font-medium ${getSeverityColor(
-                                        report.severity
-                                      )}`}
-                                    >
-                                      {getSeverityIcon(report.severity, 10)}
-                                      {report.severity}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                              <span className="text-xs text-slate-500 bg-slate-800/80 px-2 py-0.5 rounded-full whitespace-nowrap">
-                                {formatTimeAgo(report.createdAt)}
+                          <p className="text-xs text-slate-400 mb-1">
+                            Program:{" "}
+                            <span className="text-slate-300">
+                              {report.program?.title ?? "Unknown Program"}
+                            </span>
+                          </p>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-slate-500 flex items-center gap-1">
+                              <Clock size={10} />
+                              {formatTimeAgo(report.createdAt)}
+                            </span>
+                            {report.severity && (
+                              <span
+                                className={`flex items-center gap-1 ${getSeverityColor(
+                                  report.severity
+                                )}`}
+                              >
+                                {getSeverityIcon(report.severity, 10)}
+                                {report.severity}
                               </span>
-                            </div>
-
-                            {/* Action indicator */}
-                            <div className="flex justify-end mt-2">
-                              <span className="text-xs text-slate-400 hover:text-purple-400 flex items-center gap-1 transition-colors duration-200">
-                                <span>View Details</span>
-                                <ChevronRight size={12} />
-                              </span>
-                            </div>
-                          </Link>
-                        </div>
+                            )}
+                          </div>
+                        </Link>
                       </li>
                     ))}
                   </ul>
@@ -492,7 +486,7 @@ const EnhancedDashboard = () => {
                       className="inline-flex items-center gap-1 text-purple-400 hover:text-purple-300 transition-colors duration-200 text-sm font-medium group"
                     >
                       <span>View All Reports</span>
-                      <ArrowRight
+                      <ChevronRight
                         size={16}
                         className="transform transition-transform duration-300 group-hover:translate-x-1"
                       />
@@ -535,7 +529,7 @@ const EnhancedDashboard = () => {
               ) : programsError ? (
                 <div className="flex-grow flex items-center justify-center">
                   <div className="flex flex-col items-center gap-3 text-center">
-                    <AlertCircleIcon className="text-red-400" size={24} />
+                    <AlertTriangle className="text-red-400" size={24} />
                     <p className="text-red-400 text-sm">
                       Failed to load programs
                     </p>
@@ -649,7 +643,7 @@ const EnhancedDashboard = () => {
                       className="inline-flex items-center gap-1 text-purple-400 hover:text-purple-300 transition-colors duration-200 text-sm font-medium group"
                     >
                       <span>Explore All Programs</span>
-                      <ArrowRight
+                      <ChevronRight
                         size={16}
                         className="transform transition-transform duration-300 group-hover:translate-x-1"
                       />

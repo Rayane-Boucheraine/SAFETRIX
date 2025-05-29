@@ -79,18 +79,16 @@ export default function CreativeProgramsPageV2() {
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [statusFilter] = useState<ProgramStatus | null>(
-    ProgramStatus.ACTIVE
-  );
+  const [statusFilter] = useState<ProgramStatus | null>(ProgramStatus.ACTIVE);
 
   useEffect(() => {
     const fetchPrograms = async () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await programService.getAllPrograms(
-          statusFilter || undefined
-        );
+
+        // Use the correct service method - either getActivePrograms() or a general method
+        const response = await programService.getActivePrograms(); // This should match your programService
 
         // Handle different response structures
         let programsData: Program[];
@@ -118,6 +116,7 @@ export default function CreativeProgramsPageV2() {
           avgResponseTime: Math.floor(Math.random() * 120) + 24, // Mock data
           reportsResolved: Math.floor(Math.random() * 50) + 10, // Mock data
           acceptanceRate: Math.floor(Math.random() * 40) + 60, // Mock data
+          rules: "", // Add default rules property
         }));
 
         setPrograms(mappedPrograms);

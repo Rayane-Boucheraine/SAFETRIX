@@ -1,222 +1,210 @@
 import BaseUrl from "@/components/BaseUrl";
-import { ProgramStatus, CreateProgramDto } from "@/types/program";
+import { ProgramStatus } from "@/types/program";
 
-export interface UpdateProgramDto {
-  [key: string]: string | number | boolean | ProgramStatus | undefined;
-}
-
+// Program interface matching the backend
 export interface Program {
   id: string;
   title: string;
-  company?: string;
-  description?: string;
-  scope?: string[];
-  rewards?: {
-    low: number;
-    medium: number;
-    high: number;
-    critical: number;
-  };
+  description: string;
   status: ProgramStatus;
-  startDate?: string;
+  minReward: number;
+  maxReward: number;
+  startDate: string;
   endDate?: string;
+  createdAt: string;
+  updatedAt: string;
+  scope?: string;
+  rewardType?: string;
+  startup?: {
+    id: string;
+    name?: string;
+  };
   participantsCount?: number;
   submissionsCount?: number;
-  website?: string;
-  contactEmail?: string;
-  rules?: string[];
-  outOfScope?: string[];
 }
 
-export interface IProgramService {
-  getAllPrograms(status?: ProgramStatus): Promise<Program[]>;
-  updateProgram(id: string, programData: UpdateProgramDto): Promise<Program>;
-  getProgramById(id: string): Promise<Program>;
-  getMyPrograms(): Promise<Program[]>; // For startup users
-  createProgram(programData: CreateProgramDto): Promise<Program>;
-  updateProgramStatus(id: string, status: ProgramStatus): Promise<Program>;
-  deleteProgram(id: string): Promise<void>;
-  joinProgram(id: string): Promise<void>;
-  checkParticipation(
-    id: string
-  ): Promise<{ program: Program; isParticipating: boolean }>;
-}
-
-class ProgramService implements IProgramService {
-  async getAllPrograms(status?: ProgramStatus) {
+class ProgramService {
+  // Get all programs with optional status filter
+  async getPrograms(status?: ProgramStatus): Promise<Program[]> {
     try {
-      const query = status ? `?status=${status}` : "";
-      const response = await BaseUrl.get(`/programs${query}`);
+      const params = status ? `?status=${status}` : "";
+      const response = await BaseUrl.get(`/programs${params}`);
 
-      // Handle response structure
-      if (response.data?.data && Array.isArray(response.data.data)) {
+      // Handle different response structures
+      if (response.data?.data) {
         return response.data.data;
       } else if (Array.isArray(response.data)) {
         return response.data;
-      } else {
-        console.error("Unexpected programs response structure:", response.data);
-        return [];
       }
+
+      console.warn("Unexpected programs response structure:", response.data);
+      return [];
     } catch (error) {
       console.error("Error fetching programs:", error);
-      throw error;
+      return [];
     }
   }
 
-  async getActivePrograms() {
+  // Get active programs
+  async getActivePrograms(): Promise<Program[]> {
     try {
       const response = await BaseUrl.get("/programs/active");
 
-      // Handle response structure
-      if (response.data?.data && Array.isArray(response.data.data)) {
+      // Handle different response structures
+      if (response.data?.data) {
         return response.data.data;
       } else if (Array.isArray(response.data)) {
         return response.data;
-      } else {
-        console.error(
-          "Unexpected active programs response structure:",
-          response.data
-        );
-        return [];
       }
+
+      console.warn(
+        "Unexpected active programs response structure:",
+        response.data
+      );
+      return [];
     } catch (error) {
       console.error("Error fetching active programs:", error);
-      throw error;
+      return [];
     }
   }
 
-  async getProgramById(id: string) {
-    try {
-      const response = await BaseUrl.get(`/programs/${id}`);
-
-      // Handle response structure
-      if (response.data?.data) {
-        return response.data.data;
-      } else {
-        return response.data;
-      }
-    } catch (error) {
-      console.error(`Error fetching program with id ${id}:`, error);
-      throw error;
-    }
-  }
-
-  async getMyPrograms() {
+  // Get programs created by current user (startup role)
+  async getMyPrograms(): Promise<Program[]> {
     try {
       const response = await BaseUrl.get("/programs/my-programs");
 
-      // Handle response structure
-      if (response.data?.data && Array.isArray(response.data.data)) {
+      // Handle different response structures
+      if (response.data?.data) {
         return response.data.data;
       } else if (Array.isArray(response.data)) {
         return response.data;
-      } else {
-        console.error(
-          "Unexpected my programs response structure:",
-          response.data
-        );
-        return [];
       }
+
+      console.warn("Unexpected my programs response structure:", response.data);
+      return [];
     } catch (error) {
       console.error("Error fetching my programs:", error);
-      throw error;
+      return [];
     }
   }
 
-  async createProgram(programData: CreateProgramDto): Promise<Program> {
+  // Get a specific program by ID
+  async getProgram(id: string): Promise<Program | null> {
+    try {
+      const response = await BaseUrl.get(`/programs/${id}`);
+      return response.data?.data || response.data || null;
+    } catch (error) {
+      console.error(`Error fetching program ${id}:`, error);
+      return null;
+    }
+  }
+
+  // Create a new program
+  async createProgram(programData: Partial<Program>): Promise<Program | null> {
     try {
       const response = await BaseUrl.post("/programs", programData);
-
-      // Handle response structure
-      if (response.data?.data) {
-        return response.data.data;
-      } else {
-        return response.data;
-      }
+      return response.data?.data || response.data || null;
     } catch (error) {
       console.error("Error creating program:", error);
       throw error;
     }
   }
 
+  // Update a program
   async updateProgram(
     id: string,
-    programData: UpdateProgramDto
-  ): Promise<Program> {
+    programData: Partial<Program>
+  ): Promise<Program | null> {
     try {
       const response = await BaseUrl.patch(`/programs/${id}`, programData);
-
-      // Handle response structure
-      if (response.data?.data) {
-        return response.data.data;
-      } else {
-        return response.data;
-      }
+      return response.data?.data || response.data || null;
     } catch (error) {
-      console.error(`Error updating program with id ${id}:`, error);
+      console.error(`Error updating program ${id}:`, error);
       throw error;
     }
   }
 
+  // Update program status
   async updateProgramStatus(
     id: string,
     status: ProgramStatus
-  ): Promise<Program> {
+  ): Promise<Program | null> {
     try {
       const response = await BaseUrl.patch(`/programs/${id}/status`, {
         status,
       });
-
-      // Handle response structure
-      if (response.data?.data) {
-        return response.data.data;
-      } else {
-        return response.data;
-      }
+      return response.data?.data || response.data || null;
     } catch (error) {
-      console.error(`Error updating status for program with id ${id}:`, error);
+      console.error(`Error updating program status ${id}:`, error);
       throw error;
     }
   }
 
-  async deleteProgram(id: string): Promise<void> {
+  // Delete a program
+  async deleteProgram(id: string): Promise<boolean> {
     try {
       await BaseUrl.delete(`/programs/${id}`);
+      return true;
     } catch (error) {
-      console.error(`Error deleting program with id ${id}:`, error);
+      console.error(`Error deleting program ${id}:`, error);
       throw error;
     }
   }
 
-  async joinProgram(id: string): Promise<void> {
-    try {
-      await BaseUrl.post(`/programs/${id}/join`);
-    } catch (error) {
-      console.error(`Error joining program with id ${id}:`, error);
-      throw error;
-    }
-  }
-
-  async checkParticipation(
+  // Join a program
+  async joinProgram(
     id: string
-  ): Promise<{ program: Program; isParticipating: boolean }> {
+  ): Promise<{ success: boolean; message?: string }> {
     try {
-      // Since the backend doesn't have this endpoint, we'll fetch the program and assume not participating
-      const program = await this.getProgramById(id);
-
+      const response = await BaseUrl.post(`/programs/${id}/join`, {});
       return {
-        program,
-        isParticipating: false, // This would need to be implemented in the backend
+        success: true,
+        message: response.data?.message || "Successfully joined program",
       };
     } catch (error) {
-      console.error(
-        `Error checking participation for program with id ${id}:`,
-        error
-      );
+      console.error(`Error joining program ${id}:`, error);
       throw error;
+    }
+  }
+
+  // Leave a program
+  async leaveProgram(
+    id: string
+  ): Promise<{ success: boolean; message?: string }> {
+    try {
+      const response = await BaseUrl.post(`/programs/${id}/leave`, {});
+      return {
+        success: true,
+        message: response.data?.message || "Successfully left program",
+      };
+    } catch (error) {
+      console.error(`Error leaving program ${id}:`, error);
+      throw error;
+    }
+  }
+
+  // Check if current user is a participant
+  async checkParticipation(id: string): Promise<boolean> {
+    try {
+      const response = await BaseUrl.get(`/programs/${id}/check-participation`);
+      return response.data?.data?.isParticipant || false;
+    } catch (error) {
+      console.error(`Error checking participation ${id}:`, error);
+      return false;
+    }
+  }
+
+  // Get participant count
+  async getParticipantsCount(id: string): Promise<number> {
+    try {
+      const response = await BaseUrl.get(`/programs/${id}/participants`);
+      return response.data?.data?.participantsCount || 0;
+    } catch (error) {
+      console.error(`Error getting participants count ${id}:`, error);
+      return 0;
     }
   }
 }
 
-export const programService = new ProgramService();
+const programService = new ProgramService();
 export default programService;

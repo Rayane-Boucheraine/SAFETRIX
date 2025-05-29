@@ -30,7 +30,7 @@ BaseUrl.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       secureLocalStorage.removeItem("token");
-      window.location.href = `/login`;
+      window.location.href = `/auth`;
     }
     return Promise.reject(error);
   }

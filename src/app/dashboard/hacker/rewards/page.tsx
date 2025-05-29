@@ -39,36 +39,51 @@ export default function RewardsPage() {
     try {
       setLoading(true);
       setError(null);
-      const rewardsData = await rewardService.getMyRewards();
+      const response = await rewardService.getMyRewards();
+
+      // Ensure we have a proper array
+      let rewardsData: Reward[] = [];
+      if (Array.isArray(response)) {
+        rewardsData = response;
+      } else if (response?.data && Array.isArray(response.data)) {
+        rewardsData = response.data;
+      } else {
+        console.warn("Unexpected rewards response structure:", response);
+        rewardsData = [];
+      }
+
       setRewards(rewardsData);
     } catch (error: unknown) {
       console.error("Failed to fetch rewards:", error);
       setError(
         error instanceof Error ? error.message : "Failed to fetch rewards"
       );
+      setRewards([]); // Always set to empty array on error
     } finally {
       setLoading(false);
     }
   };
 
-  // Calculate stats from actual data
-  const totalEarned = rewards
+  // Calculate stats from actual data - ensure rewards is always an array
+  const rewardsArray = Array.isArray(rewards) ? rewards : [];
+
+  const totalEarned = rewardsArray
     .filter((r) => r.status === RewardStatus.PAID)
     .reduce((sum, r) => sum + r.amount, 0);
-  const pendingPayouts = rewards.filter(
+  const pendingPayouts = rewardsArray.filter(
     (r) => r.status === RewardStatus.PENDING
   ).length;
-  const approvedPayouts = rewards.filter(
+  const approvedPayouts = rewardsArray.filter(
     (r) => r.status === RewardStatus.APPROVED
   ).length;
   const uniqueProgramsPaid = new Set(
-    rewards
+    rewardsArray
       .filter((r) => r.status === RewardStatus.PAID)
       .map((r) => r.program.title)
   ).size;
 
-  // Simple filtering logic
-  const filteredRewards = rewards.filter((reward) => {
+  // Simple filtering logic - ensure rewards is always an array
+  const filteredRewards = rewardsArray.filter((reward) => {
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch =
       !searchTerm ||
@@ -83,8 +98,8 @@ export default function RewardsPage() {
     return matchesSearch && matchesStatus && matchesProgram;
   });
 
-  // Unique Programs for filter
-  const uniquePrograms = [...new Set(rewards.map((r) => r.program.title))];
+  // Unique Programs for filter - ensure rewards is always an array
+  const uniquePrograms = [...new Set(rewardsArray.map((r) => r.program.title))];
 
   // Filter change handler
   const handleFilterChange = (

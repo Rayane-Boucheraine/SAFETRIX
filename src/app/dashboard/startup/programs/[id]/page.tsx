@@ -41,8 +41,12 @@ export default function ProgramDetailPage() {
     try {
       setLoading(true);
       setError(null);
-      const response = await programService.getProgramById(programId);
-      setProgram(response.data);
+      const response = await programService.getProgram(programId);
+      if (response) {
+        setProgram(response as Program);
+      } else {
+        setError("Program not found");
+      }
     } catch (error: unknown) {
       console.error("Failed to fetch program:", error);
       setError(error instanceof Error ? error.message : "Failed to fetch program details");

@@ -15,8 +15,26 @@ import {
 import Link from "next/link";
 import reportService from "@/services/reportService";
 import programService from "@/services/programService";
-import { CreateReportDto, ReportSeverity } from "@/services/reportService";
-import { Program } from "@/types/program";
+import { CreateReportData, ReportSeverity } from "@/services/reportService";
+import { Program, ProgramRewardType, ProgramStatus } from "@/types/program"; // Add ProgramRewardType and ProgramStatus import
+
+interface ApiProgramData {
+  id: string;
+  title: string;
+  description: string;
+  status: string; // API might send status as string
+  minReward?: number;
+  maxReward?: number;
+  createdAt: string;
+  updatedAt?: string;
+  startDate?: string;
+  rewardType?: ProgramRewardType;
+  scope?: string;
+  rules?: string; // Add rules if it can come from API
+  vulnerabilityTypes?: string[]; // Add vulnerabilityTypes if it can come from API
+  startup?: { id: string; name: string };
+  rewardRange?: string;
+}
 
 export default function CreateReportPage() {
   const router = useRouter();
@@ -24,16 +42,16 @@ export default function CreateReportPage() {
   const [programsLoading, setProgramsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [programs, setPrograms] = useState<Program[]>([]);
-  const [proofUrls, setProofUrls] = useState<string[]>([""]);
 
-  const [formData, setFormData] = useState<CreateReportDto>({
+  // Initialize form data with proofUrls already included
+  const [formData, setFormData] = useState<CreateReportData>({
     title: "",
     description: "",
     programId: "",
     severity: ReportSeverity.MEDIUM,
     impact: "",
     stepsToReproduce: "",
-    proofUrls: [],
+    proofUrls: [""],
     fixRecommendation: "",
   });
 
@@ -41,51 +59,106 @@ export default function CreateReportPage() {
     fetchActivePrograms();
   }, []);
 
+  // Corrected fetchActivePrograms function
   const fetchActivePrograms = async () => {
     try {
       setProgramsLoading(true);
-      const activePrograms = await programService.getActivePrograms();
-      setPrograms(activePrograms.data || []);
-    } catch (error) {
+      setError(null);
+      const response = await programService.getActivePrograms();
+
+      let programsData: Program[] = [];
+
+      const mapApiProgToProgram = (apiProg: ApiProgramData): Program => ({
+        id: apiProg.id,
+        title: apiProg.title,
+        description: apiProg.description,
+        status: apiProg.status as ProgramStatus, // Cast API string status to ProgramStatus enum
+        minReward: apiProg.minReward ?? 0,
+        maxReward: apiProg.maxReward ?? 0,
+        createdAt: apiProg.createdAt,
+        updatedAt: apiProg.updatedAt || apiProg.createdAt,
+        name: apiProg.title,
+        type: "Public" as const,
+        startDate: apiProg.startDate || apiProg.createdAt,
+        rewardType: apiProg.rewardType || ("MONETARY" as ProgramRewardType),
+        scope: typeof apiProg.scope === "string" ? apiProg.scope : "",
+        rules: apiProg.rules || "", // Provide default if not in API response
+        vulnerabilityTypes: Array.isArray(apiProg.vulnerabilityTypes)
+          ? apiProg.vulnerabilityTypes.filter(
+              (item): item is string => typeof item === "string"
+            )
+          : [], // Provide default if not in API response
+        startup: apiProg.startup || { id: "", name: "Unknown Company" },
+        rewardRange:
+          apiProg.rewardRange ||
+          `$${apiProg.minReward ?? 0} - $${apiProg.maxReward ?? 0}`,
+      });
+
+      if (response) {
+        if (
+          typeof response === "object" &&
+          response !== null &&
+          "data" in response &&
+          Array.isArray((response as { data: unknown }).data)
+        ) {
+          programsData = ((response as { data: ApiProgramData[] }).data as ApiProgramData[]).map(
+            mapApiProgToProgram
+          );
+        } else if (Array.isArray(response)) {
+          programsData = (response as ApiProgramData[]).map(
+            mapApiProgToProgram
+          );
+        }
+      }
+
+      setPrograms(programsData);
+    } catch (error: unknown) {
       console.error("Failed to fetch programs:", error);
-      setError("Failed to load available programs");
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to load available programs"
+      );
     } finally {
       setProgramsLoading(false);
     }
   };
 
   const handleInputChange = (
-    field: keyof CreateReportDto,
-    value: CreateReportDto[keyof CreateReportDto]
+    field: keyof CreateReportData,
+    value: CreateReportData[keyof CreateReportData]
   ) => {
-    setFormData((prev) => ({
+    setFormData((prev: CreateReportData) => ({
       ...prev,
       [field]: value,
     }));
   };
 
   const handleProofUrlChange = (index: number, value: string) => {
-    const newUrls = [...proofUrls];
+    // Always ensure proofUrls is an array
+    const newUrls = [...(formData.proofUrls || [])];
     newUrls[index] = value;
-    setProofUrls(newUrls);
 
-    // Update form data with non-empty URLs
-    const validUrls = newUrls.filter((url) => url.trim() !== "");
-    handleInputChange("proofUrls", validUrls);
+    setFormData((prev) => ({
+      ...prev,
+      proofUrls: newUrls,
+    }));
   };
 
   const addProofUrl = () => {
-    setProofUrls([...proofUrls, ""]);
+    setFormData((prev) => ({
+      ...prev,
+      proofUrls: [...(prev.proofUrls || []), ""],
+    }));
   };
 
   const removeProofUrl = (index: number) => {
-    if (proofUrls.length > 1) {
-      const newUrls = proofUrls.filter((_, i) => i !== index);
-      setProofUrls(newUrls);
-
-      // Update form data
-      const validUrls = newUrls.filter((url) => url.trim() !== "");
-      handleInputChange("proofUrls", validUrls);
+    if ((formData.proofUrls || []).length > 1) {
+      const newUrls = (formData.proofUrls || []).filter((_, i) => i !== index);
+      setFormData((prev) => ({
+        ...prev,
+        proofUrls: newUrls,
+      }));
     }
   };
 
@@ -101,15 +174,22 @@ export default function CreateReportPage() {
       setLoading(true);
       setError(null);
 
-      await reportService.createReport(formData);
+      // Filter out empty proof URLs before submission
+      const submissionData = {
+        ...formData,
+        proofUrls: (formData.proofUrls || []).filter(
+          (url) => url.trim() !== ""
+        ),
+      };
+
+      await reportService.createReport(submissionData);
       router.push("/dashboard/hacker/reports");
     } catch (error: unknown) {
       console.error("Failed to create report:", error);
       setError(
         (error as { response?: { data?: { message?: string } } }).response?.data
           ?.message ||
-          (error as Error).message ||
-          "Failed to create report"
+          (error instanceof Error ? error.message : "Failed to create report")
       );
     } finally {
       setLoading(false);
@@ -311,7 +391,8 @@ export default function CreateReportPage() {
               Proof URLs (Screenshots, Videos, etc.)
             </label>
 
-            {proofUrls.map((url, index) => (
+            {/* Render the proof URLs from formData instead of a separate state */}
+            {(formData.proofUrls || []).map((url, index) => (
               <div key={index} className="flex gap-2">
                 <input
                   type="url"
@@ -320,7 +401,7 @@ export default function CreateReportPage() {
                   className="flex-1 bg-slate-700/70 border border-slate-600/60 text-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent"
                   placeholder="https://example.com/screenshot.png"
                 />
-                {proofUrls.length > 1 && (
+                {(formData.proofUrls || []).length > 1 && (
                   <button
                     type="button"
                     onClick={() => removeProofUrl(index)}

@@ -16,7 +16,7 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 import programService from "@/services/programService";
-import { Program, ProgramStatus } from "@/types/program";
+import { Program, ProgramStatus, ProgramRewardType } from "@/types/program";
 
 interface BackendProgram {
   id: string;
@@ -27,6 +27,7 @@ interface BackendProgram {
   maxReward: number;
   createdAt: string;
   startup?: {
+    id?: string;
     name: string;
   };
 }
@@ -48,16 +49,49 @@ export default function StartupProgramsPage() {
       setError(null);
       const response = await programService.getMyPrograms();
 
-      console.log(response);
-      
-      // Transform data to match frontend structure
-      const transformedPrograms = response.data.map(
-        (program: BackendProgram) => ({
-          ...program,
+      console.log("Programs response:", response);
+
+      // Improved handling of response structure
+      let programsData: BackendProgram[] = [];
+
+      if (response) {
+        if (
+          typeof response === "object" &&
+          "data" in response &&
+          Array.isArray(response.data)
+        ) {
+          programsData = response.data;
+        } else if (Array.isArray(response)) {
+          programsData = response as BackendProgram[];
+        }
+      }
+
+      // Transform data to match frontend structure with proper type checking
+      const transformedPrograms: Program[] = programsData.map(
+        (program: BackendProgram): Program => ({
+          id: program.id,
+          title: program.title,
+          description: program.description,
+          status: program.status,
+          minReward: program.minReward,
+          maxReward: program.maxReward,
+          createdAt: program.createdAt,
+          updatedAt: program.createdAt,
           name: program.title,
           company: program.startup?.name || "Your Company",
           rewardRange: `$${program.minReward} - $${program.maxReward}`,
           type: "Public" as const,
+          startDate: program.createdAt,
+          rewardType: "MONETARY" as ProgramRewardType,
+          scope: "",
+          rules: "", // Ensure rules is present
+          vulnerabilityTypes: [], // Add missing property
+          startup: program.startup
+            ? {
+                id: program.startup.id || "",
+                name: program.startup.name || "Your Company",
+              }
+            : { id: "", name: "Your Company" },
         })
       );
 

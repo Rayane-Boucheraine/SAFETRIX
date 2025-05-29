@@ -87,10 +87,26 @@ export default function CreateProgramPage() {
       return;
     }
 
+    // Improved date validation
+    if (formData.startDate && formData.endDate) {
+      // Set time parts to noon to avoid timezone issues
+      const startDate = new Date(formData.startDate);
+      startDate.setHours(12, 0, 0, 0);
+
+      const endDate = new Date(formData.endDate);
+      endDate.setHours(12, 0, 0, 0);
+
+      if (endDate <= startDate) {
+        setError("End date must be after start date");
+        return;
+      }
+    }
+
     try {
       setLoading(true);
       setError(null);
 
+      // Pass the original form data with Date objects to the service
       await programService.createProgram(formData);
 
       // Redirect to programs list or the created program
@@ -224,6 +240,7 @@ export default function CreateProgramPage() {
                       ? formData.endDate.toISOString().split("T")[0]
                       : ""
                   }
+                  min={formData.startDate.toISOString().split("T")[0]} // Prevent selecting dates before start date
                   onChange={(e) =>
                     handleInputChange(
                       "endDate",
@@ -232,6 +249,9 @@ export default function CreateProgramPage() {
                   }
                   className="w-full bg-slate-800/70 border border-slate-700/60 text-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-transparent"
                 />
+                <p className="text-xs text-slate-400 mt-1">
+                  Must be after the start date
+                </p>
               </div>
 
               <div>

@@ -11,7 +11,8 @@ import {
   Award,
   Target,
 } from "lucide-react";
-import { programService, Program } from "@/services/programService";
+import programService from "@/services/programService";
+import { Program, ProgramRewardType } from "@/types/program";
 
 const getErrorMessage = (err: unknown): string => {
   if (err && typeof err === "object" && "response" in err) {
@@ -33,12 +34,79 @@ const Page = () => {
   useEffect(() => {
     const fetchProgram = async () => {
       try {
-        const data = await programService.checkParticipation(
+        setLoading(true);
+        setError(null);
+
+        // Use the correct method name - this should match your programService implementation
+        // Based on your backend, this should be a method that calls GET /programs/:id
+        const programResponse = await programService.getProgram(
           params.id as string
         );
-        setProgram(data.program);
-        setIsParticipating(data.isParticipating);
+
+        let programData;
+        if (programResponse?.data) {
+          programData = programResponse.data;
+        } else {
+          programData = programResponse;
+        }
+
+        // Transform backend data to match frontend Program interface
+        const transformedProgram: Program = {
+          id: programData.id,
+          title: programData.title,
+          description: programData.description,
+          status: programData.status,
+          minReward: programData.minReward || 0,
+          maxReward: programData.maxReward || 0,
+          createdAt: programData.createdAt,
+          updatedAt: programData.updatedAt || programData.createdAt,
+          name: programData.title,
+          company:
+            programData.startup?.name ||
+            programData.companyName ||
+            "Unknown Company",
+          rewardRange: `$${programData.minReward || 0} - $${
+            programData.maxReward || 0
+          }`,
+          type: "Public" as const,
+          startDate: programData.startDate || programData.createdAt,
+          rewardType: "MONETARY" as ProgramRewardType,
+          scope: programData.scope || "",
+          rules: programData.rules || "",
+          vulnerabilityTypes: programData.vulnerabilityTypes || [],
+          startup: programData.startup || { id: "", name: "Unknown Company" },
+          // Additional properties that might be expected by the UI
+          rewards: {
+            low: programData.minReward || 0,
+            high: programData.maxReward || 0,
+          },
+          participantsCount: programData.participantsCount || 0,
+          submissionsCount: programData.submissionsCount || 0,
+          website: programData.website,
+          contactEmail: programData.contactEmail,
+          endDate: programData.endDate,
+        };
+
+        setProgram(transformedProgram);
+
+        // Check participation status separately
+        try {
+          const participationResponse = await programService.checkParticipation(
+            params.id as string
+          );
+          const participationData =
+            participationResponse?.data || participationResponse;
+          setIsParticipating(participationData.isParticipant || false);
+        } catch (participationError) {
+          // If participation check fails, assume not participating
+          console.warn(
+            "Could not check participation status:",
+            participationError
+          );
+          setIsParticipating(false);
+        }
       } catch (err: unknown) {
+        console.error("Failed to fetch program:", err);
         setError(getErrorMessage(err));
       } finally {
         setLoading(false);
