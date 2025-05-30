@@ -144,6 +144,9 @@ class ReportService {
     rewardAmount?: number
   ): Promise<any> {
     try {
+      console.log(
+        `Updating report ${reportId} with status: ${status}, rewardAmount: ${rewardAmount}`
+      );
       const response = await BaseUrl.patch(`/reports/${reportId}/status`, {
         status,
         reviewNotes,

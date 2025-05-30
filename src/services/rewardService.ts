@@ -103,6 +103,16 @@ class RewardService {
       throw error;
     }
   }
+
+  async getHackerRewardDashboard(): Promise<any> {
+    try {
+      const response = await BaseUrl.get("/rewards/my-dashboard");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching hacker reward dashboard:", error);
+      throw error;
+    }
+  }
 }
 
 export default new RewardService();

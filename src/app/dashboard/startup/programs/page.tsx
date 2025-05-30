@@ -330,13 +330,7 @@ export default function StartupProgramsPage() {
                           >
                             <Eye size={16} />
                           </Link>
-                          <Link
-                            href={`/dashboard/startup/programs/${program.id}/edit`}
-                            className="p-1.5 text-slate-400 hover:text-blue-400 hover:bg-slate-700/50 rounded"
-                            title="Edit Program"
-                          >
-                            <Pencil size={16} />
-                          </Link>
+
                           {program.status === ProgramStatus.DRAFT && (
                             <button
                               onClick={() => handleDeleteProgram(program.id)}

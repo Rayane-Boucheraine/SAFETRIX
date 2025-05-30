@@ -55,23 +55,42 @@ const ProfileSettings: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const profileData = await startupProfileService.getStartupProfile();
-      console.log(profileData);
-      
-      setProfile(profileData);
+
+      // Static MyQCM company data instead of API call
+      const staticProfile = {
+        name: "MyQCM Company",
+        industry: "Cybersecurity Solutions",
+        description:
+          "MyQCM is a leading cybersecurity company specialized in Quality Control Management solutions. We provide advanced security monitoring, risk assessment, and threat intelligence services to protect organizations from emerging cyber threats.",
+        location: "San Francisco, CA",
+        team_size: 85,
+        security_needs: [
+          "Web Application Security",
+          "API Security",
+          "Cloud Security",
+          "Compliance & Governance",
+          "Incident Response",
+        ],
+        yearly_revenue: 5800000,
+      };
+
+      console.log("Static profile data:", staticProfile);
+
+      // Set the static profile data
+      setProfile(staticProfile);
       setFormData({
-        name: profileData.name,
-        industry: profileData.industry,
-        description: profileData.description,
-        location: profileData.location,
-        team_size: profileData.team_size,
-        security_needs: profileData.security_needs,
-        yearly_revenue: profileData.yearly_revenue,
+        name: staticProfile.name,
+        industry: staticProfile.industry,
+        description: staticProfile.description,
+        location: staticProfile.location,
+        team_size: staticProfile.team_size,
+        security_needs: staticProfile.security_needs,
+        yearly_revenue: staticProfile.yearly_revenue,
       });
     } catch (error: unknown) {
-      console.error("Failed to fetch profile:", error);
+      console.error("Failed to load profile:", error);
       setError(
-        error instanceof Error ? error.message : "Failed to fetch profile"
+        error instanceof Error ? error.message : "Failed to load profile data"
       );
     } finally {
       setLoading(false);
@@ -105,11 +124,14 @@ const ProfileSettings: React.FC = () => {
       setError(null);
       setSuccess(null);
 
-      await startupProfileService.updateStartupProfile(formData);
+      // Simulate API call success
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      console.log("Form data submitted:", formData);
+
       setSuccess("Profile updated successfully!");
 
-      // Refresh profile data
-      await fetchProfile();
+      // Update the profile data after "saving"
+      setProfile(formData as StartupProfile);
     } catch (error: unknown) {
       console.error("Failed to update profile:", error);
       setError(

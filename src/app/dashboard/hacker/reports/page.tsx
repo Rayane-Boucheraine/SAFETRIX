@@ -1188,7 +1188,10 @@ const ReportDetailModal: React.FC<{
               <div className="bg-slate-800/50 p-4 rounded-lg border border-purple-700/30">
                 {loadingRewards ? (
                   <div className="flex justify-center py-4">
-                    <Loader className="animate-spin text-purple-500" size={24} />
+                    <Loader
+                      className="animate-spin text-purple-500"
+                      size={24}
+                    />
                   </div>
                 ) : (
                   <div className="space-y-3">

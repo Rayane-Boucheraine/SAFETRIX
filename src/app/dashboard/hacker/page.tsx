@@ -27,6 +27,7 @@ import {
   Code,
   Lock,
   ExternalLink,
+  DollarSign,
 } from "lucide-react";
 import userService from "@/services/userService";
 import reportService, {
@@ -35,6 +36,7 @@ import reportService, {
   ReportSeverity,
 } from "@/services/reportService";
 import programService from "@/services/programService";
+import rewardService from "@/services/rewardService";
 
 interface UserProfile {
   alias?: string;
@@ -71,6 +73,14 @@ const EnhancedDashboard = () => {
   const [programs, setPrograms] = useState<Program[]>([]);
   const [programsLoading, setProgramsLoading] = useState(true);
   const [programsError, setProgramsError] = useState<string | null>(null);
+  const [rewardStats, setRewardStats] = useState({
+    totalEarned: 0,
+    pendingAmount: 0,
+    totalRewards: 0,
+    paidRewards: 0,
+  });
+  const [rewardsLoading, setRewardsLoading] = useState(true);
+  const [rewardsError, setRewardsError] = useState<string | null>(null);
 
   // Animation effect on load
   useEffect(() => {
@@ -78,6 +88,7 @@ const EnhancedDashboard = () => {
     fetchUserName();
     fetchRecentReports();
     fetchFeaturedPrograms();
+    fetchRewardStats();
   }, []);
 
   const fetchUserName = async () => {
@@ -159,6 +170,39 @@ const EnhancedDashboard = () => {
       setPrograms([]); // Set empty array on error
     } finally {
       setProgramsLoading(false);
+    }
+  };
+
+  const fetchRewardStats = async () => {
+    try {
+      setRewardsLoading(true);
+      setRewardsError(null);
+      const response = await rewardService.getHackerRewardDashboard();
+
+      if (response?.data?.statistics) {
+        setRewardStats({
+          totalEarned: response.data.statistics.totalEarned,
+          pendingAmount: response.data.statistics.pendingAmount,
+          totalRewards: response.data.statistics.rewardCount,
+          paidRewards: response.data.statistics.paidCount,
+        });
+      } else {
+        setRewardStats({
+          totalEarned: 0,
+          pendingAmount: 0,
+          totalRewards: 0,
+          paidRewards: 0,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to fetch reward stats:", error);
+      setRewardsError(
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch reward statistics"
+      );
+    } finally {
+      setRewardsLoading(false);
     }
   };
 
@@ -296,11 +340,11 @@ const EnhancedDashboard = () => {
         </div>
 
         {/* Stats cards with updated purple theme color scheme */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Enhanced stat cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          {/* Total Reports */}
           <StatCard
-            title="Reports Submitted"
-            value={hackerStats.reportsSubmitted}
+            title="Total Reports"
+            value={reports.length}
             icon={FileText}
             iconColor="text-cyan-500"
             trend={+15}
@@ -308,29 +352,10 @@ const EnhancedDashboard = () => {
             chartColor="#22D3EE"
           />
 
-          <StatCard
-            title="Accepted Reports"
-            value={hackerStats.reportsAccepted}
-            icon={CheckCircle}
-            iconColor="text-green-500"
-            trend={+22}
-            chartData={[25, 40, 50, 45, 60, 55, 65, 70, 65, 85]}
-            chartColor="#9333EA"
-          />
-
-          <StatCard
-            title="Pending Review"
-            value={hackerStats.pendingReview}
-            icon={Activity}
-            iconColor="text-yellow-500"
-            trend={-5}
-            chartData={[15, 25, 20, 30, 15, 25, 10, 15, 20, 15]}
-            chartColor="#FBBF24"
-          />
-
+          {/* Total Rewards */}
           <StatCard
             title="Total Rewards"
-            value={`$${hackerStats.totalRewards.toLocaleString("en-US")}`}
+            value={`$${rewardStats.totalEarned.toLocaleString("en-US")}`}
             icon={Award}
             iconColor="text-purple-400"
             isSpecial={true}
@@ -341,20 +366,10 @@ const EnhancedDashboard = () => {
             chartColor="#A855F7"
           />
 
-          <StatCard
-            title="Current Rank"
-            value={`#${hackerStats.currentRank}`}
-            icon={TrendingUp}
-            iconColor="text-purple-400"
-            trend={+12}
-            chartData={[80, 75, 65, 60, 55, 48, 45, 44, 42, 42]}
-            chartColor="#C084FC"
-            invertTrend={true}
-          />
-
+          {/* Programs Joined */}
           <StatCard
             title="Programs Joined"
-            value={hackerStats.programsJoined}
+            value={programs.length}
             icon={Target}
             iconColor="text-blue-400"
             trend={+2}
@@ -656,29 +671,58 @@ const EnhancedDashboard = () => {
         </div>
       </div>
 
+      {/* --------- Rewards Stats Section --------- */}
+      <div className="bg-slate-800/70 rounded-xl p-5 border border-purple-600/30">
+        <div className="flex items-center gap-2 mb-4">
+          <DollarSign className="text-purple-400" size={18} />
+          <h3 className="text-lg font-medium text-slate-100">Rewards</h3>
+        </div>
+
+        {rewardsLoading ? (
+          <div className="flex justify-center py-4">
+            <Loader className="animate-spin text-purple-500" size={24} />
+          </div>
+        ) : rewardsError ? (
+          <div className="text-center text-red-400 py-2">{rewardsError}</div>
+        ) : (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-slate-700/50 p-3 rounded-lg">
+              <p className="text-xs text-slate-400">Total Earned</p>
+              <p className="text-xl font-bold text-green-400">
+                ${rewardStats.totalEarned.toLocaleString()}
+              </p>
+            </div>
+            <div className="bg-slate-700/50 p-3 rounded-lg">
+              <p className="text-xs text-slate-400">Pending</p>
+              <p className="text-xl font-bold text-amber-400">
+                ${rewardStats.pendingAmount.toLocaleString()}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* --------- Footer Section with Quick Actions --------- */}
-      <div className="mt-12">
-        <div className="bg-gradient-to-r from-[#180729]/90 via-[#2A0D45]/90 to-[#180729]/90 rounded-2xl p-6 border border-purple-900/50 shadow-lg relative overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(147,51,234,0.05),transparent_70%)]"></div>
+      <div className="bg-gradient-to-r from-[#180729]/90 via-[#2A0D45]/90 to-[#180729]/90 rounded-2xl p-6 border border-purple-900/50 shadow-lg relative overflow-hidden mt-12">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(147,51,234,0.05),transparent_70%)]"></div>
 
-          <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <Sparkles size={20} className="text-purple-400" />
-              <h3 className="text-lg font-medium text-slate-200">
-                Ready to hunt more bugs?
-              </h3>
-            </div>
+        <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Sparkles size={20} className="text-purple-400" />
+            <h3 className="text-lg font-medium text-slate-200">
+              Ready to hunt more bugs?
+            </h3>
+          </div>
 
-            <div className="flex flex-wrap gap-3 justify-center sm:justify-end">
-              <Link
-                href="/dashboard/hacker/programs"
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg 
-                shadow-lg transition-all duration-300 text-sm flex items-center gap-2"
-              >
-                <Target size={16} />
-                <span>Find New Programs</span>
-              </Link>
-            </div>
+          <div className="flex flex-wrap gap-3 justify-center sm:justify-end">
+            <Link
+              href="/dashboard/hacker/programs"
+              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg 
+              shadow-lg transition-all duration-300 text-sm flex items-center gap-2"
+            >
+              <Target size={16} />
+              <span>Find New Programs</span>
+            </Link>
           </div>
         </div>
       </div>

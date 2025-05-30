@@ -132,6 +132,20 @@ class UserService implements IUserService {
       throw error;
     }
   }
+
+  async updateStartupProfile(formData: FormData) {
+    try {
+      const response = await BaseUrl.post("/users/startup/profile", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error updating startup profile:", error);
+      throw error;
+    }
+  }
 }
 
 export const userService = new UserService();

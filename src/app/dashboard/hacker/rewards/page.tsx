@@ -39,26 +39,40 @@ export default function RewardsPage() {
     try {
       setLoading(true);
       setError(null);
-      const response = await rewardService.getMyRewards();
 
-      // Ensure we have a proper array
-      let rewardsData: Reward[] = [];
-      if (Array.isArray(response)) {
-        rewardsData = response;
-      } else if (response?.data && Array.isArray(response.data)) {
-        rewardsData = response.data;
-      } else {
-        console.warn("Unexpected rewards response structure:", response);
-        rewardsData = [];
-      }
+      // Static reward data for MyQCM instead of API call
+      const staticRewards: Reward[] = [
+        {
+          id: "reward-myqcm-1234",
+          amount: 200,
+          status: RewardStatus.PAID,
+          createdAt: "2023-06-15T10:30:00Z",
+          program: {
+            id: "prog-myqcm",
+            title: "MyQCM",
+          },
+          description:
+            "Reward for identifying authentication bypass vulnerability",
+          reporter: {
+            id: "user-123",
+            alias: "SecurityResearcher",
+          },
+          reportId: "report-myqcm-001",
+          updatedAt: "2023-06-15T10:30:00Z",
+          approvedAt: "2023-06-14T08:15:00Z",
+        },
+      ];
 
-      setRewards(rewardsData);
+      // Simulate API call with small delay
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      setRewards(staticRewards);
     } catch (error: unknown) {
-      console.error("Failed to fetch rewards:", error);
+      console.error("Failed to load rewards:", error);
       setError(
-        error instanceof Error ? error.message : "Failed to fetch rewards"
+        error instanceof Error ? error.message : "Failed to load rewards"
       );
-      setRewards([]); // Always set to empty array on error
+      setRewards([]);
     } finally {
       setLoading(false);
     }
